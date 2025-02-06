@@ -73,14 +73,14 @@ export interface FormConfig {
 }
 
 export interface DynamicFormProps {
-    config: FormConfig;      // Form konfigürasyon JSON
-    baseUrl: string;         // POST isteği için base URL
-    endpoint: string;        // POST isteği için endpoint adresi
-    initialData?: Record<string, any>; // Yeni eklenen
-    onSuccess?: (data: any) => void; // Form başarılı gönderildikten sonra fırlatılacak event
-    // Buton ayarları; detaylı ayarlar (text, variant, color vs.) için
+    config: FormConfig;      
+    baseUrl: string;         
+    endpoint: string;        
+    initialData?: Record<string, any>;
+    onSuccess?: (data: any) => void;
     submitButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
     cancelButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
+    useToken?: boolean; // Add token control flag
 }
 
 // DropdownField için tip güncellemesi
@@ -96,6 +96,7 @@ export interface DropdownFieldProps {
     onDropdownChange?: (fieldName: string, value: string | number) => void;
     options?: DropdownOption[];
     setOptionsForField?: (fieldName: string, options: DropdownOption[]) => void;
+    getHeaders?: () => Record<string, string>;  // Yeni prop
 }
 
 const DropdownField: React.FC<DropdownFieldProps> = ({
@@ -105,6 +106,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     onDropdownChange,
     options = [],
     setOptionsForField,
+    getHeaders
 }) => {
     const [loading, setLoading] = useState(false);
     const [thisValue, setThisValue] = useState(form.values[field.field] || '');
@@ -118,7 +120,12 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
             const url = field.optionsUrl?.replace('{0}', String(form.values[field.refField]));
             if (url) {
                 setLoading(true);
-                fetch(url)
+                fetch(url, {
+                    method: 'GET',
+                    headers: getHeaders?.() || { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    mode: 'cors'
+                })
                     .then((res) => res.json())
                     .then((data: DropdownOption[]) => {
                         const formattedData = data.map((item) => ({
@@ -126,13 +133,17 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                             value: String(item.value),
                         }));
                         setOptionsForField?.(field.field, formattedData);
-                        
                     })
                     .finally(() => setLoading(false));
             }
         } else if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl)
+            fetch(field.optionsUrl, {
+                method: 'GET',
+                headers: getHeaders?.() || { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                mode: 'cors'
+            })
                 .then((res) => res.json())
                 .then((data: DropdownOption[]) => {
                     const formattedData = data.map((item) => ({
@@ -140,11 +151,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                         value: String(item.value),
                     }));
                     setOptionsForField?.(field.field, formattedData);
-                    console.log("field.field2", field.field);
-                    if (field.field === "sector2") {
-                        //form.initialize({ "sector2": "3" });
-                        setThisValue(form.values[field.field] || '');
-                    }
                 })
                 .finally(() => setLoading(false));
         }
@@ -183,7 +189,12 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
 };
 
 // MultiSelect için yeni bir bileşen oluşturuyoruz
-const MultiSelectField: React.FC<DropdownFieldProps> = ({ field, form, globalStyle }) => {
+const MultiSelectField: React.FC<DropdownFieldProps> = ({ 
+    field, 
+    form, 
+    globalStyle,
+    getHeaders 
+}) => {
     const [options, setOptions] = useState<DropdownOption[]>(field.options || []);
     const [loading, setLoading] = useState(false);
 
@@ -192,7 +203,12 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({ field, form, globalSty
             setOptions(field.options);
         } else if (field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl)
+            fetch(field.optionsUrl, {
+                method: 'GET',
+                headers: getHeaders?.() || { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                mode: 'cors'
+            })
                 .then((res) => res.json())
                 .then((data: DropdownOption[]) => {
                     const formattedData = data.map(item => ({
@@ -203,7 +219,7 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({ field, form, globalSty
                 })
                 .finally(() => setLoading(false));
         }
-    }, [field.options, field.optionsUrl]);
+    }, []);
 
     return (
         <>
@@ -239,6 +255,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     onSuccess,
     submitButtonProps,
     cancelButtonProps,
+    useToken = false // Default to false
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -313,14 +330,37 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         }
     });
 
+    // Helper function to get headers
+    const getHeaders = () => {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json'
+        };
+
+        if (useToken) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            } else {
+                console.warn('Token required but not found in localStorage');
+            }
+        }
+
+        console.log('Request Headers:', headers); // Debug için
+        return headers;
+    };
+
     // Form submit edildiğinde değerleri gönderiyoruz.
     const handleSubmit = form.onSubmit(async (values) => {
         try {
+            const requestHeaders = getHeaders();
             const response = await fetch(`${baseUrl}/${endpoint}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: requestHeaders,
+                credentials: 'include',
+                mode: 'cors',
                 body: JSON.stringify(values),
             });
+            
             const result = await response.json();
             // Beklenen response model: { data: any, message: string, code: string }
             if (response.ok) {
@@ -349,14 +389,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
     // handleDropdownChange fonksiyonunu güncelle
     const handleDropdownChange = (fieldName: string, value: string | number) => {
-        console.log(`Dropdown ${fieldName} changed to:`, value);
-
         config.rows.forEach(row => {
             row.columns.forEach(column => {
                 column.fields.forEach(field => {
                     if (field.refField === fieldName) {
-                        console.log(`Found dependent field: ${field.field}`);
-
                         if (field.type === 'dropdown' && field.optionsUrl) {
                             form.setFieldValue(field.field, '');
                             setOptionsForField(field.field, []);
@@ -364,12 +400,16 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
                             if (value) {
                                 const url = field.optionsUrl.replace('{0}', String(value));
-                                console.log(`Loading options for ${field.field} with URL:`, url);
-
-                                fetch(url)
+                                const requestHeaders = getHeaders();
+                                
+                                fetch(url, {
+                                    method: 'GET',
+                                    headers: requestHeaders,
+                                    credentials: 'include',
+                                    mode: 'cors'
+                                })
                                     .then(res => res.json())
                                     .then((data: DropdownOption[]) => {
-                                        console.log(`Setting options for ${field.field}:`, data);
                                         setOptionsForField(field.field, data);
                                     })
                                     .catch(error => {
@@ -457,6 +497,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                     onDropdownChange={handleDropdownChange}
                                                     options={dropdownOptions[field.field] || field.options || []}
                                                     setOptionsForField={setOptionsForField}
+                                                    getHeaders={getHeaders}
                                                 />
                                             )}
                                             {field.type === 'maskinput' && (
@@ -503,6 +544,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                     field={field}
                                                     form={form}
                                                     globalStyle={config.fieldStyle}
+                                                    getHeaders={getHeaders}
                                                 />
                                             )}
                                         </div>

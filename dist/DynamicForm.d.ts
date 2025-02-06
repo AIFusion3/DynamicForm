@@ -55,6 +55,7 @@ export interface DynamicFormProps {
     cancelButtonProps?: Partial<ButtonProps & {
         onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
     }>;
+    useToken?: boolean;
 }
 interface DropdownOption {
     value: string | number;
@@ -67,6 +68,7 @@ export interface DropdownFieldProps {
     onDropdownChange?: (fieldName: string, value: string | number) => void;
     options?: DropdownOption[];
     setOptionsForField?: (fieldName: string, options: DropdownOption[]) => void;
+    getHeaders?: () => Record<string, string>;
 }
 /**
  * DynamicForm Bileşeni:

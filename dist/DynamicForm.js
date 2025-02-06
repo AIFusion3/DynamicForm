@@ -55,7 +55,7 @@ import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
 var DropdownField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
     var _d = useState(form.values[field.field] || ''), thisValue = _d[0], setThisValue = _d[1];
     useEffect(function () {
@@ -67,7 +67,12 @@ var DropdownField = function (_a) {
             var url = (_a = field.optionsUrl) === null || _a === void 0 ? void 0 : _a.replace('{0}', String(form.values[field.refField]));
             if (url) {
                 setLoading(true);
-                fetch(url)
+                fetch(url, {
+                    method: 'GET',
+                    headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    mode: 'cors'
+                })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
                     var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
@@ -78,16 +83,16 @@ var DropdownField = function (_a) {
         }
         else if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl)
+            fetch(field.optionsUrl, {
+                method: 'GET',
+                headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                mode: 'cors'
+            })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
-                console.log("field.field2", field.field);
-                if (field.field === "sector2") {
-                    //form.initialize({ "sector2": "3" });
-                    setThisValue(form.values[field.field] || '');
-                }
             })
                 .finally(function () { return setLoading(false); });
         }
@@ -109,7 +114,7 @@ var DropdownField = function (_a) {
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
 var MultiSelectField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
     var _b = useState(field.options || []), options = _b[0], setOptions = _b[1];
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
     useEffect(function () {
@@ -118,7 +123,12 @@ var MultiSelectField = function (_a) {
         }
         else if (field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl)
+            fetch(field.optionsUrl, {
+                method: 'GET',
+                headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                mode: 'cors'
+            })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
@@ -126,7 +136,7 @@ var MultiSelectField = function (_a) {
             })
                 .finally(function () { return setLoading(false); });
         }
-    }, [field.options, field.optionsUrl]);
+    }, []);
     return (React.createElement(React.Fragment, null,
         React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Select options", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : [], onChange: function (value) { return form.setFieldValue(field.field, value); }, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
@@ -139,10 +149,12 @@ var MultiSelectField = function (_a) {
  * - Submit ve Cancel butonları, dışarıdan detaylı buton ayarları ile kontrol edilebilir.
  */
 var DynamicForm = function (_a) {
-    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps;
+    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken // Default to false
+    , useToken = _b === void 0 ? false : _b // Default to false
+    ;
     // Form değerlerini takip etmek için state ekliyoruz
-    var _b = useState({}), formValues = _b[0], setFormValues = _b[1];
-    var _c = useState({}), dropdownOptions = _c[0], setDropdownOptions = _c[1];
+    var _c = useState({}), formValues = _c[0], setFormValues = _c[1];
+    var _d = useState({}), dropdownOptions = _d[0], setDropdownOptions = _d[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     // Checkbox için false, date için null, diğerleri için boş string
     var initialValues = {};
@@ -218,16 +230,36 @@ var DynamicForm = function (_a) {
             setFormValues(values);
         }
     });
+    // Helper function to get headers
+    var getHeaders = function () {
+        var headers = {
+            'Content-Type': 'application/json'
+        };
+        if (useToken) {
+            var token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = "Bearer ".concat(token);
+            }
+            else {
+                console.warn('Token required but not found in localStorage');
+            }
+        }
+        console.log('Request Headers:', headers); // Debug için
+        return headers;
+    };
     // Form submit edildiğinde değerleri gönderiyoruz.
     var handleSubmit = form.onSubmit(function (values) { return __awaiter(void 0, void 0, void 0, function () {
-        var response, result, error_1;
+        var requestHeaders, response, result, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
+                    requestHeaders = getHeaders();
                     return [4 /*yield*/, fetch("".concat(baseUrl, "/").concat(endpoint), {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: requestHeaders,
+                            credentials: 'include',
+                            mode: 'cors',
                             body: JSON.stringify(values),
                         })];
                 case 1:
@@ -266,23 +298,25 @@ var DynamicForm = function (_a) {
     };
     // handleDropdownChange fonksiyonunu güncelle
     var handleDropdownChange = function (fieldName, value) {
-        console.log("Dropdown ".concat(fieldName, " changed to:"), value);
         config.rows.forEach(function (row) {
             row.columns.forEach(function (column) {
                 column.fields.forEach(function (field) {
                     if (field.refField === fieldName) {
-                        console.log("Found dependent field: ".concat(field.field));
                         if (field.type === 'dropdown' && field.optionsUrl) {
                             form.setFieldValue(field.field, '');
                             setOptionsForField(field.field, []);
                             field.options = [];
                             if (value) {
                                 var url = field.optionsUrl.replace('{0}', String(value));
-                                console.log("Loading options for ".concat(field.field, " with URL:"), url);
-                                fetch(url)
+                                var requestHeaders = getHeaders();
+                                fetch(url, {
+                                    method: 'GET',
+                                    headers: requestHeaders,
+                                    credentials: 'include',
+                                    mode: 'cors'
+                                })
                                     .then(function (res) { return res.json(); })
                                     .then(function (data) {
-                                    console.log("Setting options for ".concat(field.field, ":"), data);
                                     setOptionsForField(field.field, data);
                                 })
                                     .catch(function (error) {
@@ -314,13 +348,13 @@ var DynamicForm = function (_a) {
                             field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                             field.type === 'date' && (React.createElement(DatePickerInput, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined })),
                             field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
-                            field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField })),
+                            field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
                             field.type === 'maskinput' && (React.createElement(InputBase, __assign({ label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                             field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
                                     form.setFieldValue(field.field, val !== '' ? Number(val) : null);
                                 }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
                             field.type === 'switch' && (React.createElement(Switch, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { defaultChecked: field.defaultChecked, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                            field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle }))));
+                            field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders }))));
                     })));
                 })))); }),
             React.createElement(Group, null,
