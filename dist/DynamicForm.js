@@ -149,12 +149,12 @@ var MultiSelectField = function (_a) {
  * - Submit ve Cancel butonları, dışarıdan detaylı buton ayarları ile kontrol edilebilir.
  */
 var DynamicForm = function (_a) {
-    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken // Default to false
-    , useToken = _b === void 0 ? false : _b // Default to false
+    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug // Varsayılan değer false
+    , showDebug = _c === void 0 ? false : _c // Varsayılan değer false
     ;
     // Form değerlerini takip etmek için state ekliyoruz
-    var _c = useState({}), formValues = _c[0], setFormValues = _c[1];
-    var _d = useState({}), dropdownOptions = _d[0], setDropdownOptions = _d[1];
+    var _d = useState({}), formValues = _d[0], setFormValues = _d[1];
+    var _e = useState({}), dropdownOptions = _e[0], setDropdownOptions = _e[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     // Checkbox için false, date için null, diğerleri için boş string
     var initialValues = {};
@@ -363,8 +363,8 @@ var DynamicForm = function (_a) {
                         cancelProps.onClick && cancelProps.onClick(event);
                     } }), cancelProps.children || 'Cancel'),
                 React.createElement(Button, __assign({ type: "submit" }, submitProps), submitProps.children || 'Save')),
-            React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
+            showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
                 React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
-                React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2))))));
+                React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))));
 };
 export default DynamicForm;

@@ -66,7 +66,7 @@ export interface RowConfig {
     columns: ColumnConfig[];           // Columns
 }
 
-// Global olarak field stilini belirlemek için (bileşenin kendisine uygulanır)
+
 export interface FormConfig {
     fieldStyle?: React.CSSProperties;
     rows: RowConfig[];
@@ -80,7 +80,8 @@ export interface DynamicFormProps {
     onSuccess?: (data: any) => void;
     submitButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
     cancelButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
-    useToken?: boolean; // Add token control flag
+    useToken?: boolean;
+    showDebug?: boolean; 
 }
 
 // DropdownField için tip güncellemesi
@@ -255,7 +256,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     onSuccess,
     submitButtonProps,
     cancelButtonProps,
-    useToken = false // Default to false
+    useToken = false,
+    showDebug = false // Varsayılan değer false
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -570,13 +572,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     </Button>
                 </Group>
 
-                {/* Debug alanı */}
-                <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                    <Text size="sm" mb={8}>Debug - Form Values:</Text>
-                    <pre style={{ margin: 0 }}>
-                        {JSON.stringify(formValues, null, 2)}
-                    </pre>
-                </div>
+                {showDebug === true && (
+                    <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                        <Text size="sm" mb={8}>Debug - Form Values:</Text>
+                        <pre style={{ margin: 0 }}>
+                            {JSON.stringify(formValues, null, 2)}
+                        </pre>
+                    </div>
+                )}
             </form>
         </MantineProvider>
     );

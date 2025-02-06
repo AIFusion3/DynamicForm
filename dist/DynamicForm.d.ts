@@ -56,6 +56,7 @@ export interface DynamicFormProps {
         onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
     }>;
     useToken?: boolean;
+    showDebug?: boolean;
 }
 interface DropdownOption {
     value: string | number;
