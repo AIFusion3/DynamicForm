@@ -56,36 +56,54 @@ import { IMaskInput } from 'react-imask';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
-    // İlk yükleme için API çağrısı
+    var _d = useState(form.values[field.field] || ''), thisValue = _d[0], setThisValue = _d[1];
     useEffect(function () {
-        if (!field.refField && !field.options && field.optionsUrl) {
+        var _a;
+        if (form.values[field.field]) {
+            setThisValue(form.values[field.field]);
+        }
+        if (field.refField && form.values[field.field] && form.values[field.refField]) {
+            var url = (_a = field.optionsUrl) === null || _a === void 0 ? void 0 : _a.replace('{0}', String(form.values[field.refField]));
+            if (url) {
+                setLoading(true);
+                fetch(url)
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                    var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
+                    setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
+                })
+                    .finally(function () { return setLoading(false); });
+            }
+        }
+        else if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
             fetch(field.optionsUrl)
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
-            })
-                .catch(function (error) {
-                console.error('Dropdown options fetch error:', error);
+                console.log("field.field2", field.field);
+                if (field.field === "sector2") {
+                    //form.initialize({ "sector2": "3" });
+                    setThisValue(form.values[field.field] || '');
+                }
             })
                 .finally(function () { return setLoading(false); });
         }
-    }, [field.options, field.optionsUrl]);
+    }, []);
+    // Form state'inden ilgili alanın güncel değerini alıyoruz.
+    var currentValue = form.values[field.field];
     return (React.createElement(React.Fragment, null,
         React.createElement(Select, __assign({ label: field.title, placeholder: field.placeholder || "Select an option", data: options.map(function (item) { return ({
                 value: String(item.value),
-                label: item.label
-            }); }) }, form.getInputProps(field.field), { onChange: function (value) {
-                form.setFieldValue(field.field, value);
-                if (value === null) {
-                    onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, '');
-                }
-                else {
-                    var parsedValue = !isNaN(Number(value)) ? Number(value) : value;
-                    onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, parsedValue);
-                }
-            }, required: field.required, disabled: loading || (!!field.refField && !form.values[field.refField]), style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true })),
+                label: item.label,
+            }); }) }, form.getInputProps(field.field), { value: thisValue, onChange: function (val) {
+                form.setFieldValue(field.field, val);
+                onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, val || '');
+                setThisValue(val || '');
+            }, error: form.errors[field.field], required: field.required, 
+            //disabled={loading || (!!field.refField && !form.values[field.refField])}
+            style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true })),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
@@ -134,6 +152,9 @@ var DynamicForm = function (_a) {
                     // Number tipi için özel kontrol
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
+                    }
+                    else if (field.type === 'dropdown') {
+                        initialValues[field.field] = String(initialData[field.field]);
                     }
                     else {
                         initialValues[field.field] = initialData[field.field];

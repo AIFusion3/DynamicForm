@@ -97,35 +97,60 @@ export interface DropdownFieldProps {
     setOptionsForField?: (fieldName: string, options: DropdownOption[]) => void;
 }
 
-const DropdownField: React.FC<DropdownFieldProps> = ({ 
-    field, 
-    form, 
-    globalStyle, 
-    onDropdownChange, 
+const DropdownField: React.FC<DropdownFieldProps> = ({
+    field,
+    form,
+    globalStyle,
+    onDropdownChange,
     options = [],
-    setOptionsForField 
+    setOptionsForField,
 }) => {
     const [loading, setLoading] = useState(false);
-
-    // İlk yükleme için API çağrısı
+    const [thisValue, setThisValue] = useState(form.values[field.field] || '');
+    
     useEffect(() => {
-        if (!field.refField && !field.options && field.optionsUrl) {
+        if(form.values[field.field]) {
+            setThisValue(form.values[field.field]);
+        }
+        
+        if (field.refField && form.values[field.field] && form.values[field.refField]) {
+            const url = field.optionsUrl?.replace('{0}', String(form.values[field.refField]));
+            if (url) {
+                setLoading(true);
+                fetch(url)
+                    .then((res) => res.json())
+                    .then((data: DropdownOption[]) => {
+                        const formattedData = data.map((item) => ({
+                            ...item,
+                            value: String(item.value),
+                        }));
+                        setOptionsForField?.(field.field, formattedData);
+                        
+                    })
+                    .finally(() => setLoading(false));
+            }
+        } else if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
             fetch(field.optionsUrl)
                 .then((res) => res.json())
                 .then((data: DropdownOption[]) => {
-                    const formattedData = data.map(item => ({
+                    const formattedData = data.map((item) => ({
                         ...item,
-                        value: String(item.value)
+                        value: String(item.value),
                     }));
                     setOptionsForField?.(field.field, formattedData);
-                })
-                .catch((error) => {
-                    console.error('Dropdown options fetch error:', error);
+                    console.log("field.field2", field.field);
+                    if (field.field === "sector2") {
+                        //form.initialize({ "sector2": "3" });
+                        setThisValue(form.values[field.field] || '');
+                    }
                 })
                 .finally(() => setLoading(false));
         }
-    }, [field.options, field.optionsUrl]);
+    }, []);
+
+    // Form state'inden ilgili alanın güncel değerini alıyoruz.
+    const currentValue = form.values[field.field];
 
     return (
         <>
@@ -134,20 +159,18 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 placeholder={field.placeholder || "Select an option"}
                 data={options.map((item: DropdownOption) => ({
                     value: String(item.value),
-                    label: item.label
+                    label: item.label,
                 }))}
                 {...form.getInputProps(field.field)}
-                onChange={(value) => {
-                    form.setFieldValue(field.field, value);
-                    if (value === null) {
-                        onDropdownChange?.(field.field, '');
-                    } else {
-                        const parsedValue = !isNaN(Number(value)) ? Number(value) : value;
-                        onDropdownChange?.(field.field, parsedValue);
-                    }
+                value={thisValue}
+                onChange={(val) => {
+                  form.setFieldValue(field.field, val);
+                  onDropdownChange?.(field.field, val || '');
+                  setThisValue(val || '');
                 }}
+                error={form.errors[field.field]}
                 required={field.required}
-                disabled={loading || (!!field.refField && !form.values[field.refField])}
+                //disabled={loading || (!!field.refField && !form.values[field.refField])}
                 style={globalStyle ? globalStyle : undefined}
                 allowDeselect={false}
                 clearable={true}
@@ -230,6 +253,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     // Number tipi için özel kontrol
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
+                    } else if (field.type === 'dropdown') {
+                        initialValues[field.field] = String(initialData[field.field]);
                     } else {
                         initialValues[field.field] = initialData[field.field];
                     }
@@ -321,22 +346,22 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     // handleDropdownChange fonksiyonunu güncelle
     const handleDropdownChange = (fieldName: string, value: string | number) => {
         console.log(`Dropdown ${fieldName} changed to:`, value);
-        
+
         config.rows.forEach(row => {
             row.columns.forEach(column => {
                 column.fields.forEach(field => {
                     if (field.refField === fieldName) {
                         console.log(`Found dependent field: ${field.field}`);
-                        
+
                         if (field.type === 'dropdown' && field.optionsUrl) {
                             form.setFieldValue(field.field, '');
                             setOptionsForField(field.field, []);
                             field.options = [];
-                            
-                            if (value){
+
+                            if (value) {
                                 const url = field.optionsUrl.replace('{0}', String(value));
                                 console.log(`Loading options for ${field.field} with URL:`, url);
-                                
+
                                 fetch(url)
                                     .then(res => res.json())
                                     .then((data: DropdownOption[]) => {
@@ -500,7 +525,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
                 {/* Debug alanı */}
                 <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                    <Text size="sm"  mb={8}>Debug - Form Values:</Text>
+                    <Text size="sm" mb={8}>Debug - Form Values:</Text>
                     <pre style={{ margin: 0 }}>
                         {JSON.stringify(formValues, null, 2)}
                     </pre>
