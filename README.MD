@@ -63,18 +63,65 @@ function App() {
     );
 }
 ```
-
 ## Props
 
-| Prop | Tip | Zorunlu | Açıklama |
-|------|-----|---------|-----------|
-| config | FormConfig | ✓ | Form yapılandırması |
-| baseUrl | string | ✓ | API base URL |
-| endpoint | string | ✓ | API endpoint |
-| initialData | object | | Başlangıç değerleri |
-| onSuccess | function | | Başarılı submit callback |
-| submitButtonProps | object | | Submit buton özellikleri |
-| cancelButtonProps | object | | İptal buton özellikleri |
+| Prop | Tip | Açıklama |
+|------|-----|----------|
+| config | FormConfig | Form yapılandırması |
+| baseUrl | string | API base URL |
+| endpoint | string | API endpoint |
+| initialData | object | Başlangıç değerleri |
+| onSuccess | function | Başarılı form gönderimi callback'i |
+| submitButtonProps | object | Kaydet butonu özellikleri |
+| cancelButtonProps | object | İptal butonu özellikleri |
+| useToken | boolean | Token kullanımı (default: false) |
+| showDebug | boolean | Debug modu (default: false) |
+
+
+## Field Tipleri ve Özellikleri
+
+### Ortak Özellikler
+- field: Alan adı
+- title: Etiket
+- type: Alan tipi
+- required: Zorunlu alan
+- placeholder: Placeholder metni
+
+### Özel Özellikler
+
+#### Textarea
+- minRows: Minimum satır
+- maxRows: Maksimum satır
+- autosize: Otomatik boyutlandırma
+
+#### Dropdown
+- optionsUrl: Seçenekler için API URL
+- options: Statik seçenekler
+- refField: Bağımlı olduğu alan
+
+#### Number
+- min: Minimum değer
+- max: Maksimum değer
+- step: Artış miktarı
+- prefix: Önek
+- suffix: Sonek
+- defaultValue: Varsayılan değer
+- decimalSeparator: Ondalık ayracı
+- thousandSeparator: Binlik ayracı
+
+#### MaskInput
+- mask: Maske paterni
+
+#### Switch
+- defaultChecked: Varsayılan durum
+
+## Token Kullanımı
+
+Token kullanımı için:
+1. useToken prop'unu true olarak ayarlayın
+2. localStorage'da 'token' anahtarıyla JWT token'ı saklayın
+
+Token otomatik olarak API isteklerine Bearer token olarak eklenecektir.
 
 ## Lisans
 
