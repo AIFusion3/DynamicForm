@@ -20,7 +20,7 @@ Mantine UI tabanlı, dinamik form oluşturma komponenti.
 
 ```bash
 npm install @mantine/core @mantine/form
-npm install dynamic-form
+npm install git+https://github.com/AIFusion3/DynamicForm
 ```
 
 ## Kullanım
