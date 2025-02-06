@@ -29,38 +29,38 @@ npm install dynamic-form
 import DynamicForm from 'dynamic-form';
 const config = {
 rows: [
-{
-title: "Kişisel Bilgiler",
-columns: [
-{
-span: 6,
-fields: [
-{
-field: "name",
-title: "Ad",
-type: "textbox",
-required: true
-},
-{
-field: "birthDate",
-title: "Doğum Tarihi",
-type: "date"
-}
-]
-}
-]
-}
+    {
+        title: "Kişisel Bilgiler",
+        columns: [
+            {
+                span: 6,
+                fields: [
+                    {
+                    field: "name",
+                    title: "Ad",
+                    type: "textbox",
+                    required: true
+                    },
+                    {
+                    field: "birthDate",
+                    title: "Doğum Tarihi",
+                    type: "date"
+                    }
+                ]
+            }
+        ]
+    }
 ]
 };
 function App() {
-return (
-<DynamicForm
-config={config}
-baseUrl="https://api.example.com"
-endpoint="users"
-onSuccess={(data) => console.log(data)}
-/>
-);
+    return (
+        <DynamicForm
+        config={config}
+        baseUrl="https://api.example.com"
+        endpoint="users"
+        onSuccess={(data) => console.log(data)}
+        />
+    );
 }
 ```
 
