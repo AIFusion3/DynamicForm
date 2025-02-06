@@ -53,6 +53,7 @@ import { useForm } from '@mantine/form';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
+import { notifications, Notifications } from '@mantine/notifications';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
@@ -236,13 +237,16 @@ var DynamicForm = function (_a) {
                     result = _a.sent();
                     // Beklenen response model: { data: any, message: string, code: string }
                     if (response.ok) {
-                        console.log('Form submitted successfully.');
                         if (onSuccess) {
                             onSuccess(result.data);
                         }
                     }
                     else {
-                        console.error('Error response:', result.message);
+                        notifications.show({
+                            title: 'Hata',
+                            message: result.message || 'Bir hata oluştu',
+                            color: 'red'
+                        });
                     }
                     return [3 /*break*/, 4];
                 case 3:
@@ -295,6 +299,7 @@ var DynamicForm = function (_a) {
     var cancelProps = cancelButtonProps || {};
     var submitProps = submitButtonProps || {};
     return (React.createElement(MantineProvider, null,
+        React.createElement(Notifications, null),
         React.createElement("form", { onSubmit: handleSubmit },
             config.rows.map(function (row, rowIndex) { return (React.createElement("div", { key: rowIndex, style: { marginBottom: '2rem' } },
                 row.title && (React.createElement(Text, { size: "lg", mb: "sm", style: row.headerStyle }, row.title)),

@@ -21,26 +21,27 @@ import { useForm } from '@mantine/form';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
+import { notifications, Notifications } from '@mantine/notifications';
 
-// Desteklenen field tipleri
+// Supported field types
 export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect';
 
 export interface FieldConfig {
-    field: string;      // Alan adı
-    title: string;      // Görüntülenecek etiket
+    field: string;      // Field name
+    title: string;      // Label to display
     type: FieldType;
     required?: boolean;
-    maxLength?: number; // Yeni eklenen
-    placeholder?: string;  // Placeholder özelliği eklendi
-    mask?: string;  // Maskinput için mask pattern
-    // Textarea için opsiyonlar:
+    maxLength?: number; // Newly added
+    placeholder?: string;  // Placeholder property added
+    mask?: string;  // Mask pattern for maskinput
+    // Options for textarea:
     minRows?: number;
     maxRows?: number;
-    autosize?: boolean;  // Yeni eklenen
-    // Dropdown alanları için:
-    optionsUrl?: string;  // API üzerinden seçenekleri çekmek için URL
-    options?: { value: string; label: string }[]; // Statik seçenekler (opsiyonel)
-    // Number input için özellikler
+    autosize?: boolean;  // Newly added
+    // For dropdown fields:
+    optionsUrl?: string;  // URL to fetch options from API
+    options?: { value: string; label: string }[]; // Static options (optional)
+    // Properties for number input
     min?: number;
     max?: number;
     step?: number;
@@ -49,20 +50,20 @@ export interface FieldConfig {
     defaultValue?: number;
     decimalSeparator?: string;
     thousandSeparator?: string;
-    defaultChecked?: boolean;  // Switch için varsayılan değer
-    refField?: string;  // Referans alınacak field adı
+    defaultChecked?: boolean;  // Default value for switch
+    refField?: string;  // Reference field name
 }
 
-// Yeni: Bir sütun içindeki alanları tanımlayan arayüz, opsiyonel span ekledik
+// New: Interface defining fields in a column, added optional span
 export interface ColumnConfig {
-    span?: number; // Eğer tanımlanmışsa, bu sütunun Grid.Col span değeri olarak kullanılacak.
+    span?: number; // If defined, will be used as Grid.Col span value
     fields: FieldConfig[];
 }
 
 export interface RowConfig {
-    title?: string;                    // Row başlığı (örneğin "Genel Bilgiler")
-    headerStyle?: React.CSSProperties; // Row başlığına özel stil ayarı (opsiyonel)
-    columns: ColumnConfig[];           // Sütunlar
+    title?: string;                    // Row title (e.g. "General Information") 
+    headerStyle?: React.CSSProperties; // Custom style for row header (optional)
+    columns: ColumnConfig[];           // Columns
 }
 
 // Global olarak field stilini belirlemek için (bileşenin kendisine uygulanır)
@@ -323,12 +324,15 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             const result = await response.json();
             // Beklenen response model: { data: any, message: string, code: string }
             if (response.ok) {
-                console.log('Form submitted successfully.');
                 if (onSuccess) {
                     onSuccess(result.data);
                 }
             } else {
-                console.error('Error response:', result.message);
+                notifications.show({
+                    title: 'Hata',
+                    message: result.message || 'Bir hata oluştu',
+                    color: 'red'
+                });
             }
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -385,6 +389,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
     return (
         <MantineProvider>
+            <Notifications />
             <form onSubmit={handleSubmit}>
                 {config.rows.map((row, rowIndex) => (
                     <div key={rowIndex} style={{ marginBottom: '2rem' }}>
