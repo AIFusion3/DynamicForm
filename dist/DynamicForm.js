@@ -56,22 +56,7 @@ import { IMaskInput } from 'react-imask';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
-    var _d = useState(false), isInitialized = _d[0], setIsInitialized = _d[1];
-    // Initial value için useEffect
-    useEffect(function () {
-        var initialValue = form.values[field.field];
-        if (!isInitialized && initialValue && field.refField) {
-            var refValue = field.refField ? form.values[field.refField] : null;
-            if (refValue) {
-                setIsInitialized(true);
-                onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.refField, refValue);
-                setTimeout(function () {
-                    onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, initialValue);
-                }, 500);
-            }
-        }
-    }, [form.values, field.field, field.refField, isInitialized]);
-    // API'den options yükleme
+    // İlk yükleme için API çağrısı
     useEffect(function () {
         if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
@@ -81,24 +66,26 @@ var DropdownField = function (_a) {
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
             })
+                .catch(function (error) {
+                console.error('Dropdown options fetch error:', error);
+            })
                 .finally(function () { return setLoading(false); });
         }
     }, [field.options, field.optionsUrl]);
     return (React.createElement(React.Fragment, null,
-        React.createElement(Select, { label: field.title, placeholder: field.placeholder || "Select an option", data: options.map(function (item) { return ({
+        React.createElement(Select, __assign({ label: field.title, placeholder: field.placeholder || "Select an option", data: options.map(function (item) { return ({
                 value: String(item.value),
                 label: item.label
-            }); }), value: String(form.values[field.field] || ''), onChange: function (value) {
+            }); }) }, form.getInputProps(field.field), { onChange: function (value) {
+                form.setFieldValue(field.field, value);
                 if (value === null) {
-                    form.setFieldValue(field.field, '');
                     onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, '');
                 }
                 else {
                     var parsedValue = !isNaN(Number(value)) ? Number(value) : value;
-                    form.setFieldValue(field.field, parsedValue);
                     onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, parsedValue);
                 }
-            }, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true }),
+            }, required: field.required, disabled: loading || (!!field.refField && !form.values[field.refField]), style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true })),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz

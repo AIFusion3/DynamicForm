@@ -1,5 +1,5 @@
 // components/DynamicForm.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     Button,
     ButtonProps,
@@ -106,24 +106,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     setOptionsForField 
 }) => {
     const [loading, setLoading] = useState(false);
-    const [isInitialized, setIsInitialized] = useState(false);
 
-    // Initial value için useEffect
-    useEffect(() => {
-        const initialValue = form.values[field.field];
-        if (!isInitialized && initialValue && field.refField) {
-            const refValue = field.refField ? form.values[field.refField] : null;
-            if (refValue) {
-                setIsInitialized(true);
-                onDropdownChange?.(field.refField, refValue);
-                setTimeout(() => {
-                    onDropdownChange?.(field.field, initialValue);
-                }, 500);
-            }
-        }
-    }, [form.values, field.field, field.refField, isInitialized]);
-
-    // API'den options yükleme
+    // İlk yükleme için API çağrısı
     useEffect(() => {
         if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
@@ -135,6 +119,9 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                         value: String(item.value)
                     }));
                     setOptionsForField?.(field.field, formattedData);
+                })
+                .catch((error) => {
+                    console.error('Dropdown options fetch error:', error);
                 })
                 .finally(() => setLoading(false));
         }
@@ -149,20 +136,18 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                     value: String(item.value),
                     label: item.label
                 }))}
-                value={String(form.values[field.field] || '')}
+                {...form.getInputProps(field.field)}
                 onChange={(value) => {
+                    form.setFieldValue(field.field, value);
                     if (value === null) {
-                        form.setFieldValue(field.field, '');
                         onDropdownChange?.(field.field, '');
                     } else {
                         const parsedValue = !isNaN(Number(value)) ? Number(value) : value;
-                        form.setFieldValue(field.field, parsedValue);
                         onDropdownChange?.(field.field, parsedValue);
                     }
                 }}
-                error={form.errors[field.field]}
                 required={field.required}
-                disabled={loading}
+                disabled={loading || (!!field.refField && !form.values[field.refField])}
                 style={globalStyle ? globalStyle : undefined}
                 allowDeselect={false}
                 clearable={true}
