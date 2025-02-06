@@ -1,49 +1,49 @@
 # Dynamic Form
 
-Mantine UI tabanlı, dinamik form oluşturma komponenti.
+Mantine UI based dynamic form creation component.
 
-## Özellikler
+## Features
 
-- JSON yapılandırması ile form oluşturma
-- Desteklenen alan tipleri:
+- Form creation with JSON configuration
+- Supported field types:
   - Textbox
-  - Textarea  
-  - Date
+  - Textarea
+  - Date 
   - Checkbox
-  - Dropdown (Bağımlı dropdown desteği)
+  - Dropdown (With dependent dropdown support)
   - Mask Input
   - Number
   - Switch
   - MultiSelect
 
-## Kurulum
+## Installation
 
 ```bash
 npm install @mantine/core @mantine/form
 npm install git+https://github.com/AIFusion3/DynamicForm
 ```
 
-## Kullanım
+## Usage
 
 ```tsx
 import DynamicForm from 'dynamic-form';
 const config = {
 rows: [
     {
-        title: "Kişisel Bilgiler",
+        title: "Personal Information",
         columns: [
             {
                 span: 6,
                 fields: [
                     {
-                    field: "name",
-                    title: "Ad",
+                    field: "name", 
+                    title: "Name",
                     type: "textbox",
                     required: true
                     },
                     {
                     field: "birthDate",
-                    title: "Doğum Tarihi",
+                    title: "Birth Date",
                     type: "date"
                     }
                 ]
@@ -63,67 +63,67 @@ function App() {
     );
 }
 ```
+
 ## Props
 
-| Prop | Tip | Açıklama |
-|------|-----|----------|
-| config | FormConfig | Form yapılandırması |
+| Prop | Type | Description |
+|------|-----|-------------|
+| config | FormConfig | Form configuration |
 | baseUrl | string | API base URL |
 | endpoint | string | API endpoint |
-| initialData | object | Başlangıç değerleri |
-| onSuccess | function | Başarılı form gönderimi callback'i |
-| submitButtonProps | object | Kaydet butonu özellikleri |
-| cancelButtonProps | object | İptal butonu özellikleri |
-| useToken | boolean | Token kullanımı (default: false) |
-| showDebug | boolean | Debug modu (default: false) |
+| initialData | object | Initial values |
+| onSuccess | function | Successful form submission callback |
+| submitButtonProps | object | Save button properties |
+| cancelButtonProps | object | Cancel button properties |
+| useToken | boolean | Token usage (default: false) |
+| showDebug | boolean | Debug mode (default: false) |
 
+## Field Types and Properties
 
-## Field Tipleri ve Özellikleri
+### Common Properties
+- field: Field name
+- title: Label
+- type: Field type
+- required: Required field
+- placeholder: Placeholder text
 
-### Ortak Özellikler
-- field: Alan adı
-- title: Etiket
-- type: Alan tipi
-- required: Zorunlu alan
-- placeholder: Placeholder metni
-
-### Özel Özellikler
+### Special Properties
 
 #### Textarea
-- minRows: Minimum satır
-- maxRows: Maksimum satır
-- autosize: Otomatik boyutlandırma
+- minRows: Minimum rows
+- maxRows: Maximum rows
+- autosize: Auto sizing
 
 #### Dropdown
-- optionsUrl: Seçenekler için API URL
-- options: Statik seçenekler
-- refField: Bağımlı olduğu alan
+- optionsUrl: API URL for options
+- options: Static options
+- refField: Dependent field
 
 #### Number
-- min: Minimum değer
-- max: Maksimum değer
-- step: Artış miktarı
-- prefix: Önek
-- suffix: Sonek
-- defaultValue: Varsayılan değer
-- decimalSeparator: Ondalık ayracı
-- thousandSeparator: Binlik ayracı
+- min: Minimum value
+- max: Maximum value
+- step: Step amount
+- prefix: Prefix
+- suffix: Suffix
+- defaultValue: Default value
+- decimalSeparator: Decimal separator
+- thousandSeparator: Thousand separator
 
 #### MaskInput
-- mask: Maske paterni
+- mask: Mask pattern
 
 #### Switch
-- defaultChecked: Varsayılan durum
+- defaultChecked: Default state
 
-## Token Kullanımı
+## Token Usage
 
-Token kullanımı için:
-1. useToken prop'unu true olarak ayarlayın
-2. localStorage'da 'token' anahtarıyla JWT token'ı saklayın
+For token usage:
+1. Set useToken prop to true
+2. Store JWT token in localStorage with 'token' key
 
-Token otomatik olarak API isteklerine Bearer token olarak eklenecektir.
+Token will be automatically added to API requests as Bearer token.
 
-## Lisans
+## License
 
 MIT
 
