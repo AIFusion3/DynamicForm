@@ -57,6 +57,7 @@ export interface DynamicFormProps {
     }>;
     useToken?: boolean;
     showDebug?: boolean;
+    pk_field?: string;
 }
 interface DropdownOption {
     value: string | number;

@@ -149,9 +149,7 @@ var MultiSelectField = function (_a) {
  * - Submit ve Cancel butonları, dışarıdan detaylı buton ayarları ile kontrol edilebilir.
  */
 var DynamicForm = function (_a) {
-    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug // Varsayılan değer false
-    , showDebug = _c === void 0 ? false : _c // Varsayılan değer false
-    ;
+    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field;
     // Form değerlerini takip etmek için state ekliyoruz
     var _d = useState({}), formValues = _d[0], setFormValues = _d[1];
     var _e = useState({}), dropdownOptions = _e[0], setDropdownOptions = _e[1];
@@ -249,14 +247,19 @@ var DynamicForm = function (_a) {
     };
     // Form submit edildiğinde değerleri gönderiyoruz.
     var handleSubmit = form.onSubmit(function (values) { return __awaiter(void 0, void 0, void 0, function () {
-        var requestHeaders, response, result, error_1;
+        var requestHeaders, isPutRequest, method, url, response, result, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
                     requestHeaders = getHeaders();
-                    return [4 /*yield*/, fetch("".concat(baseUrl, "/").concat(endpoint), {
-                            method: 'POST',
+                    isPutRequest = pk_field && initialData && initialData[pk_field];
+                    method = isPutRequest ? 'PUT' : 'POST';
+                    url = isPutRequest
+                        ? "".concat(baseUrl, "/").concat(endpoint, "/").concat(initialData[pk_field])
+                        : "".concat(baseUrl, "/").concat(endpoint);
+                    return [4 /*yield*/, fetch(url, {
+                            method: method,
                             headers: requestHeaders,
                             credentials: 'include',
                             mode: 'cors',

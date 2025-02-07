@@ -81,7 +81,8 @@ export interface DynamicFormProps {
     submitButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
     cancelButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
     useToken?: boolean;
-    showDebug?: boolean; 
+    showDebug?: boolean;
+    pk_field?: string; // Yeni eklenen alan
 }
 
 // DropdownField için tip güncellemesi
@@ -257,7 +258,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     submitButtonProps,
     cancelButtonProps,
     useToken = false,
-    showDebug = false // Varsayılan değer false
+    showDebug = false,
+    pk_field
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -355,8 +357,16 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     const handleSubmit = form.onSubmit(async (values) => {
         try {
             const requestHeaders = getHeaders();
-            const response = await fetch(`${baseUrl}/${endpoint}`, {
-                method: 'POST',
+            
+            // pk_field kontrolü
+            const isPutRequest = pk_field && initialData && initialData[pk_field];
+            const method = isPutRequest ? 'PUT' : 'POST';
+            const url = isPutRequest 
+                ? `${baseUrl}/${endpoint}/${initialData[pk_field]}`
+                : `${baseUrl}/${endpoint}`;
+
+            const response = await fetch(url, {
+                method,
                 headers: requestHeaders,
                 credentials: 'include',
                 mode: 'cors',
