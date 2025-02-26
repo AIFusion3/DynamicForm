@@ -61,7 +61,7 @@ import { Text, Group, Progress, Box, Loader, Overlay, Image as MantineImage, But
 import { IconUpload, IconTrash, IconArrowLeft, IconArrowRight, IconRefresh } from '@tabler/icons-react';
 // Tek bir resim yükleme kutusu için bileşen
 var ImageUploadBox = function (_a) {
-    var index = _a.index, imageData = _a.imageData, uploadUrl = _a.uploadUrl, maxSize = _a.maxSize, acceptedFileTypes = _a.acceptedFileTypes, width = _a.width, height = _a.height, uploadContext = _a.uploadContext, getHeaders = _a.getHeaders, onImageUploaded = _a.onImageUploaded, onImageRemoved = _a.onImageRemoved, onMoveImage = _a.onMoveImage, totalImages = _a.totalImages;
+    var index = _a.index, imageData = _a.imageData, uploadUrl = _a.uploadUrl, title = _a.title, maxSize = _a.maxSize, acceptedFileTypes = _a.acceptedFileTypes, width = _a.width, height = _a.height, uploadContext = _a.uploadContext, getHeaders = _a.getHeaders, onImageUploaded = _a.onImageUploaded, onImageRemoved = _a.onImageRemoved, onMoveImage = _a.onMoveImage, totalImages = _a.totalImages;
     var _b = useState(false), loading = _b[0], setLoading = _b[1];
     var _c = useState(0), progress = _c[0], setProgress = _c[1];
     var _d = useState(''), error = _d[0], setError = _d[1];
@@ -199,7 +199,7 @@ var ImageUploadBox = function (_a) {
             React.createElement(Group, { justify: "center", style: { pointerEvents: 'none' } },
                 React.createElement(Box, { ta: "center" },
                     React.createElement(IconUpload, { style: { color: 'var(--mantine-color-gray-6)', marginBottom: '10px' } }),
-                    React.createElement(Text, { size: "xs", fw: 500 }, "G\u00F6rsel Y\u00FCkle"))))),
+                    React.createElement(Text, { size: "xs", fw: 500 }, title))))),
         !imageData && preview && (React.createElement(Box, { ta: "center", mx: "auto", w: "100%", h: "100%", display: "flex", style: { alignItems: 'center', justifyContent: 'center' }, pos: "relative", onMouseEnter: function () { return setShowOverlay(true); }, onMouseLeave: function () { return setShowOverlay(false); } },
             React.createElement(MantineImage, { src: preview, alt: "\u00D6nizleme ".concat(index + 1), fit: "contain", w: "auto", h: "auto", style: {
                     maxWidth: '100%',
@@ -334,7 +334,7 @@ var UploadCollection = function (_a) {
     var totalBoxes = maxImages;
     return (React.createElement("div", null,
         React.createElement(ScrollArea, { type: "scroll", scrollbarSize: 6, offsetScrollbars: true },
-            React.createElement(Flex, { gap: "md", wrap: "nowrap", style: { overflowX: 'auto', paddingBottom: '10px' } }, Array.from({ length: totalBoxes }).map(function (_, index) { return (React.createElement(ImageUploadBox, { key: index, index: index, imageData: index < images.length ? images[index] : null, uploadUrl: field.uploadUrl || '', maxSize: field.maxSize, acceptedFileTypes: field.acceptedFileTypes, width: width, height: height, uploadContext: field.uploadContext, getHeaders: getHeaders, onImageUploaded: handleImageUploaded, onImageRemoved: handleImageRemoved, onMoveImage: handleMoveImage, totalImages: images.length })); }))),
+            React.createElement(Flex, { gap: "md", wrap: "nowrap", style: { overflowX: 'auto', paddingBottom: '10px' } }, Array.from({ length: totalBoxes }).map(function (_, index) { return (React.createElement(ImageUploadBox, { key: index, index: index, imageData: index < images.length ? images[index] : null, uploadUrl: field.uploadUrl || '', maxSize: field.maxSize, title: field.title, acceptedFileTypes: field.acceptedFileTypes, width: width, height: height, uploadContext: field.uploadContext, getHeaders: getHeaders, onImageUploaded: handleImageUploaded, onImageRemoved: handleImageRemoved, onMoveImage: handleMoveImage, totalImages: images.length })); }))),
         form.errors[field.field] && (React.createElement(Text, { c: "red", size: "xs", mt: "xs" }, form.errors[field.field]))));
 };
 export default UploadCollection;

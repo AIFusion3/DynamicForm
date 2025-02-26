@@ -1,6 +1,6 @@
 {
   "name": "dynamic-form",
-  "version": "2.1.37",
+  "version": "2.1.41",
   "main": "dist/DynamicForm.js",
   "types": "dist/DynamicForm.d.ts",
   "scripts": {

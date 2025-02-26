@@ -246,6 +246,6 @@ var DropField = function (_a) {
                 React.createElement(Loader, { color: "blue", size: "lg" }))),
             error && (React.createElement(Text, { c: "red", ta: "center", mt: "sm", size: "xs" }, error)),
             uploadSuccess && !imageUrls && (React.createElement(Text, { c: "green", ta: "center", mt: "sm", size: "xs" }, "Resim ba\u015Far\u0131yla i\u015Flendi, URL'ler al\u0131n\u0131yor..."))),
-        loading && (React.createElement(Progress, { value: progress, mt: "xs", size: "sm", color: progress === 100 ? 'green' : 'blue', w: typeof width === 'number' ? width : '100%' }))));
+        loading && (React.createElement(Progress, { value: progress, mt: "xs", size: "xs", color: progress === 100 ? 'green' : 'blue', w: typeof width === 'number' ? width : '100%' }))));
 };
 export default DropField;

@@ -62,6 +62,7 @@ const ImageUploadBox: React.FC<{
   imageData: ImageData | null;
   uploadUrl: string;
   maxSize?: number;
+  title: string;
   acceptedFileTypes?: string[];
   width: number | string;
   height: number;
@@ -75,6 +76,7 @@ const ImageUploadBox: React.FC<{
   index, 
   imageData, 
   uploadUrl, 
+  title,
   maxSize, 
   acceptedFileTypes, 
   width,
@@ -241,7 +243,7 @@ const ImageUploadBox: React.FC<{
             <Box ta="center">
               <IconUpload style={{ color: 'var(--mantine-color-gray-6)', marginBottom: '10px' }} />
               <Text size="xs" fw={500}>
-                Görsel Yükle
+              {title}
               </Text>
             </Box>
           </Group>
@@ -547,6 +549,7 @@ const UploadCollection: React.FC<UploadCollectionProps> = ({ field, form, global
               imageData={index < images.length ? images[index] : null}
               uploadUrl={field.uploadUrl || ''}
               maxSize={field.maxSize}
+              title={field.title}
               acceptedFileTypes={field.acceptedFileTypes}
               width={width}
               height={height}

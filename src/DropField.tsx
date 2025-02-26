@@ -353,17 +353,18 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
             Resim başarıyla işlendi, URL'ler alınıyor...
           </Text>
         )}
+        
       </Paper>
-      
       {loading && (
         <Progress 
           value={progress} 
           mt="xs" 
-          size="sm" 
+          size="xs" 
           color={progress === 100 ? 'green' : 'blue'} 
           w={typeof width === 'number' ? width : '100%'}
         />
       )}
+      
     </div>
   );
 };
