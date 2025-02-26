@@ -2,7 +2,7 @@ import React from 'react';
 import { ButtonProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import '@mantine/dates/styles.css';
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload';
 export interface FieldConfig {
     field: string;
     title: string;
@@ -29,6 +29,12 @@ export interface FieldConfig {
     thousandSeparator?: string;
     defaultChecked?: boolean;
     refField?: string;
+    uploadUrl?: string;
+    maxSize?: number;
+    acceptedFileTypes?: string[];
+    imageWidth?: number;
+    imageHeight?: number;
+    uploadContext?: string;
 }
 export interface ColumnConfig {
     span?: number;

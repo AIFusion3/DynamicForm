@@ -1,11 +1,17 @@
 {
   "name": "dynamic-form",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "dist/DynamicForm.js",
   "types": "dist/DynamicForm.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
+    "build:patch": "npm run version:patch && npm run build",
+    "build:minor": "npm run version:minor && npm run build",
+    "build:major": "npm run version:major && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +21,7 @@
     "@emotion/react": "^11.14.0",
     "@mantine/core": "^7.16.2",
     "@mantine/dates": "^7.16.2",
+    "@mantine/dropzone": "^7.17.0",
     "@mantine/form": "^7.16.2",
     "@mantine/hooks": "^7.16.2",
     "@mantine/notifications": "^7.16.2",

@@ -22,9 +22,10 @@ import { MantineProvider } from '@mantine/core';
 import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
+import DropField from './DropField';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -52,6 +53,13 @@ export interface FieldConfig {
     thousandSeparator?: string;
     defaultChecked?: boolean;  // Default value for switch
     refField?: string;  // Reference field name
+    // Properties for upload field
+    uploadUrl?: string;  // URL to upload files
+    maxSize?: number;  // Maximum file size in bytes
+    acceptedFileTypes?: string[];  // Accepted file types
+    imageWidth?: number;  // Width for image preview
+    imageHeight?: number;  // Height for image preview
+    uploadContext?: string;  // İsteğe bağlı upload context parametresi
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -129,8 +137,10 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                     mode: 'cors'
                 })
                     .then((res) => res.json())
-                    .then((data: DropdownOption[]) => {
-                        const formattedData = data.map((item) => ({
+                    .then((response) => {
+                        // API yanıtında "data" anahtarını kontrol et
+                        const data = response.data || response;
+                        const formattedData = data.map((item: DropdownOption) => ({
                             ...item,
                             value: String(item.value),
                         }));
@@ -147,8 +157,10 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 mode: 'cors'
             })
                 .then((res) => res.json())
-                .then((data: DropdownOption[]) => {
-                    const formattedData = data.map((item) => ({
+                .then((response) => {
+                    // API yanıtında "data" anahtarını kontrol et
+                    const data = response.data || response;
+                    const formattedData = data.map((item: DropdownOption) => ({
                         ...item,
                         value: String(item.value),
                     }));
@@ -212,8 +224,10 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
                 mode: 'cors'
             })
                 .then((res) => res.json())
-                .then((data: DropdownOption[]) => {
-                    const formattedData = data.map(item => ({
+                .then((response) => {
+                    // API yanıtında "data" anahtarını kontrol et
+                    const data = response.data || response;
+                    const formattedData = data.map((item: DropdownOption) => ({
                         ...item,
                         value: String(item.value)
                     }));
@@ -553,6 +567,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             )}
                                             {field.type === 'multiselect' && (
                                                 <MultiSelectField
+                                                    field={field}
+                                                    form={form}
+                                                    globalStyle={config.fieldStyle}
+                                                    getHeaders={getHeaders}
+                                                />
+                                            )}
+                                            {field.type === 'upload' && (
+                                                <DropField
                                                     field={field}
                                                     form={form}
                                                     globalStyle={config.fieldStyle}

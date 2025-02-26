@@ -54,6 +54,7 @@ import { MantineProvider } from '@mantine/core';
 import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
+import DropField from './DropField';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
@@ -74,7 +75,9 @@ var DropdownField = function (_a) {
                     mode: 'cors'
                 })
                     .then(function (res) { return res.json(); })
-                    .then(function (data) {
+                    .then(function (response) {
+                    // API yanıtında "data" anahtarını kontrol et
+                    var data = response.data || response;
                     var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                     setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
                 })
@@ -90,7 +93,9 @@ var DropdownField = function (_a) {
                 mode: 'cors'
             })
                 .then(function (res) { return res.json(); })
-                .then(function (data) {
+                .then(function (response) {
+                // API yanıtında "data" anahtarını kontrol et
+                var data = response.data || response;
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
             })
@@ -130,7 +135,9 @@ var MultiSelectField = function (_a) {
                 mode: 'cors'
             })
                 .then(function (res) { return res.json(); })
-                .then(function (data) {
+                .then(function (response) {
+                // API yanıtında "data" anahtarını kontrol et
+                var data = response.data || response;
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptions(formattedData);
             })
@@ -357,7 +364,8 @@ var DynamicForm = function (_a) {
                                     form.setFieldValue(field.field, val !== '' ? Number(val) : null);
                                 }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
                             field.type === 'switch' && (React.createElement(Switch, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { defaultChecked: field.defaultChecked, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                            field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders }))));
+                            field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                            field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders }))));
                     })));
                 })))); }),
             React.createElement(Group, null,
