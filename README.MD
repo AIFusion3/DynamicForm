@@ -251,8 +251,8 @@ Example:
 - uploadUrl: URL to upload files
 - maxSize: Maximum file size in bytes (default: 5MB)
 - acceptedFileTypes: Array of accepted MIME types
-- imageWidth: Width for image preview (default: 200px)
-- imageHeight: Height for image preview (default: 200px)
+- width: Width for image preview (default: 200px)
+- height: Height for image preview (default: 200px)
 - uploadContext: Optional context parameter for the upload request
 
 The Upload field provides a drag-and-drop interface for file uploads with image preview. When a file is selected, it's automatically uploaded to the specified URL. The component shows upload progress and displays the uploaded image once complete.
@@ -268,8 +268,8 @@ Example configuration:
   uploadUrl: "https://api.example.com/upload",
   maxSize: 5 * 1024 * 1024, // 5MB
   acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
-  imageWidth: 200,
-  imageHeight: 200,
+  width: 200,
+  height: 200,
   uploadContext: "product" // Optional context parameter
 }
 ```
@@ -302,6 +302,63 @@ The component stores the image URLs in the form values as an object:
   "detail": "https://example.com/images/detail/image.jpg"
 }
 ```
+
+#### UploadCollection
+- type: "uploadcollection"
+- uploadUrl: URL to upload files
+- maxSize: Maximum file size in bytes (default: 5MB)
+- acceptedFileTypes: Array of accepted MIME types
+- width: Width for each image preview (default: 150px)
+- height: Height for each image preview (default: 150px)
+- uploadContext: Optional context parameter for the upload request
+- maxImages: Maximum number of images allowed (default: 10)
+
+The UploadCollection field provides a horizontal scrollable collection of upload boxes for multiple image uploads. Each image can be uploaded, replaced, deleted, and reordered using left/right buttons. The component shows upload progress for each image and displays the uploaded images once complete.
+
+Example configuration:
+
+```tsx
+{
+  field: "productGallery",
+  title: "Product Gallery",
+  type: "uploadcollection",
+  required: true,
+  uploadUrl: "https://api.example.com/upload",
+  maxSize: 5 * 1024 * 1024, // 5MB
+  acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
+  width: "100%",
+  height: 220,
+  maxImages: 5,
+  uploadContext: "product_gallery" // Optional context parameter
+}
+```
+
+The upload request format and expected API response are the same as the Upload field. The component stores the image URLs in the form values as an array of objects:
+
+```json
+[
+  {
+    "list": "https://example.com/images/list/image1.jpg",
+    "detail": "https://example.com/images/detail/image1.jpg"
+  },
+  {
+    "list": "https://example.com/images/list/image2.jpg",
+    "detail": "https://example.com/images/detail/image2.jpg"
+  }
+]
+```
+
+Features of UploadCollection:
+- Horizontal scrollable interface for multiple images
+- Drag and drop support for each upload box
+- Image preview with overlay controls
+- Ability to replace existing images
+- Delete functionality for removing images
+- Left/right buttons for reordering images
+- Progress indicator during upload
+- Error handling and display
+
+**Note:** The `width` and `height` properties were previously named `imageWidth` and `imageHeight` in versions prior to 1.x.x. The new property names provide more consistent naming across components.
 
 ## API Integration
 
