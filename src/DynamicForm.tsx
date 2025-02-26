@@ -137,10 +137,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                     mode: 'cors'
                 })
                     .then((res) => res.json())
-                    .then((response) => {
-                        // API yanıtında "data" anahtarını kontrol et
-                        const data = response.data || response;
-                        const formattedData = data.map((item: DropdownOption) => ({
+                    .then((data: DropdownOption[]) => {
+                        const formattedData = data.map((item) => ({
                             ...item,
                             value: String(item.value),
                         }));
@@ -157,10 +155,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 mode: 'cors'
             })
                 .then((res) => res.json())
-                .then((response) => {
-                    // API yanıtında "data" anahtarını kontrol et
-                    const data = response.data || response;
-                    const formattedData = data.map((item: DropdownOption) => ({
+                .then((data: DropdownOption[]) => {
+                    const formattedData = data.map((item) => ({
                         ...item,
                         value: String(item.value),
                     }));
@@ -224,10 +220,8 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
                 mode: 'cors'
             })
                 .then((res) => res.json())
-                .then((response) => {
-                    // API yanıtında "data" anahtarını kontrol et
-                    const data = response.data || response;
-                    const formattedData = data.map((item: DropdownOption) => ({
+                .then((data: DropdownOption[]) => {
+                    const formattedData = data.map(item => ({
                         ...item,
                         value: String(item.value)
                     }));

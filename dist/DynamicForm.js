@@ -75,9 +75,7 @@ var DropdownField = function (_a) {
                     mode: 'cors'
                 })
                     .then(function (res) { return res.json(); })
-                    .then(function (response) {
-                    // API yanıtında "data" anahtarını kontrol et
-                    var data = response.data || response;
+                    .then(function (data) {
                     var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                     setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
                 })
@@ -93,9 +91,7 @@ var DropdownField = function (_a) {
                 mode: 'cors'
             })
                 .then(function (res) { return res.json(); })
-                .then(function (response) {
-                // API yanıtında "data" anahtarını kontrol et
-                var data = response.data || response;
+                .then(function (data) {
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
             })
@@ -135,9 +131,7 @@ var MultiSelectField = function (_a) {
                 mode: 'cors'
             })
                 .then(function (res) { return res.json(); })
-                .then(function (response) {
-                // API yanıtında "data" anahtarını kontrol et
-                var data = response.data || response;
+                .then(function (data) {
                 var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
                 setOptions(formattedData);
             })
