@@ -16,6 +16,7 @@ Mantine UI based dynamic form creation component.
   - Switch
   - MultiSelect
   - Upload (File upload with preview)
+  - UploadCollection (Multiple file uploads with preview and ordering)
 - Automatic form validation
 - Dependent fields support
 - API integration with customizable endpoints
