@@ -23,9 +23,10 @@ import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
+import UploadCollection from './UploadCollection';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -569,6 +570,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             )}
                                             {field.type === 'upload' && (
                                                 <DropField
+                                                    field={field}
+                                                    form={form}
+                                                    globalStyle={config.fieldStyle}
+                                                    getHeaders={getHeaders}
+                                                />
+                                            )}
+                                            {field.type === 'uploadcollection' && (
+                                                <UploadCollection
                                                     field={field}
                                                     form={form}
                                                     globalStyle={config.fieldStyle}

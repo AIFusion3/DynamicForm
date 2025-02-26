@@ -15,7 +15,7 @@ import {
   Button,
   ActionIcon
 } from '@mantine/core';
-import { IconUpload, IconRefresh } from '@tabler/icons-react';
+import { IconUpload, IconRefresh, IconTrash } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 
@@ -41,8 +41,8 @@ export interface DropFieldProps {
     uploadUrl?: string;
     maxSize?: number;
     acceptedFileTypes?: string[];
-    imageWidth?: number;
-    imageHeight?: number;
+    width?: number | string;
+    height?: number;
     uploadContext?: string;
   };
   form: ReturnType<typeof useForm>;
@@ -204,8 +204,8 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
     form.setFieldValue(field.field, null);
   };
 
-  const imageWidth = field.imageWidth || 200;
-  const imageHeight = field.imageHeight || 200;
+  const width = field.width || 200;
+  const height = field.height || 200;
 
   return (
     <div>
@@ -216,8 +216,8 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
         radius="md"
         bg="#f9f9f9"
         pos="relative"
-        w={imageWidth}
-        h={imageHeight}
+        w={typeof width === 'number' ? width : '100%'}
+        h={typeof height === 'number' ? height : '100%'}
         style={{ overflow: 'hidden' }}
       >
         {!imageUrls && (
@@ -290,13 +290,37 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
                   borderRadius: '5px'
                 }}
               >
-                <Button
-                  onClick={resetUpload}
-                  variant="outline" 
-                  color="white"
-                >
-                  <IconRefresh size={16} />
-                </Button>
+                <Group gap={5}>
+                  <Dropzone
+                    onDrop={handleDrop}
+                    onReject={() => setError('Dosya reddedildi')}
+                    maxSize={field.maxSize || 5 * 1024 * 1024}
+                    accept={field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp']}
+                    multiple={false}
+                    disabled={loading}
+                    p={0}
+                    style={{
+                      border: 'none',
+                      background: 'transparent'
+                    }}
+                  >
+                    <Button
+                      variant="outline" 
+                      color="white"
+                      size="xs"
+                    >
+                      <IconRefresh size={16} />
+                    </Button>
+                  </Dropzone>
+                  <Button
+                    onClick={resetUpload}
+                    variant="outline" 
+                    color="white"
+                    size="xs"
+                  >
+                    <IconTrash size={16} />
+                  </Button>
+                </Group>
               </Box>
             )}
           </Box>
@@ -337,7 +361,7 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
           mt="xs" 
           size="sm" 
           color={progress === 100 ? 'green' : 'blue'} 
-          w={imageWidth}
+          w={typeof width === 'number' ? width : '100%'}
         />
       )}
     </div>

@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import React, { useState } from 'react';
 import { Dropzone } from '@mantine/dropzone';
 import { Text, Group, Progress, Paper, Box, Loader, Overlay, Image as MantineImage, Button } from '@mantine/core';
-import { IconUpload, IconRefresh } from '@tabler/icons-react';
+import { IconUpload, IconRefresh, IconTrash } from '@tabler/icons-react';
 var DropField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
     var _b = useState(null), file = _b[0], setFile = _b[1];
@@ -206,10 +206,10 @@ var DropField = function (_a) {
         setShowOverlay(false);
         form.setFieldValue(field.field, null);
     };
-    var imageWidth = field.imageWidth || 200;
-    var imageHeight = field.imageHeight || 200;
+    var width = field.width || 200;
+    var height = field.height || 200;
     return (React.createElement("div", null,
-        React.createElement(Paper, { shadow: "xs", p: "xs", withBorder: true, radius: "md", bg: "#f9f9f9", pos: "relative", w: imageWidth, h: imageHeight, style: { overflow: 'hidden' } },
+        React.createElement(Paper, { shadow: "xs", p: "xs", withBorder: true, radius: "md", bg: "#f9f9f9", pos: "relative", w: typeof width === 'number' ? width : '100%', h: typeof height === 'number' ? height : '100%', style: { overflow: 'hidden' } },
             !imageUrls && (React.createElement(Dropzone, { onDrop: handleDrop, onReject: function () { return setError('Dosya reddedildi'); }, maxSize: field.maxSize || 5 * 1024 * 1024, accept: field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp'], multiple: false, disabled: loading, w: "100%", h: "100%", mx: "auto", style: {
                     display: 'flex',
                     alignItems: 'center',
@@ -233,12 +233,19 @@ var DropField = function (_a) {
                         justifyContent: 'center',
                         borderRadius: '5px'
                     } },
-                    React.createElement(Button, { onClick: resetUpload, variant: "outline", color: "white" },
-                        React.createElement(IconRefresh, { size: 16 })))))),
+                    React.createElement(Group, { gap: 5 },
+                        React.createElement(Dropzone, { onDrop: handleDrop, onReject: function () { return setError('Dosya reddedildi'); }, maxSize: field.maxSize || 5 * 1024 * 1024, accept: field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp'], multiple: false, disabled: loading, p: 0, style: {
+                                border: 'none',
+                                background: 'transparent'
+                            } },
+                            React.createElement(Button, { variant: "outline", color: "white", size: "xs" },
+                                React.createElement(IconRefresh, { size: 16 }))),
+                        React.createElement(Button, { onClick: resetUpload, variant: "outline", color: "white", size: "xs" },
+                            React.createElement(IconTrash, { size: 16 }))))))),
             loading && (React.createElement(Overlay, { color: "#fff", backgroundOpacity: 0.7, center: true, pos: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 },
                 React.createElement(Loader, { color: "blue", size: "lg" }))),
             error && (React.createElement(Text, { c: "red", ta: "center", mt: "sm", size: "xs" }, error)),
             uploadSuccess && !imageUrls && (React.createElement(Text, { c: "green", ta: "center", mt: "sm", size: "xs" }, "Resim ba\u015Far\u0131yla i\u015Flendi, URL'ler al\u0131n\u0131yor..."))),
-        loading && (React.createElement(Progress, { value: progress, mt: "xs", size: "sm", color: progress === 100 ? 'green' : 'blue', w: imageWidth }))));
+        loading && (React.createElement(Progress, { value: progress, mt: "xs", size: "sm", color: progress === 100 ? 'green' : 'blue', w: typeof width === 'number' ? width : '100%' }))));
 };
 export default DropField;
