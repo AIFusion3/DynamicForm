@@ -161,38 +161,100 @@ FormConfig
 - field: Field name
 - title: Label
 - type: Field type
-- required: Required field
+- required: Boolean indicating if the field is required
 - placeholder: Placeholder text
+- maxLength: Maximum character length (for text inputs)
 
 ### Special Properties
 
+#### Textbox
+- type: "textbox"
+- maxLength: Maximum character length
+
+```tsx
+{
+  field: "name",
+  title: "Full Name",
+  type: "textbox",
+  required: true,
+  placeholder: "Enter your full name",
+  maxLength: 100
+}
+```
+
 #### Textarea
+- type: "textarea"
 - minRows: Minimum rows
 - maxRows: Maximum rows
 - autosize: Auto sizing
+- maxLength: Maximum character length
+
+```tsx
+{
+  field: "description",
+  title: "Description",
+  type: "textarea",
+  required: true,
+  placeholder: "Enter description",
+  minRows: 3,
+  maxRows: 6,
+  autosize: true,
+  maxLength: 500
+}
+```
+
+#### Date
+- type: "date"
+
+```tsx
+{
+  field: "birthDate",
+  title: "Birth Date",
+  type: "date",
+  required: true,
+  placeholder: "Select date"
+}
+```
+
+#### Checkbox
+- type: "checkbox"
+
+```tsx
+{
+  field: "agreeTerms",
+  title: "I agree to the terms and conditions",
+  type: "checkbox",
+  required: true
+}
+```
+
+#### Switch
+- type: "switch"
+- defaultChecked: Default state
+
+```tsx
+{
+  field: "isActive",
+  title: "Active Status",
+  type: "switch",
+  defaultChecked: true
+}
+```
 
 #### Dropdown
+- type: "dropdown"
 - optionsUrl: API URL for options
 - options: Static options
 - refField: Dependent field
 
-The dropdown component supports both static options and dynamic options loaded from an API. When using `optionsUrl`, the component will fetch options from the specified URL. The API response can be either a direct array of options or an object with a `data` property containing the array:
-
-```json
-// Direct array response
-[
-  { "value": "1", "label": "Option 1" },
-  { "value": "2", "label": "Option 2" }
-]
-
-// Or with data property
+```tsx
 {
-  "data": [
-    { "value": "1", "label": "Option 1" },
-    { "value": "2", "label": "Option 2" }
-  ],
-  "message": "Success",
-  "status_code": 200
+  field: "country",
+  title: "Country",
+  type: "dropdown",
+  required: true,
+  placeholder: "Select a country",
+  optionsUrl: "https://api.example.com/countries"
 }
 ```
 
@@ -215,12 +277,27 @@ For dependent dropdowns, use the `refField` property to specify the field that t
 ```
 
 #### MultiSelect
+- type: "multiselect"
 - optionsUrl: API URL for options
 - options: Static options
 
-The MultiSelect component works similarly to the Dropdown component but allows selecting multiple options. It supports the same API response formats (direct array or object with data property).
+```tsx
+{
+  field: "skills",
+  title: "Skills",
+  type: "multiselect",
+  required: true,
+  placeholder: "Select skills",
+  options: [
+    { value: "react", label: "React" },
+    { value: "vue", label: "Vue" },
+    { value: "angular", label: "Angular" }
+  ]
+}
+```
 
 #### Number
+- type: "number"
 - min: Minimum value
 - max: Maximum value
 - step: Step amount
@@ -230,24 +307,40 @@ The MultiSelect component works similarly to the Dropdown component but allows s
 - decimalSeparator: Decimal separator
 - thousandSeparator: Thousand separator
 
+```tsx
+{
+  field: "price",
+  title: "Price",
+  type: "number",
+  required: true,
+  placeholder: "Enter price",
+  min: 0,
+  max: 1000,
+  step: 0.01,
+  prefix: "$",
+  defaultValue: 0,
+  decimalSeparator: ".",
+  thousandSeparator: ","
+}
+```
+
 #### MaskInput
+- type: "maskinput"
 - mask: Mask pattern
 
-Example:
 ```tsx
 {
   field: "phone",
   title: "Phone Number",
   type: "maskinput",
-  mask: "+1 (000) 000-0000",
-  required: true
+  required: true,
+  placeholder: "Enter phone number",
+  mask: "+1 (000) 000-0000"
 }
 ```
 
-#### Switch
-- defaultChecked: Default state
-
 #### Upload
+- type: "upload"
 - uploadUrl: URL to upload files
 - maxSize: Maximum file size in bytes (default: 5MB)
 - acceptedFileTypes: Array of accepted MIME types
@@ -255,14 +348,10 @@ Example:
 - height: Height for image preview (default: 200px)
 - uploadContext: Optional context parameter for the upload request
 
-The Upload field provides a drag-and-drop interface for file uploads with image preview. When a file is selected, it's automatically uploaded to the specified URL. The component shows upload progress and displays the uploaded image once complete.
-
-Example configuration:
-
 ```tsx
 {
-  field: "productImage",
-  title: "Product Image",
+  field: "profileImage",
+  title: "Profile Image",
   type: "upload",
   required: true,
   uploadUrl: "https://api.example.com/upload",
@@ -270,7 +359,7 @@ Example configuration:
   acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
   width: 200,
   height: 200,
-  uploadContext: "product" // Optional context parameter
+  uploadContext: "profile"
 }
 ```
 
@@ -313,10 +402,6 @@ The component stores the image URLs in the form values as an object:
 - uploadContext: Optional context parameter for the upload request
 - maxImages: Maximum number of images allowed (default: 10)
 
-The UploadCollection field provides a horizontal scrollable collection of upload boxes for multiple image uploads. Each image can be uploaded, replaced, deleted, and reordered using left/right buttons. The component shows upload progress for each image and displays the uploaded images once complete.
-
-Example configuration:
-
 ```tsx
 {
   field: "productGallery",
@@ -326,10 +411,10 @@ Example configuration:
   uploadUrl: "https://api.example.com/upload",
   maxSize: 5 * 1024 * 1024, // 5MB
   acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
-  width: "100%",
+  width: "100%", // Can be a percentage or pixel value
   height: 220,
-  maxImages: 5,
-  uploadContext: "product_gallery" // Optional context parameter
+  maxImages: 5, // Show 5 upload boxes
+  uploadContext: "product_gallery"
 }
 ```
 
