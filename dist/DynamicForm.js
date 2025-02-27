@@ -56,6 +56,7 @@ import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
 import UploadCollection from './UploadCollection';
+import TreeField from './Tree';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
@@ -371,7 +372,8 @@ var DynamicForm = function (_a) {
                             field.type === 'switch' && (React.createElement(Switch, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { defaultChecked: field.defaultChecked, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                             field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                             field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                            field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders }))));
+                            field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                            field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders }))));
                     })));
                 })))); }),
             React.createElement(Group, null,

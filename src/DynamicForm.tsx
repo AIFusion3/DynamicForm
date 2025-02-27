@@ -24,9 +24,10 @@ import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
 import UploadCollection from './UploadCollection';
+import TreeField from './Tree';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -61,6 +62,8 @@ export interface FieldConfig {
     imageWidth?: number;  // Width for image preview
     imageHeight?: number;  // Height for image preview
     uploadContext?: string;  // İsteğe bağlı upload context parametresi
+    // Tree field için özellikler
+    levelOffset?: number; // Tree level offset
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -594,6 +597,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             )}
                                             {field.type === 'uploadcollection' && (
                                                 <UploadCollection
+                                                    field={field}
+                                                    form={form}
+                                                    globalStyle={config.fieldStyle}
+                                                    getHeaders={getHeaders}
+                                                />
+                                            )}
+                                            {field.type === 'tree' && (
+                                                <TreeField
                                                     field={field}
                                                     form={form}
                                                     globalStyle={config.fieldStyle}
