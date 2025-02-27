@@ -208,6 +208,9 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
 }) => {
     const [options, setOptions] = useState<DropdownOption[]>(field.options || []);
     const [loading, setLoading] = useState(false);
+    const [selectedValues, setSelectedValues] = useState<string[]>(
+        Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : []
+    );
 
     useEffect(() => {
         if (field.options) {
@@ -232,14 +235,27 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
         }
     }, []);
 
+    useEffect(() => {
+        if (form.values[field.field]) {
+            setSelectedValues(
+                Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : []
+            );
+        }
+    }, [form.values[field.field]]);
+
+    const handleValueChange = (value: string[]) => {
+        setSelectedValues(value);
+        form.setFieldValue(field.field, value);
+    };
+
     return (
         <>
             <MultiSelect
                 label={field.title}
                 placeholder={field.placeholder || "Select options"}
                 data={options.map(item => ({ value: String(item.value), label: item.label }))}
-                value={Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : []}
-                onChange={(value) => form.setFieldValue(field.field, value)}
+                value={selectedValues}
+                onChange={handleValueChange}
                 error={form.errors[field.field]}
                 required={field.required}
                 disabled={loading}

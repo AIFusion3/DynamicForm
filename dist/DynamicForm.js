@@ -119,6 +119,7 @@ var MultiSelectField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
     var _b = useState(field.options || []), options = _b[0], setOptions = _b[1];
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
+    var _d = useState(Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : []), selectedValues = _d[0], setSelectedValues = _d[1];
     useEffect(function () {
         if (field.options) {
             setOptions(field.options);
@@ -139,8 +140,17 @@ var MultiSelectField = function (_a) {
                 .finally(function () { return setLoading(false); });
         }
     }, []);
+    useEffect(function () {
+        if (form.values[field.field]) {
+            setSelectedValues(Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : []);
+        }
+    }, [form.values[field.field]]);
+    var handleValueChange = function (value) {
+        setSelectedValues(value);
+        form.setFieldValue(field.field, value);
+    };
     return (React.createElement(React.Fragment, null,
-        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Select options", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : [], onChange: function (value) { return form.setFieldValue(field.field, value); }, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
+        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Select options", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 /**
