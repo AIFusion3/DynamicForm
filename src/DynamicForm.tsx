@@ -25,9 +25,10 @@ import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
 import UploadCollection from './UploadCollection';
 import TreeField from './Tree';
+import SubListForm from './SubListForm';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -64,6 +65,11 @@ export interface FieldConfig {
     uploadContext?: string;  // İsteğe bağlı upload context parametresi
     // Tree field için özellikler
     levelOffset?: number; // Tree level offset
+    // SubListForm için özellikler - sadece sublistform tipi için geçerli
+    subform?: FormConfig;
+    buttonTitle?: string;
+    columns?: { key: string; title: string }[];
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -94,7 +100,9 @@ export interface DynamicFormProps {
     cancelButtonProps?: Partial<ButtonProps & { onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }>;
     useToken?: boolean;
     showDebug?: boolean;
-    pk_field?: string; // Yeni eklenen alan
+    pk_field?: string;
+    noSubmit?: boolean; // API'ye submit etmeden form değerlerini döndürmek için
+    noForm?: boolean; // Form elementini tamamen kaldır
 }
 
 // DropdownField için tip güncellemesi
@@ -287,7 +295,9 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     cancelButtonProps,
     useToken = false,
     showDebug = false,
-    pk_field
+    pk_field,
+    noSubmit = false,
+    noForm = false
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -383,6 +393,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
     // Form submit edildiğinde değerleri gönderiyoruz.
     const handleSubmit = form.onSubmit(async (values) => {
+        // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
+        if (noSubmit) {
+            if (onSuccess) {
+                onSuccess(values);
+            }
+            return;
+        }
+
         try {
             const requestHeaders = getHeaders();
             
@@ -418,6 +436,223 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             console.error('Error submitting form:', error);
         }
     });
+
+    // Eğer cancelButtonProps veya submitButtonProps tanımlı değilse boş obje oluşturuyoruz.
+    const cancelProps = cancelButtonProps || {};
+    const submitProps = submitButtonProps || {};
+
+    // Form içeriğini render eden fonksiyon
+    const renderFormContent = () => (
+        <>
+            {config.rows.map((row, rowIndex) => (
+                <div key={rowIndex} style={{ marginBottom: '2rem' }}>
+                    {row.title && (
+                        <Text size="lg" mb="sm" style={row.headerStyle}>
+                            {row.title}
+                        </Text>
+                    )}
+                    <Grid gutter="md">
+                        {row.columns.map((column, colIndex) => (
+                            <Grid.Col
+                                key={colIndex}
+                                // Eğer column.span tanımlıysa onu, tanımlı değilse 12 / row.columns.length hesaplamasını kullan.
+                                span={column.span ?? (12 / row.columns.length)}
+                            >
+                                {column.fields.map((field, fieldIndex) => (
+                                    <div key={fieldIndex} style={{ marginBottom: '1rem' }}>
+                                        {field.type === 'textbox' && (
+                                            <TextInput
+                                                label={field.title}
+                                                placeholder={field.placeholder || field.title}
+                                                {...form.getInputProps(field.field)}
+                                                required={field.required}
+                                                maxLength={field.maxLength}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            />
+                                        )}
+                                        {field.type === 'textarea' && (
+                                            <Textarea
+                                                label={field.title}
+                                                placeholder={field.placeholder || field.title}
+                                                {...form.getInputProps(field.field)}
+                                                required={field.required}
+                                                maxLength={field.maxLength}
+                                                autosize={field.autosize ?? undefined}
+                                                minRows={field.minRows ?? 1}
+                                                maxRows={field.maxRows ?? 2}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            />
+                                        )}
+                                        {field.type === 'date' && (
+                                            <DatePickerInput
+                                                label={field.title}
+                                                placeholder={field.placeholder || field.title}
+                                                value={form.values[field.field]}
+                                                onChange={(value) => form.setFieldValue(field.field, value)}
+                                                required={field.required}
+                                                error={form.errors[field.field]}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            />
+                                        )}
+                                        {field.type === 'checkbox' && (
+                                            <Checkbox
+                                                label={field.title}
+                                                {...form.getInputProps(field.field, { type: 'checkbox' })}
+                                            // Checkbox bileşeninde style uygulanması opsiyonel olabilir;
+                                            // istenirse ekleyebilirsiniz.
+                                            />
+                                        )}
+                                        {field.type === 'dropdown' && (
+                                            <DropdownField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                onDropdownChange={handleDropdownChange}
+                                                options={dropdownOptions[field.field] || field.options || []}
+                                                setOptionsForField={setOptionsForField}
+                                                getHeaders={getHeaders}
+                                            />
+                                        )}
+                                        {field.type === 'maskinput' && (
+                                            <InputBase
+                                                label={field.title}
+                                                placeholder={field.placeholder || field.title}
+                                                component={IMaskInput}
+                                                mask={field.mask || ''}
+                                                {...form.getInputProps(field.field)}
+                                                required={field.required}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            />
+                                        )}
+                                        {field.type === 'number' && (
+                                            <NumberInput
+                                                required={field.required}
+                                                min={field.min}
+                                                max={field.max}
+                                                step={field.step}
+                                                prefix={field.prefix}
+                                                suffix={field.suffix}
+                                                defaultValue={field.defaultValue}
+                                                label={field.title}
+                                                placeholder={field.placeholder}
+                                                value={form.values[field.field]}
+                                                onChange={(val) => {
+                                                    form.setFieldValue(field.field, val !== '' ? Number(val) : null);
+                                                }}
+                                                error={form.errors[field.field]}
+                                                thousandSeparator={field.thousandSeparator || ','}
+                                                decimalSeparator={field.decimalSeparator || '.'}
+                                            />
+                                        )}
+                                        {field.type === 'switch' && (
+                                            <Switch
+                                                label={field.title}
+                                                {...form.getInputProps(field.field, { type: 'checkbox' })}
+                                                defaultChecked={field.defaultChecked}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            />
+                                        )}
+                                        {field.type === 'multiselect' && (
+                                            <MultiSelectField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                getHeaders={getHeaders}
+                                            />
+                                        )}
+                                        {field.type === 'upload' && (
+                                            <DropField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                getHeaders={getHeaders}
+                                            />
+                                        )}
+                                        {field.type === 'uploadcollection' && (
+                                            <UploadCollection
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                getHeaders={getHeaders}
+                                            />
+                                        )}
+                                        {field.type === 'tree' && (
+                                            <TreeField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                getHeaders={getHeaders}
+                                            />
+                                        )}
+                                        {field.type === 'sublistform' && 'subform' in field && field.subform && (
+                                            <SubListForm
+                                                field={field as any}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                baseUrl={baseUrl}
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+                            </Grid.Col>
+                        ))}
+                    </Grid>
+                </div>
+            ))}
+            
+            <Group>
+                <Button
+                    type="button" variant="outline"
+                    {...cancelProps}
+                    onClick={(event) => {
+                        form.reset();
+                        cancelProps.onClick && cancelProps.onClick(event);
+                    }}
+                >
+                    {cancelProps.children || 'İptal'}
+                </Button>
+                <Button 
+                    type={noForm ? "button" : "submit"} 
+                    {...submitProps}
+                    onClick={(event) => {
+                        if (noForm) {
+                            // Form elementi yoksa manuel validation yap
+                            const validationResult = form.validate();
+                            
+                            if (!validationResult.hasErrors) {
+                                // Validation başarılıysa ve noSubmit=true ise
+                                // form değerlerini doğrudan onSuccess'e gönder
+                                if (noSubmit && onSuccess) {
+                                    console.log("Manuel submit: değerler gönderiliyor", form.getValues());
+                                    onSuccess(form.getValues());
+                                } 
+                                // Normal API submit
+                                else if (!noSubmit) {
+                                    handleSubmit(new Event('submit') as any);
+                                }
+                            }
+                        }
+                        
+                        // Dışarıdan verilen onClick varsa çalıştır
+                        if (submitProps.onClick) {
+                            submitProps.onClick(event);
+                        }
+                    }}
+                >
+                    {submitProps.children || 'Save'}
+                </Button>
+            </Group>
+
+            {showDebug === true && (
+                <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                    <Text size="sm" mb={8}>Debug - Form Values:</Text>
+                    <pre style={{ margin: 0 }}>
+                        {JSON.stringify(formValues, null, 2)}
+                    </pre>
+                </div>
+            )}
+        </>
+    );
 
     // Options güncelleme fonksiyonu
     const setOptionsForField = (fieldName: string, options: DropdownOption[]) => {
@@ -463,186 +698,20 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         });
     };
 
-    // Eğer cancelButtonProps veya submitButtonProps tanımlı değilse boş obje oluşturuyoruz.
-    const cancelProps = cancelButtonProps || {};
-    const submitProps = submitButtonProps || {};
-
     return (
         <MantineProvider>
             <Notifications />
-            <form onSubmit={handleSubmit}>
-                {config.rows.map((row, rowIndex) => (
-                    <div key={rowIndex} style={{ marginBottom: '2rem' }}>
-                        {row.title && (
-                            <Text size="lg" mb="sm" style={row.headerStyle}>
-                                {row.title}
-                            </Text>
-                        )}
-                        <Grid gutter="md">
-                            {row.columns.map((column, colIndex) => (
-                                <Grid.Col
-                                    key={colIndex}
-                                    // Eğer column.span tanımlıysa onu, tanımlı değilse 12 / row.columns.length hesaplamasını kullan.
-                                    span={column.span ?? (12 / row.columns.length)}
-                                >
-                                    {column.fields.map((field, fieldIndex) => (
-                                        <div key={fieldIndex} style={{ marginBottom: '1rem' }}>
-                                            {field.type === 'textbox' && (
-                                                <TextInput
-                                                    label={field.title}
-                                                    placeholder={field.placeholder || field.title}
-                                                    {...form.getInputProps(field.field)}
-                                                    required={field.required}
-                                                    maxLength={field.maxLength}
-                                                    style={config.fieldStyle ? config.fieldStyle : undefined}
-                                                />
-                                            )}
-                                            {field.type === 'textarea' && (
-                                                <Textarea
-                                                    label={field.title}
-                                                    placeholder={field.placeholder || field.title}
-                                                    {...form.getInputProps(field.field)}
-                                                    required={field.required}
-                                                    maxLength={field.maxLength}
-                                                    autosize={field.autosize ?? undefined}
-                                                    minRows={field.minRows ?? 1}
-                                                    maxRows={field.maxRows ?? 2}
-                                                    style={config.fieldStyle ? config.fieldStyle : undefined}
-                                                />
-                                            )}
-                                            {field.type === 'date' && (
-                                                <DatePickerInput
-                                                    label={field.title}
-                                                    placeholder={field.placeholder || field.title}
-                                                    value={form.values[field.field]}
-                                                    onChange={(value) => form.setFieldValue(field.field, value)}
-                                                    required={field.required}
-                                                    error={form.errors[field.field]}
-                                                    style={config.fieldStyle ? config.fieldStyle : undefined}
-                                                />
-                                            )}
-                                            {field.type === 'checkbox' && (
-                                                <Checkbox
-                                                    label={field.title}
-                                                    {...form.getInputProps(field.field, { type: 'checkbox' })}
-                                                // Checkbox bileşeninde style uygulanması opsiyonel olabilir;
-                                                // istenirse ekleyebilirsiniz.
-                                                />
-                                            )}
-                                            {field.type === 'dropdown' && (
-                                                <DropdownField
-                                                    field={field}
-                                                    form={form}
-                                                    globalStyle={config.fieldStyle}
-                                                    onDropdownChange={handleDropdownChange}
-                                                    options={dropdownOptions[field.field] || field.options || []}
-                                                    setOptionsForField={setOptionsForField}
-                                                    getHeaders={getHeaders}
-                                                />
-                                            )}
-                                            {field.type === 'maskinput' && (
-                                                <InputBase
-                                                    label={field.title}
-                                                    placeholder={field.placeholder || field.title}
-                                                    component={IMaskInput}
-                                                    mask={field.mask || ''}
-                                                    {...form.getInputProps(field.field)}
-                                                    required={field.required}
-                                                    style={config.fieldStyle ? config.fieldStyle : undefined}
-                                                />
-                                            )}
-                                            {field.type === 'number' && (
-                                                <NumberInput
-                                                    required={field.required}
-                                                    min={field.min}
-                                                    max={field.max}
-                                                    step={field.step}
-                                                    prefix={field.prefix}
-                                                    suffix={field.suffix}
-                                                    defaultValue={field.defaultValue}
-                                                    label={field.title}
-                                                    placeholder={field.placeholder}
-                                                    value={form.values[field.field]}
-                                                    onChange={(val) => {
-                                                        form.setFieldValue(field.field, val !== '' ? Number(val) : null);
-                                                    }}
-                                                    error={form.errors[field.field]}
-                                                    thousandSeparator={field.thousandSeparator || ','}
-                                                    decimalSeparator={field.decimalSeparator || '.'}
-                                                />
-                                            )}
-                                            {field.type === 'switch' && (
-                                                <Switch
-                                                    label={field.title}
-                                                    {...form.getInputProps(field.field, { type: 'checkbox' })}
-                                                    defaultChecked={field.defaultChecked}
-                                                    style={config.fieldStyle ? config.fieldStyle : undefined}
-                                                />
-                                            )}
-                                            {field.type === 'multiselect' && (
-                                                <MultiSelectField
-                                                    field={field}
-                                                    form={form}
-                                                    globalStyle={config.fieldStyle}
-                                                    getHeaders={getHeaders}
-                                                />
-                                            )}
-                                            {field.type === 'upload' && (
-                                                <DropField
-                                                    field={field}
-                                                    form={form}
-                                                    globalStyle={config.fieldStyle}
-                                                    getHeaders={getHeaders}
-                                                />
-                                            )}
-                                            {field.type === 'uploadcollection' && (
-                                                <UploadCollection
-                                                    field={field}
-                                                    form={form}
-                                                    globalStyle={config.fieldStyle}
-                                                    getHeaders={getHeaders}
-                                                />
-                                            )}
-                                            {field.type === 'tree' && (
-                                                <TreeField
-                                                    field={field}
-                                                    form={form}
-                                                    globalStyle={config.fieldStyle}
-                                                    getHeaders={getHeaders}
-                                                />
-                                            )}
-                                        </div>
-                                    ))}
-                                </Grid.Col>
-                            ))}
-                        </Grid>
-                    </div>
-                ))}
-                <Group>
-                    <Button
-                        type="button"
-                        {...cancelProps}
-                        onClick={(event) => {
-                            form.reset();
-                            cancelProps.onClick && cancelProps.onClick(event);
-                        }}
-                    >
-                        {cancelProps.children || 'Cancel'}
-                    </Button>
-                    <Button type="submit" {...submitProps}>
-                        {submitProps.children || 'Save'}
-                    </Button>
-                </Group>
-
-                {showDebug === true && (
-                    <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                        <Text size="sm" mb={8}>Debug - Form Values:</Text>
-                        <pre style={{ margin: 0 }}>
-                            {JSON.stringify(formValues, null, 2)}
-                        </pre>
-                    </div>
-                )}
-            </form>
+            {noForm ? (
+                // Form elementi OLMADAN içeriği render et
+                <div className="dynamic-form-content">
+                    {renderFormContent()}
+                </div>
+            ) : (
+                // Normal form elementi ile
+                <form onSubmit={handleSubmit}>
+                    {renderFormContent()}
+                </form>
+            )}
         </MantineProvider>
     );
 };

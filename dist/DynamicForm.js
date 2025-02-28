@@ -57,6 +57,7 @@ import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
 import UploadCollection from './UploadCollection';
 import TreeField from './Tree';
+import SubListForm from './SubListForm';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
@@ -162,10 +163,10 @@ var MultiSelectField = function (_a) {
  * - Submit ve Cancel butonları, dışarıdan detaylı buton ayarları ile kontrol edilebilir.
  */
 var DynamicForm = function (_a) {
-    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field;
+    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e;
     // Form değerlerini takip etmek için state ekliyoruz
-    var _d = useState({}), formValues = _d[0], setFormValues = _d[1];
-    var _e = useState({}), dropdownOptions = _e[0], setDropdownOptions = _e[1];
+    var _f = useState({}), formValues = _f[0], setFormValues = _f[1];
+    var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     // Checkbox için false, date için null, diğerleri için boş string
     var initialValues = {};
@@ -264,7 +265,16 @@ var DynamicForm = function (_a) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
+                    if (noSubmit) {
+                        if (onSuccess) {
+                            onSuccess(values);
+                        }
+                        return [2 /*return*/];
+                    }
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
                     requestHeaders = getHeaders();
                     isPutRequest = pk_field && initialData && initialData[pk_field];
                     method = isPutRequest ? 'PUT' : 'POST';
@@ -278,10 +288,10 @@ var DynamicForm = function (_a) {
                             mode: 'cors',
                             body: JSON.stringify(values),
                         })];
-                case 1:
+                case 2:
                     response = _a.sent();
                     return [4 /*yield*/, response.json()];
-                case 2:
+                case 3:
                     result = _a.sent();
                     // Beklenen response model: { data: any, message: string, code: string }
                     if (response.ok) {
@@ -296,15 +306,76 @@ var DynamicForm = function (_a) {
                             color: 'red'
                         });
                     }
-                    return [3 /*break*/, 4];
-                case 3:
+                    return [3 /*break*/, 5];
+                case 4:
                     error_1 = _a.sent();
                     console.error('Error submitting form:', error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     }); });
+    // Eğer cancelButtonProps veya submitButtonProps tanımlı değilse boş obje oluşturuyoruz.
+    var cancelProps = cancelButtonProps || {};
+    var submitProps = submitButtonProps || {};
+    // Form içeriğini render eden fonksiyon
+    var renderFormContent = function () { return (React.createElement(React.Fragment, null,
+        config.rows.map(function (row, rowIndex) { return (React.createElement("div", { key: rowIndex, style: { marginBottom: '2rem' } },
+            row.title && (React.createElement(Text, { size: "lg", mb: "sm", style: row.headerStyle }, row.title)),
+            React.createElement(Grid, { gutter: "md" }, row.columns.map(function (column, colIndex) {
+                var _a;
+                return (React.createElement(Grid.Col, { key: colIndex, 
+                    // Eğer column.span tanımlıysa onu, tanımlı değilse 12 / row.columns.length hesaplamasını kullan.
+                    span: (_a = column.span) !== null && _a !== void 0 ? _a : (12 / row.columns.length) }, column.fields.map(function (field, fieldIndex) {
+                    var _a, _b, _c;
+                    return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
+                        field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'date' && (React.createElement(DatePickerInput, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined })),
+                        field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
+                        field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
+                        field.type === 'maskinput' && (React.createElement(InputBase, __assign({ label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
+                                form.setFieldValue(field.field, val !== '' ? Number(val) : null);
+                            }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
+                        field.type === 'switch' && (React.createElement(Switch, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { defaultChecked: field.defaultChecked, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl }))));
+                })));
+            })))); }),
+        React.createElement(Group, null,
+            React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
+                    form.reset();
+                    cancelProps.onClick && cancelProps.onClick(event);
+                } }), cancelProps.children || 'İptal'),
+            React.createElement(Button, __assign({ type: noForm ? "button" : "submit" }, submitProps, { onClick: function (event) {
+                    if (noForm) {
+                        // Form elementi yoksa manuel validation yap
+                        var validationResult = form.validate();
+                        if (!validationResult.hasErrors) {
+                            // Validation başarılıysa ve noSubmit=true ise
+                            // form değerlerini doğrudan onSuccess'e gönder
+                            if (noSubmit && onSuccess) {
+                                console.log("Manuel submit: değerler gönderiliyor", form.getValues());
+                                onSuccess(form.getValues());
+                            }
+                            // Normal API submit
+                            else if (!noSubmit) {
+                                handleSubmit(new Event('submit'));
+                            }
+                        }
+                    }
+                    // Dışarıdan verilen onClick varsa çalıştır
+                    if (submitProps.onClick) {
+                        submitProps.onClick(event);
+                    }
+                } }), submitProps.children || 'Save')),
+        showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
+            React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
+            React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))); };
     // Options güncelleme fonksiyonu
     var setOptionsForField = function (fieldName, options) {
         setDropdownOptions(function (prev) {
@@ -345,45 +416,12 @@ var DynamicForm = function (_a) {
             });
         });
     };
-    // Eğer cancelButtonProps veya submitButtonProps tanımlı değilse boş obje oluşturuyoruz.
-    var cancelProps = cancelButtonProps || {};
-    var submitProps = submitButtonProps || {};
     return (React.createElement(MantineProvider, null,
         React.createElement(Notifications, null),
-        React.createElement("form", { onSubmit: handleSubmit },
-            config.rows.map(function (row, rowIndex) { return (React.createElement("div", { key: rowIndex, style: { marginBottom: '2rem' } },
-                row.title && (React.createElement(Text, { size: "lg", mb: "sm", style: row.headerStyle }, row.title)),
-                React.createElement(Grid, { gutter: "md" }, row.columns.map(function (column, colIndex) {
-                    var _a;
-                    return (React.createElement(Grid.Col, { key: colIndex, 
-                        // Eğer column.span tanımlıysa onu, tanımlı değilse 12 / row.columns.length hesaplamasını kullan.
-                        span: (_a = column.span) !== null && _a !== void 0 ? _a : (12 / row.columns.length) }, column.fields.map(function (field, fieldIndex) {
-                        var _a, _b, _c;
-                        return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
-                            field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                            field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                            field.type === 'date' && (React.createElement(DatePickerInput, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined })),
-                            field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
-                            field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
-                            field.type === 'maskinput' && (React.createElement(InputBase, __assign({ label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                            field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
-                                    form.setFieldValue(field.field, val !== '' ? Number(val) : null);
-                                }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
-                            field.type === 'switch' && (React.createElement(Switch, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { defaultChecked: field.defaultChecked, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                            field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                            field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                            field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                            field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders }))));
-                    })));
-                })))); }),
-            React.createElement(Group, null,
-                React.createElement(Button, __assign({ type: "button" }, cancelProps, { onClick: function (event) {
-                        form.reset();
-                        cancelProps.onClick && cancelProps.onClick(event);
-                    } }), cancelProps.children || 'Cancel'),
-                React.createElement(Button, __assign({ type: "submit" }, submitProps), submitProps.children || 'Save')),
-            showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
-                React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
-                React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))));
+        noForm ? (
+        // Form elementi OLMADAN içeriği render et
+        React.createElement("div", { className: "dynamic-form-content" }, renderFormContent())) : (
+        // Normal form elementi ile
+        React.createElement("form", { onSubmit: handleSubmit }, renderFormContent()))));
 };
 export default DynamicForm;

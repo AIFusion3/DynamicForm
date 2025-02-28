@@ -2,7 +2,7 @@ import React from 'react';
 import { ButtonProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import '@mantine/dates/styles.css';
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform';
 export interface FieldConfig {
     field: string;
     title: string;
@@ -36,6 +36,13 @@ export interface FieldConfig {
     imageHeight?: number;
     uploadContext?: string;
     levelOffset?: number;
+    subform?: FormConfig;
+    buttonTitle?: string;
+    columns?: {
+        key: string;
+        title: string;
+    }[];
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 export interface ColumnConfig {
     span?: number;
@@ -65,6 +72,8 @@ export interface DynamicFormProps {
     useToken?: boolean;
     showDebug?: boolean;
     pk_field?: string;
+    noSubmit?: boolean;
+    noForm?: boolean;
 }
 interface DropdownOption {
     value: string | number;
