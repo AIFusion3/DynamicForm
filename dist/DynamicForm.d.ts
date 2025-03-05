@@ -1,10 +1,10 @@
 import React from 'react';
-import { ButtonProps } from '@mantine/core';
+import { ButtonProps, MantineColor } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import '@mantine/dates/styles.css';
 import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol';
 export interface FieldConfig {
     field: string;
     title: string;
@@ -47,6 +47,10 @@ export interface FieldConfig {
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     editorHeight?: number;
     valueFormat?: string;
+    color?: MantineColor;
+    radius?: number | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    fullWidth?: boolean;
+    orientation?: 'horizontal' | 'vertical';
 }
 export interface ColumnConfig {
     span?: number;

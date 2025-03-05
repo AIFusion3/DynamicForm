@@ -50,9 +50,27 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
 
     switch (field.type) {
         case 'date':
-            return new Date(value).toLocaleDateString('tr-TR');
+            try {
+                const date = new Date(value);
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}.${month}.${year}`;
+            } catch (error) {
+                return value;
+            }
         case 'datetime':
-            return new Date(value).toLocaleString('tr-TR');
+            try {
+                const date = new Date(value);
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${day}.${month}.${year} ${hours}:${minutes}`;
+            } catch (error) {
+                return value;
+            }
         case 'image':
             return value ? (
                 <Image

@@ -518,6 +518,67 @@ Features of HTMLEditor:
 - Customizable height
 - HTML content output
 
+#### SegmentedControl
+- type: "segmentedcontrol"
+- color: MantineColor (theme color or custom color)
+- radius: number | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+- size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+- fullWidth: boolean (stretch control to full width)
+- orientation: 'horizontal' | 'vertical'
+- options: Array of { value: string, label: string }
+- optionsUrl: API URL for dynamic options loading
+- refField: Reference field for dependent loading
+
+```tsx
+// Static options
+{
+  field: "status",
+  title: "Status",
+  type: "segmentedcontrol",
+  required: true,
+  color: "blue",
+  size: "sm",
+  fullWidth: true,
+  orientation: "horizontal",
+  options: [
+    { value: "1", label: "Active" },
+    { value: "0", label: "Passive" }
+  ]
+}
+
+// Dynamic options from API
+{
+  field: "category",
+  title: "Category",
+  type: "segmentedcontrol",
+  required: true,
+  color: "blue",
+  optionsUrl: "https://api.example.com/categories"
+}
+
+// Dependent loading
+{
+  field: "subcategory",
+  title: "Sub Category",
+  type: "segmentedcontrol",
+  required: true,
+  optionsUrl: "https://api.example.com/categories/{0}/subcategories",
+  refField: "category"
+}
+```
+
+Features of SegmentedControl:
+- Customizable appearance with color and size options
+- Support for both horizontal and vertical orientations
+- Full width mode for better layout control
+- Automatic value and label handling
+- Integration with form validation
+- Support for required field validation
+- Error message display
+- Dynamic options loading from API
+- Dependent field support like dropdown
+- Automatic state management for API-loaded options
+
 #### SubListForm
 - type: "sublistform"
 - subform: Nested form configuration

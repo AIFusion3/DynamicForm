@@ -15,6 +15,8 @@ import {
     NumberInput,
     Switch,
     MultiSelect,
+    SegmentedControl,
+    MantineColor
 } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -34,7 +36,7 @@ import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -78,6 +80,11 @@ export interface FieldConfig {
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     editorHeight?: number;
     valueFormat?: string;
+    // SegmentedControl için özel proplar
+    color?: MantineColor;
+    radius?: number | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    fullWidth?: boolean;
+    orientation?: 'horizontal' | 'vertical';
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -360,6 +367,78 @@ const HTMLEditorField: React.FC<{
                 </Text>
             )}
         </div>
+    );
+};
+
+// SegmentedControlField bileşenini oluşturuyoruz
+const SegmentedControlField: React.FC<DropdownFieldProps> = ({
+    field,
+    form,
+    globalStyle,
+    onDropdownChange,
+    options = [],
+    setOptionsForField,
+    getHeaders
+}) => {
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (field.optionsUrl) {
+            setLoading(true);
+            fetch(field.optionsUrl, {
+                method: 'GET',
+                headers: getHeaders?.() || { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                mode: 'cors'
+            })
+                .then((res) => res.json())
+                .then((data: DropdownOption[]) => {
+                    const formattedData = data.map((item) => ({
+                        ...item,
+                        value: String(item.value),
+                    }));
+                    setOptionsForField?.(field.field, formattedData);
+                })
+                .catch(error => {
+                    console.error(`Error loading options for ${field.field}:`, error);
+                })
+                .finally(() => setLoading(false));
+        }
+    }, []);
+
+    return (
+        <>
+            <Text size="sm" fw={500} mb={5}>
+                {field.title} {field.required && <span style={{ color: 'red' }}>*</span>}
+            </Text>
+            <SegmentedControl
+                {...form.getInputProps(field.field)}
+                onChange={(value) => {
+                    form.setFieldValue(field.field, value);
+                    const selectedOption = options.find(opt => String(opt.value) === value);
+                    if (selectedOption) {
+                        form.setFieldValue(field.field + "__title", selectedOption.label);
+                    }
+                    onDropdownChange?.(field.field, value);
+                }}
+                data={options.map((item) => ({
+                    value: String(item.value),
+                    label: item.label
+                }))}
+                color={field.color}
+                radius={field.radius}
+                size={field.size}
+                fullWidth={field.fullWidth}
+                orientation={field.orientation}
+                style={globalStyle ? globalStyle : undefined}
+            />
+            {loading && <Loader size="xs" mt={5} />}
+            {form.errors[field.field] && (
+                <Text size="xs" color="red" mt={5}>
+                    {form.errors[field.field]}
+                </Text>
+            )}
+        </>
     );
 };
 
@@ -698,6 +777,17 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 field={field}
                                                 form={form}
                                                 globalStyle={config.fieldStyle}
+                                            />
+                                        )}
+                                        {field.type === 'segmentedcontrol' && (
+                                            <SegmentedControlField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                                onDropdownChange={handleDropdownChange}
+                                                options={dropdownOptions[field.field] || field.options || []}
+                                                setOptionsForField={setOptionsForField}
+                                                getHeaders={getHeaders}
                                             />
                                         )}
                                     </div>

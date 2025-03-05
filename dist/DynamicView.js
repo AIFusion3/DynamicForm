@@ -17,9 +17,29 @@ var formatValue = function (value, field) {
         return '-';
     switch (field.type) {
         case 'date':
-            return new Date(value).toLocaleDateString('tr-TR');
+            try {
+                var date = new Date(value);
+                var day = date.getDate().toString().padStart(2, '0');
+                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                var year = date.getFullYear();
+                return "".concat(day, ".").concat(month, ".").concat(year);
+            }
+            catch (error) {
+                return value;
+            }
         case 'datetime':
-            return new Date(value).toLocaleString('tr-TR');
+            try {
+                var date = new Date(value);
+                var day = date.getDate().toString().padStart(2, '0');
+                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                var year = date.getFullYear();
+                var hours = date.getHours().toString().padStart(2, '0');
+                var minutes = date.getMinutes().toString().padStart(2, '0');
+                return "".concat(day, ".").concat(month, ".").concat(year, " ").concat(hours, ":").concat(minutes);
+            }
+            catch (error) {
+                return value;
+            }
         case 'image':
             return value ? (React.createElement(Image, { src: value, width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" })) : '-';
         case 'file':

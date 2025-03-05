@@ -47,7 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 // components/DynamicForm.tsx
 import React, { useEffect, useState } from 'react';
-import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, } from '@mantine/core';
+import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { MantineProvider } from '@mantine/core';
@@ -213,6 +213,49 @@ var HTMLEditorField = function (_a) {
                     React.createElement(RichTextEditor.AlignCenter, null),
                     React.createElement(RichTextEditor.AlignRight, null))),
             React.createElement(RichTextEditor.Content, null)),
+        form.errors[field.field] && (React.createElement(Text, { size: "xs", color: "red", mt: 5 }, form.errors[field.field]))));
+};
+// SegmentedControlField bileşenini oluşturuyoruz
+var SegmentedControlField = function (_a) {
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
+    var _c = useState(false), loading = _c[0], setLoading = _c[1];
+    useEffect(function () {
+        if (field.optionsUrl) {
+            setLoading(true);
+            fetch(field.optionsUrl, {
+                method: 'GET',
+                headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                mode: 'cors'
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                var formattedData = data.map(function (item) { return (__assign(__assign({}, item), { value: String(item.value) })); });
+                setOptionsForField === null || setOptionsForField === void 0 ? void 0 : setOptionsForField(field.field, formattedData);
+            })
+                .catch(function (error) {
+                console.error("Error loading options for ".concat(field.field, ":"), error);
+            })
+                .finally(function () { return setLoading(false); });
+        }
+    }, []);
+    return (React.createElement(React.Fragment, null,
+        React.createElement(Text, { size: "sm", fw: 500, mb: 5 },
+            field.title,
+            " ",
+            field.required && React.createElement("span", { style: { color: 'red' } }, "*")),
+        React.createElement(SegmentedControl, __assign({}, form.getInputProps(field.field), { onChange: function (value) {
+                form.setFieldValue(field.field, value);
+                var selectedOption = options.find(function (opt) { return String(opt.value) === value; });
+                if (selectedOption) {
+                    form.setFieldValue(field.field + "__title", selectedOption.label);
+                }
+                onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, value);
+            }, data: options.map(function (item) { return ({
+                value: String(item.value),
+                label: item.label
+            }); }), color: field.color, radius: field.radius, size: field.size, fullWidth: field.fullWidth, orientation: field.orientation, style: globalStyle ? globalStyle : undefined })),
+        loading && React.createElement(Loader, { size: "xs", mt: 5 }),
         form.errors[field.field] && (React.createElement(Text, { size: "xs", color: "red", mt: 5 }, form.errors[field.field]))));
 };
 /**
@@ -405,7 +448,8 @@ var DynamicForm = function (_a) {
                         field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl })),
-                        field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle }))));
+                        field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle })),
+                        field.type === 'segmentedcontrol' && (React.createElement(SegmentedControlField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders }))));
                 })));
             })))); }),
         React.createElement(Group, null,
