@@ -17,11 +17,14 @@ Mantine UI based dynamic form creation component.
   - MultiSelect
   - Upload (File upload with preview)
   - UploadCollection (Multiple file uploads with preview and ordering)
+  - HTMLEditor (Rich text editor)
+  - SubListForm (Nested table support with JSON data)
 - Automatic form validation
 - Dependent fields support
 - API integration with customizable endpoints
 - Error handling and notifications
 - Responsive grid layout
+- File upload support for various file types (images, PDFs, etc.)
 
 ## Installation
 
@@ -154,6 +157,7 @@ FormConfig
 | useToken | boolean | Token usage (default: false) |
 | showDebug | boolean | Debug mode (default: false) |
 | pk_field | string | Primary key field name for PUT requests |
+| hiddenCancel | boolean | Hide cancel button (default: false) |
 
 ## Field Types and Properties
 
@@ -444,6 +448,143 @@ Features of UploadCollection:
 - Error handling and display
 
 **Note:** The `width` and `height` properties were previously named `imageWidth` and `imageHeight` in versions prior to 1.x.x. The new property names provide more consistent naming across components.
+
+#### HTMLEditor
+- type: "htmleditor"
+- editorHeight: Editor height in pixels
+
+```tsx
+{
+  field: "content",
+  title: "Content",
+  type: "htmleditor",
+  required: true,
+  editorHeight: 300
+}
+```
+
+Features of HTMLEditor:
+- Rich text editing capabilities
+- Toolbar with formatting options:
+  - Bold, Italic, Underline, Strikethrough
+  - Headings (H1-H4)
+  - Lists (bullet and ordered)
+  - Links
+  - Text alignment
+  - Code and Clear formatting
+- Customizable height
+- HTML content output
+
+#### SubListForm
+- type: "sublistform"
+- subform: Nested form configuration
+- columns: Column definitions with support for nested JSON data
+- size: Modal size for edit form
+- buttonTitle: Custom add button text
+
+```tsx
+{
+  field: "variants",
+  title: "Product Variants",
+  type: "sublistform",
+  required: true,
+  buttonTitle: "Add Variant",
+  size: "lg",
+  columns: [
+    {
+      key: "name",
+      title: "Name"
+    },
+    {
+      key: "options",
+      title: "Options",
+      type: "json",
+      subColumns: [
+        { key: "color", title: "Color" },
+        { key: "size", title: "Size" }
+      ]
+    }
+  ],
+  subform: {
+    rows: [
+      {
+        columns: [
+          {
+            fields: [
+              {
+                field: "name",
+                title: "Variant Name",
+                type: "textbox",
+                required: true
+              },
+              {
+                field: "options",
+                title: "Options",
+                type: "sublistform",
+                // Nested configuration...
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Features of SubListForm:
+- Table view of list items
+- Add/Edit/Delete operations
+- Modal form for item editing
+- Support for nested JSON data display
+- Customizable columns
+- Nested table support for JSON array data
+
+#### Upload (Updated)
+The Upload component now supports various file types beyond images:
+
+```tsx
+// Image upload configuration
+{
+  field: "profileImage",
+  title: "Profile Image",
+  type: "upload",
+  acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
+  uploadUrl: "/api/upload"
+}
+
+// PDF upload configuration
+{
+  field: "document",
+  title: "Document",
+  type: "upload",
+  acceptedFileTypes: ["application/pdf"],
+  uploadUrl: "/api/upload"
+}
+```
+
+New features for Upload component:
+- Support for non-image file types
+- File type specific preview:
+  - Images: thumbnail preview
+  - Other files: file icon with filename
+- "View File" link for non-image files
+- Display of accepted file types
+- Different response handling for images vs files:
+  - Images: expects list_image_url and detail_image_url
+  - Files: expects file_url
+
+Expected API response format for files:
+```json
+{
+  "data": {
+    "success": true,
+    "file_url": "https://example.com/files/document.pdf"
+  },
+  "message": "Upload successful",
+  "status_code": 200
+}
+```
 
 ## API Integration
 

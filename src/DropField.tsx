@@ -15,7 +15,7 @@ import {
   Button,
   ActionIcon
 } from '@mantine/core';
-import { IconUpload, IconRefresh, IconTrash } from '@tabler/icons-react';
+import { IconUpload, IconRefresh, IconTrash, IconFile } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 
@@ -24,6 +24,7 @@ interface UploadResponse {
     success: boolean;
     list_image_url?: string;
     detail_image_url?: string;
+    file_url?: string;
     error?: string;
   };
   message: string;
@@ -62,6 +63,11 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
     detail: string;
   } | null>(null);
   const [showOverlay, setShowOverlay] = useState<boolean>(false);
+
+  const isImageUpload = React.useMemo(() => {
+    const imageTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/jpg'];
+    return field.acceptedFileTypes?.some(type => imageTypes.includes(type)) ?? true;
+  }, [field.acceptedFileTypes]);
 
   React.useEffect(() => {
     if (form.values[field.field] && typeof form.values[field.field] === 'object') {
@@ -157,18 +163,27 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
       const responseData: UploadResponse = await response.json();
       console.log('Upload response:', responseData);
       
-      if (responseData.data && responseData.data.list_image_url && responseData.data.detail_image_url) {
-        const imageData = {
-          list: responseData.data.list_image_url,
-          detail: responseData.data.detail_image_url
-        };
-        
-        setImageUrls(imageData);
-        
-        form.setFieldValue(field.field, imageData);
+      if (isImageUpload) {
+        if (responseData.data && responseData.data.list_image_url && responseData.data.detail_image_url) {
+          const imageData = {
+            list: responseData.data.list_image_url,
+            detail: responseData.data.detail_image_url
+          };
+          
+          setImageUrls(imageData);
+          form.setFieldValue(field.field, imageData);
+        } else {
+          console.error('API yanıtında beklenen URL\'ler bulunamadı:', responseData);
+          throw new Error('Görsel URL\'leri alınamadı');
+        }
       } else {
-        console.error('API yanıtında beklenen URL\'ler bulunamadı:', responseData);
-        throw new Error('Görsel URL\'leri alınamadı');
+        if (responseData.data && responseData.data.file_url) {
+          form.setFieldValue(field.field, responseData.data.file_url);
+          setImageUrls({ list: '__FILE__', detail: responseData.data.file_url });
+        } else {
+          console.error('API yanıtında beklenen dosya URL\'si bulunamadı:', responseData);
+          throw new Error('Dosya URL\'si alınamadı');
+        }
       }
       
     } catch (err) {
@@ -224,7 +239,7 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
           <Dropzone
             onDrop={handleDrop}
             onReject={() => setError('Dosya reddedildi')}
-            maxSize={field.maxSize || 5 * 1024 * 1024} // Varsayılan 5MB
+            maxSize={field.maxSize || 5 * 1024 * 1024}
             accept={field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp']}
             multiple={false}
             disabled={loading}
@@ -243,6 +258,11 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
                 <Text size="xs" fw={500}>
                   {field.title}
                 </Text>
+                {field.acceptedFileTypes && (
+                  <Text size="xs" c="dimmed">
+                    Kabul edilen dosya tipleri: {field.acceptedFileTypes.join(', ')}
+                  </Text>
+                )}
               </Box>
             </Group>
           </Dropzone>
@@ -260,20 +280,34 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
             onMouseEnter={() => setShowOverlay(true)}
             onMouseLeave={() => setShowOverlay(false)}
           >
-            <MantineImage
-              src={imageUrls.list}
-              alt={field.title}
-              fit="contain"
-              w="auto"
-              h="auto"
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '100%', 
-                objectFit: 'contain',
-                borderRadius: '5px'
-              }}
-              radius="md"
-            />
+            {isImageUpload && imageUrls.list !== '__FILE__' ? (
+              <MantineImage
+                src={imageUrls.list}
+                alt={field.title}
+                fit="contain"
+                w="auto"
+                h="auto"
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '100%', 
+                  objectFit: 'contain',
+                  borderRadius: '5px'
+                }}
+                radius="md"
+              />
+            ) : (
+              <Box ta="center">
+                <IconFile size={48} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                <Text size="sm" mt={5} style={{ wordBreak: 'break-word' }}>
+                  {file?.name || 'Yüklenen Dosya'}
+                </Text>
+                <Text size="xs" c="dimmed" mt={2}>
+                  <a href={imageUrls.detail} target="_blank" rel="noopener noreferrer">
+                    Dosyayı Görüntüle
+                  </a>
+                </Text>
+              </Box>
+            )}
             
             {showOverlay && (
               <Box 

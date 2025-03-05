@@ -58,6 +58,11 @@ import DropField from './DropField';
 import UploadCollection from './UploadCollection';
 import TreeField from './Tree';
 import SubListForm from './SubListForm';
+import { RichTextEditor } from '@mantine/tiptap';
+import { useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import '@mantine/tiptap/styles.css';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
@@ -109,11 +114,17 @@ var DropdownField = function (_a) {
                 label: item.label,
             }); }) }, form.getInputProps(field.field), { value: thisValue, onChange: function (val) {
                 form.setFieldValue(field.field, val);
+                // Seçilen öğenin title değerini ayrı bir alana kaydet
+                var selectedOption = options.find(function (opt) { return String(opt.value) === val; });
+                if (selectedOption) {
+                    form.setFieldValue(field.field + "__title", selectedOption.label);
+                }
+                else {
+                    form.setFieldValue(field.field + "__title", '');
+                }
                 onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, val || '');
                 setThisValue(val || '');
-            }, error: form.errors[field.field], required: field.required, 
-            //disabled={loading || (!!field.refField && !form.values[field.refField])}
-            style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true })),
+            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true })),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
@@ -155,6 +166,54 @@ var MultiSelectField = function (_a) {
         React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Select options", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
+// HTMLEditor bileşenini oluşturalım
+var HTMLEditorField = function (_a) {
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle;
+    var editor = useEditor({
+        extensions: [
+            StarterKit,
+            Link,
+        ],
+        content: form.values[field.field] || '',
+        onUpdate: function (_a) {
+            var editor = _a.editor;
+            form.setFieldValue(field.field, editor.getHTML());
+        },
+    });
+    return (React.createElement("div", { style: globalStyle },
+        React.createElement(Text, { size: "sm", fw: 500, mb: 5 },
+            field.title,
+            " ",
+            field.required && React.createElement("span", { style: { color: 'red' } }, "*")),
+        React.createElement(RichTextEditor, { editor: editor, style: { minHeight: field.editorHeight } },
+            React.createElement(RichTextEditor.Toolbar, { sticky: true, stickyOffset: 60 },
+                React.createElement(RichTextEditor.ControlsGroup, null,
+                    React.createElement(RichTextEditor.Bold, null),
+                    React.createElement(RichTextEditor.Italic, null),
+                    React.createElement(RichTextEditor.Underline, null),
+                    React.createElement(RichTextEditor.Strikethrough, null),
+                    React.createElement(RichTextEditor.ClearFormatting, null),
+                    React.createElement(RichTextEditor.Code, null)),
+                React.createElement(RichTextEditor.ControlsGroup, null,
+                    React.createElement(RichTextEditor.H1, null),
+                    React.createElement(RichTextEditor.H2, null),
+                    React.createElement(RichTextEditor.H3, null),
+                    React.createElement(RichTextEditor.H4, null)),
+                React.createElement(RichTextEditor.ControlsGroup, null,
+                    React.createElement(RichTextEditor.Blockquote, null),
+                    React.createElement(RichTextEditor.Hr, null),
+                    React.createElement(RichTextEditor.BulletList, null),
+                    React.createElement(RichTextEditor.OrderedList, null)),
+                React.createElement(RichTextEditor.ControlsGroup, null,
+                    React.createElement(RichTextEditor.Link, null),
+                    React.createElement(RichTextEditor.Unlink, null)),
+                React.createElement(RichTextEditor.ControlsGroup, null,
+                    React.createElement(RichTextEditor.AlignLeft, null),
+                    React.createElement(RichTextEditor.AlignCenter, null),
+                    React.createElement(RichTextEditor.AlignRight, null))),
+            React.createElement(RichTextEditor.Content, null)),
+        form.errors[field.field] && (React.createElement(Text, { size: "xs", color: "red", mt: 5 }, form.errors[field.field]))));
+};
 /**
  * DynamicForm Bileşeni:
  * - JSON konfigürasyona göre form alanlarını oluşturur.
@@ -163,10 +222,10 @@ var MultiSelectField = function (_a) {
  * - Submit ve Cancel butonları, dışarıdan detaylı buton ayarları ile kontrol edilebilir.
  */
 var DynamicForm = function (_a) {
-    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e;
+    var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e, _f = _a.hiddenCancel, hiddenCancel = _f === void 0 ? false : _f;
     // Form değerlerini takip etmek için state ekliyoruz
-    var _f = useState({}), formValues = _f[0], setFormValues = _f[1];
-    var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
+    var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
+    var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     // Checkbox için false, date için null, diğerleri için boş string
     var initialValues = {};
@@ -343,14 +402,15 @@ var DynamicForm = function (_a) {
                         field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                        field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl }))));
+                        field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl })),
+                        field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle }))));
                 })));
             })))); }),
         React.createElement(Group, null,
-            React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
+            !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
                     form.reset();
                     cancelProps.onClick && cancelProps.onClick(event);
-                } }), cancelProps.children || 'İptal'),
+                } }), cancelProps.children || 'İptal')),
             React.createElement(Button, __assign({ type: noForm ? "button" : "submit" }, submitProps, { onClick: function (event) {
                     if (noForm) {
                         // Form elementi yoksa manuel validation yap

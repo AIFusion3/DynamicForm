@@ -17,6 +17,18 @@ import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
 import DynamicForm from './DynamicForm';
 import { FormConfig } from './DynamicForm';
 
+interface SubColumn {
+  key: string;
+  title: string;
+}
+
+interface Column {
+  key: string;
+  title: string;
+  type?: 'json';
+  subColumns?: SubColumn[];
+}
+
 export interface SubListFormProps {
   field: {
     field: string;
@@ -26,7 +38,7 @@ export interface SubListFormProps {
     required?: boolean;
     subform: FormConfig;
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-    columns?: { key: string; title: string }[];
+    columns?: Column[];
   };
   form: ReturnType<typeof useForm>;
   globalStyle?: React.CSSProperties;
@@ -50,7 +62,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
   }, [form.values[field.field]]); // field.field değiştiğinde tekrar çalıştır
   
   // Tablo sütunlarını belirle
-  const columns = field.columns || Object.keys(field.subform.rows[0].columns[0].fields[0])
+  const columns: Column[] = field.columns || Object.keys(field.subform.rows[0].columns[0].fields[0])
     .filter(key => key !== 'field' && key !== 'type')
     .map(key => ({ key, title: key }));
 
@@ -137,9 +149,39 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                   <Table.Tr key={index}>
                     {columns.map(column => (
                       <Table.Td key={column.key}>
-                        {typeof item[column.key] === 'object' 
-                          ? JSON.stringify(item[column.key]) 
-                          : String(item[column.key] || '')}
+                        {(() => {
+                          if (column.type === 'json' && column.subColumns) {
+                            if (Array.isArray(item[column.key])) {
+                              const subColumns = column.subColumns;
+                              return (
+                                <Table>
+                                  <Table.Thead>
+                                    <Table.Tr>
+                                      {subColumns.map(subCol => (
+                                        <Table.Th key={subCol.key}>{subCol.title}</Table.Th>
+                                      ))}
+                                    </Table.Tr>
+                                  </Table.Thead>
+                                  <Table.Tbody>
+                                    {item[column.key].map((subItem: any, subIndex: number) => (
+                                      <Table.Tr key={subIndex}>
+                                        {subColumns.map(subCol => (
+                                          <Table.Td key={subCol.key}>
+                                            {String(subItem[subCol.key] || '')}
+                                          </Table.Td>
+                                        ))}
+                                      </Table.Tr>
+                                    ))}
+                                  </Table.Tbody>
+                                </Table>
+                              );
+                            }
+                            return null;
+                          }
+                          return typeof item[column.key] === 'object' 
+                            ? JSON.stringify(item[column.key]) 
+                            : String(item[column.key] || '');
+                        })()}
                       </Table.Td>
                     ))}
                     <Table.Td>

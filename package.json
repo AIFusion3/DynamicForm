@@ -1,6 +1,6 @@
 {
   "name": "dynamic-form",
-  "version": "2.1.104",
+  "version": "2.4.0",
   "main": "dist/DynamicForm.js",
   "types": "dist/DynamicForm.d.ts",
   "scripts": {
@@ -25,7 +25,12 @@
     "@mantine/form": "^7.16.2",
     "@mantine/hooks": "^7.16.2",
     "@mantine/notifications": "^7.16.2",
+    "@mantine/tiptap": "^7.16.2",
     "@tabler/icons-react": "^3.29.0",
+    "@tiptap/extension-link": "^2.11.5",
+    "@tiptap/pm": "^2.11.5",
+    "@tiptap/react": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
     "dayjs": "^1.11.13",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

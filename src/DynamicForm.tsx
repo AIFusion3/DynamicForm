@@ -26,9 +26,14 @@ import DropField from './DropField';
 import UploadCollection from './UploadCollection';
 import TreeField from './Tree';
 import SubListForm from './SubListForm';
+import { RichTextEditor } from '@mantine/tiptap';
+import { useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import '@mantine/tiptap/styles.css';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -70,6 +75,7 @@ export interface FieldConfig {
     buttonTitle?: string;
     columns?: { key: string; title: string }[];
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    editorHeight?: number;
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -103,6 +109,7 @@ export interface DynamicFormProps {
     pk_field?: string;
     noSubmit?: boolean; // API'ye submit etmeden form değerlerini döndürmek için
     noForm?: boolean; // Form elementini tamamen kaldır
+    hiddenCancel?: boolean;
 }
 
 // DropdownField için tip güncellemesi
@@ -193,13 +200,19 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 {...form.getInputProps(field.field)}
                 value={thisValue}
                 onChange={(val) => {
-                  form.setFieldValue(field.field, val);
-                  onDropdownChange?.(field.field, val || '');
-                  setThisValue(val || '');
+                    form.setFieldValue(field.field, val);
+                    // Seçilen öğenin title değerini ayrı bir alana kaydet
+                    const selectedOption = options.find(opt => String(opt.value) === val);
+                    if (selectedOption) {
+                        form.setFieldValue(field.field + "__title", selectedOption.label);
+                    } else {
+                        form.setFieldValue(field.field + "__title", '');
+                    }
+                    onDropdownChange?.(field.field, val || '');
+                    setThisValue(val || '');
                 }}
                 error={form.errors[field.field]}
                 required={field.required}
-                //disabled={loading || (!!field.refField && !form.values[field.refField])}
                 style={globalStyle ? globalStyle : undefined}
                 allowDeselect={false}
                 clearable={true}
@@ -278,6 +291,76 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
     );
 };
 
+// HTMLEditor bileşenini oluşturalım
+const HTMLEditorField: React.FC<{
+    field: FieldConfig;
+    form: ReturnType<typeof useForm>;
+    globalStyle?: React.CSSProperties;
+}> = ({ field, form, globalStyle }) => {
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Link,
+        ],
+        content: form.values[field.field] || '',
+        onUpdate: ({ editor }) => {
+            form.setFieldValue(field.field, editor.getHTML());
+        },
+    });
+
+    return (
+        <div style={globalStyle}>
+            <Text size="sm" fw={500} mb={5}>
+                {field.title} {field.required && <span style={{ color: 'red' }}>*</span>}
+            </Text>
+            <RichTextEditor editor={editor} style={{ minHeight:field.editorHeight }}>
+                <RichTextEditor.Toolbar sticky stickyOffset={60}>
+                    <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.Bold />
+                        <RichTextEditor.Italic />
+                        <RichTextEditor.Underline />
+                        <RichTextEditor.Strikethrough />
+                        <RichTextEditor.ClearFormatting />
+                        <RichTextEditor.Code />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.H1 />
+                        <RichTextEditor.H2 />
+                        <RichTextEditor.H3 />
+                        <RichTextEditor.H4 />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.Blockquote />
+                        <RichTextEditor.Hr />
+                        <RichTextEditor.BulletList />
+                        <RichTextEditor.OrderedList />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.Link />
+                        <RichTextEditor.Unlink />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.AlignLeft />
+                        <RichTextEditor.AlignCenter />
+                        <RichTextEditor.AlignRight />
+                    </RichTextEditor.ControlsGroup>
+                </RichTextEditor.Toolbar>
+
+                <RichTextEditor.Content />
+            </RichTextEditor>
+            {form.errors[field.field] && (
+                <Text size="xs" color="red" mt={5}>
+                    {form.errors[field.field]}
+                </Text>
+            )}
+        </div>
+    );
+};
+
 /**
  * DynamicForm Bileşeni:
  * - JSON konfigürasyona göre form alanlarını oluşturur.
@@ -297,7 +380,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     showDebug = false,
     pk_field,
     noSubmit = false,
-    noForm = false
+    noForm = false,
+    hiddenCancel = false
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -592,6 +676,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 baseUrl={baseUrl}
                                             />
                                         )}
+                                        {field.type === 'htmleditor' && (
+                                            <HTMLEditorField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
+                                            />
+                                        )}
                                     </div>
                                 ))}
                             </Grid.Col>
@@ -601,16 +692,18 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             ))}
             
             <Group>
-                <Button
-                    type="button" variant="outline"
-                    {...cancelProps}
-                    onClick={(event) => {
-                        form.reset();
-                        cancelProps.onClick && cancelProps.onClick(event);
-                    }}
-                >
-                    {cancelProps.children || 'İptal'}
-                </Button>
+                {!hiddenCancel && (
+                    <Button
+                        type="button" variant="outline"
+                        {...cancelProps}
+                        onClick={(event) => {
+                            form.reset();
+                            cancelProps.onClick && cancelProps.onClick(event);
+                        }}
+                    >
+                        {cancelProps.children || 'İptal'}
+                    </Button>
+                )}
                 <Button 
                     type={noForm ? "button" : "submit"} 
                     {...submitProps}

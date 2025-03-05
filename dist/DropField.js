@@ -49,7 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import React, { useState } from 'react';
 import { Dropzone } from '@mantine/dropzone';
 import { Text, Group, Progress, Paper, Box, Loader, Overlay, Image as MantineImage, Button } from '@mantine/core';
-import { IconUpload, IconRefresh, IconTrash } from '@tabler/icons-react';
+import { IconUpload, IconRefresh, IconTrash, IconFile } from '@tabler/icons-react';
 var DropField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
     var _b = useState(null), file = _b[0], setFile = _b[1];
@@ -60,6 +60,11 @@ var DropField = function (_a) {
     var _g = useState(''), error = _g[0], setError = _g[1];
     var _h = useState(null), imageUrls = _h[0], setImageUrls = _h[1];
     var _j = useState(false), showOverlay = _j[0], setShowOverlay = _j[1];
+    var isImageUpload = React.useMemo(function () {
+        var _a, _b;
+        var imageTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/jpg'];
+        return (_b = (_a = field.acceptedFileTypes) === null || _a === void 0 ? void 0 : _a.some(function (type) { return imageTypes.includes(type); })) !== null && _b !== void 0 ? _b : true;
+    }, [field.acceptedFileTypes]);
     React.useEffect(function () {
         if (form.values[field.field] && typeof form.values[field.field] === 'object') {
             var imageData = form.values[field.field];
@@ -157,17 +162,29 @@ var DropField = function (_a) {
                 case 5:
                     responseData = _a.sent();
                     console.log('Upload response:', responseData);
-                    if (responseData.data && responseData.data.list_image_url && responseData.data.detail_image_url) {
-                        imageData = {
-                            list: responseData.data.list_image_url,
-                            detail: responseData.data.detail_image_url
-                        };
-                        setImageUrls(imageData);
-                        form.setFieldValue(field.field, imageData);
+                    if (isImageUpload) {
+                        if (responseData.data && responseData.data.list_image_url && responseData.data.detail_image_url) {
+                            imageData = {
+                                list: responseData.data.list_image_url,
+                                detail: responseData.data.detail_image_url
+                            };
+                            setImageUrls(imageData);
+                            form.setFieldValue(field.field, imageData);
+                        }
+                        else {
+                            console.error('API yanıtında beklenen URL\'ler bulunamadı:', responseData);
+                            throw new Error('Görsel URL\'leri alınamadı');
+                        }
                     }
                     else {
-                        console.error('API yanıtında beklenen URL\'ler bulunamadı:', responseData);
-                        throw new Error('Görsel URL\'leri alınamadı');
+                        if (responseData.data && responseData.data.file_url) {
+                            form.setFieldValue(field.field, responseData.data.file_url);
+                            setImageUrls({ list: '__FILE__', detail: responseData.data.file_url });
+                        }
+                        else {
+                            console.error('API yanıtında beklenen dosya URL\'si bulunamadı:', responseData);
+                            throw new Error('Dosya URL\'si alınamadı');
+                        }
                     }
                     return [3 /*break*/, 8];
                 case 6:
@@ -218,14 +235,21 @@ var DropField = function (_a) {
                 React.createElement(Group, { justify: "center", style: { pointerEvents: 'none' } },
                     React.createElement(Box, { ta: "center" },
                         React.createElement(IconUpload, { style: { color: 'var(--mantine-color-gray-6)', marginBottom: '10px' } }),
-                        React.createElement(Text, { size: "xs", fw: 500 }, field.title))))),
+                        React.createElement(Text, { size: "xs", fw: 500 }, field.title),
+                        field.acceptedFileTypes && (React.createElement(Text, { size: "xs", c: "dimmed" },
+                            "Kabul edilen dosya tipleri: ",
+                            field.acceptedFileTypes.join(', '))))))),
             imageUrls && (React.createElement(Box, { ta: "center", mx: "auto", w: "100%", h: "100%", display: "flex", style: { alignItems: 'center', justifyContent: 'center' }, pos: "relative", onMouseEnter: function () { return setShowOverlay(true); }, onMouseLeave: function () { return setShowOverlay(false); } },
-                React.createElement(MantineImage, { src: imageUrls.list, alt: field.title, fit: "contain", w: "auto", h: "auto", style: {
+                isImageUpload && imageUrls.list !== '__FILE__' ? (React.createElement(MantineImage, { src: imageUrls.list, alt: field.title, fit: "contain", w: "auto", h: "auto", style: {
                         maxWidth: '100%',
                         maxHeight: '100%',
                         objectFit: 'contain',
                         borderRadius: '5px'
-                    }, radius: "md" }),
+                    }, radius: "md" })) : (React.createElement(Box, { ta: "center" },
+                    React.createElement(IconFile, { size: 48, style: { color: 'var(--mantine-color-blue-6)' } }),
+                    React.createElement(Text, { size: "sm", mt: 5, style: { wordBreak: 'break-word' } }, (file === null || file === void 0 ? void 0 : file.name) || 'Yüklenen Dosya'),
+                    React.createElement(Text, { size: "xs", c: "dimmed", mt: 2 },
+                        React.createElement("a", { href: imageUrls.detail, target: "_blank", rel: "noopener noreferrer" }, "Dosyay\u0131 G\u00F6r\u00FCnt\u00FCle")))),
                 showOverlay && (React.createElement(Box, { pos: "absolute", top: 0, left: 0, right: 0, bottom: 0, style: {
                         backgroundColor: 'rgba(0, 0, 0, 0.3)',
                         display: 'flex',

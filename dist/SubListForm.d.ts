@@ -1,6 +1,16 @@
 import React from 'react';
 import { useForm } from '@mantine/form';
 import { FormConfig } from './DynamicForm';
+interface SubColumn {
+    key: string;
+    title: string;
+}
+interface Column {
+    key: string;
+    title: string;
+    type?: 'json';
+    subColumns?: SubColumn[];
+}
 export interface SubListFormProps {
     field: {
         field: string;
@@ -10,10 +20,7 @@ export interface SubListFormProps {
         required?: boolean;
         subform: FormConfig;
         size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-        columns?: {
-            key: string;
-            title: string;
-        }[];
+        columns?: Column[];
     };
     form: ReturnType<typeof useForm>;
     globalStyle?: React.CSSProperties;
