@@ -348,52 +348,73 @@ For dependent dropdowns, use the `refField` property to specify the field that t
 - uploadUrl: URL to upload files
 - maxSize: Maximum file size in bytes (default: 5MB)
 - acceptedFileTypes: Array of accepted MIME types
-- width: Width for image preview (default: 200px)
-- height: Height for image preview (default: 200px)
+- width: Width for preview (default: 200px)
+- height: Height for preview (default: 200px)
 - uploadContext: Optional context parameter for the upload request
 
 ```tsx
+// Image upload configuration
 {
   field: "profileImage",
   title: "Profile Image",
   type: "upload",
-  required: true,
-  uploadUrl: "https://api.example.com/upload",
-  maxSize: 5 * 1024 * 1024, // 5MB
   acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
-  width: 200,
-  height: 200,
-  uploadContext: "profile"
+  uploadUrl: "/api/upload"
+}
+
+// PDF upload configuration
+{
+  field: "document",
+  title: "Document",
+  type: "upload",
+  acceptedFileTypes: ["application/pdf"],
+  uploadUrl: "/api/upload"
 }
 ```
 
-The upload request is sent as `multipart/form-data` with the following fields:
-- file: The file to upload
-- filename: The name of the file
-- content_type: The MIME type of the file
-- uploadcontext: The context parameter (if provided)
+Features:
+- Support for both image and non-image file types
+- File type specific preview:
+  - Images: Shows thumbnail preview
+  - Other files (PDF, etc.): Shows file icon and filename
+- "View File" link for non-image files
+- Display of accepted file types in the dropzone
+- Different API response handling based on file type
 
 Expected API response format:
 
+For images:
 ```json
 {
   "data": {
     "success": true,
     "list_image_url": "https://example.com/images/list/image.jpg",
     "detail_image_url": "https://example.com/images/detail/image.jpg"
-  },
-  "message": "Upload successful",
-  "status_code": 200
+  }
 }
 ```
 
-The component stores the image URLs in the form values as an object:
+For other files (PDF, etc.):
+```json
+{
+  "data": {
+    "success": true,
+    "file_url": "https://example.com/files/document.pdf"
+  }
+}
+```
 
+Form values stored:
+- Images: Object with list and detail URLs
 ```json
 {
   "list": "https://example.com/images/list/image.jpg",
   "detail": "https://example.com/images/detail/image.jpg"
 }
+```
+- Other files: String with file URL
+```json
+"https://example.com/files/document.pdf"
 ```
 
 #### UploadCollection
@@ -539,52 +560,6 @@ Features of SubListForm:
 - Support for nested JSON data display
 - Customizable columns
 - Nested table support for JSON array data
-
-#### Upload (Updated)
-The Upload component now supports various file types beyond images:
-
-```tsx
-// Image upload configuration
-{
-  field: "profileImage",
-  title: "Profile Image",
-  type: "upload",
-  acceptedFileTypes: ["image/png", "image/jpeg", "image/webp"],
-  uploadUrl: "/api/upload"
-}
-
-// PDF upload configuration
-{
-  field: "document",
-  title: "Document",
-  type: "upload",
-  acceptedFileTypes: ["application/pdf"],
-  uploadUrl: "/api/upload"
-}
-```
-
-New features for Upload component:
-- Support for non-image file types
-- File type specific preview:
-  - Images: thumbnail preview
-  - Other files: file icon with filename
-- "View File" link for non-image files
-- Display of accepted file types
-- Different response handling for images vs files:
-  - Images: expects list_image_url and detail_image_url
-  - Files: expects file_url
-
-Expected API response format for files:
-```json
-{
-  "data": {
-    "success": true,
-    "file_url": "https://example.com/files/document.pdf"
-  },
-  "message": "Upload successful",
-  "status_code": 200
-}
-```
 
 ## API Integration
 
