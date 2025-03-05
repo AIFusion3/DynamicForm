@@ -1,6 +1,10 @@
-# Dynamic Form
+# Dynamic Form Component
 
-Mantine UI based dynamic form creation component.
+A flexible and customizable form component built with Mantine UI.
+
+## DynamicView Documentation
+
+- [DynamicView Documentation](docs/DynamicView.md)
 
 ## Features
 
@@ -29,14 +33,15 @@ Mantine UI based dynamic form creation component.
 ## Installation
 
 ```bash
-npm install @mantine/core @mantine/form @mantine/dates @mantine/notifications @tabler/icons-react react-imask
-npm install git+https://github.com/AIFusion3/DynamicForm
+npm install dynamic-form
+# or
+yarn add dynamic-form
 ```
 
-## Usage
+## Quick Start
 
-```tsx
-import DynamicForm from 'dynamic-form';
+```typescript
+import { DynamicForm } from 'dynamic-form';
 
 const config = {
   rows: [
