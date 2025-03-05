@@ -3,7 +3,8 @@ import { ButtonProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import '@mantine/dates/styles.css';
 import '@mantine/tiptap/styles.css';
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor';
+import 'dayjs/locale/tr';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime';
 export interface FieldConfig {
     field: string;
     title: string;
@@ -45,6 +46,7 @@ export interface FieldConfig {
     }[];
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     editorHeight?: number;
+    valueFormat?: string;
 }
 export interface ColumnConfig {
     span?: number;

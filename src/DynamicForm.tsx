@@ -16,7 +16,7 @@ import {
     Switch,
     MultiSelect,
 } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
+import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/dates/styles.css';
@@ -31,9 +31,10 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
+import 'dayjs/locale/tr';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -76,6 +77,7 @@ export interface FieldConfig {
     columns?: { key: string; title: string }[];
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     editorHeight?: number;
+    valueFormat?: string;
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -576,6 +578,21 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 required={field.required}
                                                 error={form.errors[field.field]}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                valueFormat={field.valueFormat || "DD.MM.YYYY"}
+                                                locale="tr"
+                                            />
+                                        )}
+                                        {field.type === 'datetime' && (
+                                            <DateTimePicker
+                                                label={field.title}
+                                                placeholder={field.placeholder || field.title}
+                                                value={form.values[field.field]}
+                                                onChange={(value) => form.setFieldValue(field.field, value)}
+                                                required={field.required}
+                                                error={form.errors[field.field]}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                valueFormat={field.valueFormat || "DD.MM.YYYY HH:mm"}
+                                                locale="tr"
                                             />
                                         )}
                                         {field.type === 'checkbox' && (

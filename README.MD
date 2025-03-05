@@ -209,6 +209,7 @@ FormConfig
 
 #### Date
 - type: "date"
+- valueFormat: date format (varsayılan: "DD.MM.YYYY")
 
 ```tsx
 {
@@ -216,7 +217,23 @@ FormConfig
   title: "Birth Date",
   type: "date",
   required: true,
-  placeholder: "Select date"
+  placeholder: "Select date",
+  valueFormat: "YYYY-MM-DD" // optional, default: "DD.MM.YYYY"
+}
+```
+
+#### DateTime
+- type: "datetime"
+- valueFormat: Date ve clock format (varsayılan: "DD.MM.YYYY HH:mm")
+
+```tsx
+{
+  field: "meetingTime",
+  title: "Meeting Time",
+  type: "datetime",
+  required: true,
+  placeholder: "Select date and time",
+  valueFormat: "YYYY-MM-DD HH:mm" // optional, default: "DD.MM.YYYY HH:mm"
 }
 ```
 
