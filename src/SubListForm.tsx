@@ -98,6 +98,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
   // Öğe düzenleme
   const handleEdit = (index: number) => {
     setEditingIndex(index);
+    console.log('Düzenleme için seçilen öğe-->', items[index]);
     setInitialData(items[index]);
     setOpened(true);
   };

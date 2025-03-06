@@ -56,6 +56,7 @@ var SubListForm = function (_a) {
     // Öğe düzenleme
     var handleEdit = function (index) {
         setEditingIndex(index);
+        console.log('Düzenleme için seçilen öğe-->', items[index]);
         setInitialData(items[index]);
         setOpened(true);
     };
