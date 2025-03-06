@@ -190,14 +190,14 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                       <Group gap={5}>
                         <ActionIcon 
                           size="sm" 
-                          color="blue" 
+                          color="black" 
                           onClick={() => handleEdit(index)}
                         >
                           <IconEdit size={16} />
                         </ActionIcon>
                         <ActionIcon 
                           size="sm" 
-                          color="red" 
+                          color="gray" 
                           onClick={() => handleDelete(index)}
                         >
                           <IconTrash size={16} />
