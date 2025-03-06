@@ -258,6 +258,28 @@ var SegmentedControlField = function (_a) {
         loading && React.createElement(Loader, { size: "xs", mt: 5 }),
         form.errors[field.field] && (React.createElement(Text, { size: "xs", color: "red", mt: 5 }, form.errors[field.field]))));
 };
+// Switch için özel bileşen oluşturuyoruz
+var SwitchField = function (_a) {
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle;
+    var _b = useState(function () {
+        var initialValue = form.values[field.field];
+        console.log('Switch Initial Value:', {
+            field: field.field,
+            value: initialValue,
+            type: typeof initialValue
+        });
+        return Boolean(initialValue);
+    }), isChecked = _b[0], setIsChecked = _b[1];
+    useEffect(function () {
+        var formValue = form.values[field.field];
+        setIsChecked(Boolean(formValue));
+    }, [form.values[field.field]]);
+    return (React.createElement(Switch, { label: field.title, checked: isChecked, onChange: function (event) {
+            var newValue = event.currentTarget.checked;
+            setIsChecked(newValue);
+            form.setFieldValue(field.field, newValue);
+        }, style: globalStyle ? globalStyle : undefined }));
+};
 /**
  * DynamicForm Bileşeni:
  * - JSON konfigürasyona göre form alanlarını oluşturur.
@@ -284,8 +306,14 @@ var DynamicForm = function (_a) {
                         initialValues[field.field] = String(initialData[field.field]);
                     }
                     else if (field.type === 'switch') {
-                        // Switch için boolean dönüşümü yapıyoruz
-                        initialValues[field.field] = Boolean(initialData[field.field]);
+                        var switchValue = Boolean(initialData[field.field]);
+                        console.log('Initial Data for Switch:', {
+                            field: field.field,
+                            rawValue: initialData[field.field],
+                            convertedValue: switchValue,
+                            type: typeof switchValue
+                        });
+                        initialValues[field.field] = switchValue;
                     }
                     else {
                         initialValues[field.field] = initialData[field.field];
@@ -302,7 +330,6 @@ var DynamicForm = function (_a) {
                         initialValues[field.field] = field.defaultValue || 0;
                     }
                     else if (field.type === 'switch') {
-                        // Switch için varsayılan değer
                         initialValues[field.field] = field.defaultChecked || false;
                     }
                     else {
@@ -449,7 +476,7 @@ var DynamicForm = function (_a) {
                         field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
                                 form.setFieldValue(field.field, val !== '' ? Number(val) : null);
                             }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
-                        field.type === 'switch' && (React.createElement(Switch, { label: field.title, checked: form.values[field.field], onChange: function (event) { return form.setFieldValue(field.field, event.currentTarget.checked); }, style: config.fieldStyle ? config.fieldStyle : undefined })),
+                        field.type === 'switch' && (React.createElement(SwitchField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),

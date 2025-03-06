@@ -442,6 +442,41 @@ const SegmentedControlField: React.FC<DropdownFieldProps> = ({
     );
 };
 
+// Switch için özel bileşen oluşturuyoruz
+const SwitchField: React.FC<{
+    field: FieldConfig;
+    form: ReturnType<typeof useForm>;
+    globalStyle?: React.CSSProperties;
+}> = ({ field, form, globalStyle }) => {
+    const [isChecked, setIsChecked] = useState(() => {
+        const initialValue = form.values[field.field];
+        console.log('Switch Initial Value:', {
+            field: field.field,
+            value: initialValue,
+            type: typeof initialValue
+        });
+        return Boolean(initialValue);
+    });
+
+    useEffect(() => {
+        const formValue = form.values[field.field];
+        setIsChecked(Boolean(formValue));
+    }, [form.values[field.field]]);
+
+    return (
+        <Switch
+            label={field.title}
+            checked={isChecked}
+            onChange={(event) => {
+                const newValue = event.currentTarget.checked;
+                setIsChecked(newValue);
+                form.setFieldValue(field.field, newValue);
+            }}
+            style={globalStyle ? globalStyle : undefined}
+        />
+    );
+};
+
 /**
  * DynamicForm Bileşeni:
  * - JSON konfigürasyona göre form alanlarını oluşturur.
@@ -480,8 +515,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     } else if (field.type === 'dropdown') {
                         initialValues[field.field] = String(initialData[field.field]);
                     } else if (field.type === 'switch') {
-                        // Switch için boolean dönüşümü yapıyoruz
-                        initialValues[field.field] = Boolean(initialData[field.field]);
+                        const switchValue = Boolean(initialData[field.field]);
+                        console.log('Initial Data for Switch:', {
+                            field: field.field,
+                            rawValue: initialData[field.field],
+                            convertedValue: switchValue,
+                            type: typeof switchValue
+                        });
+                        initialValues[field.field] = switchValue;
                     } else {
                         initialValues[field.field] = initialData[field.field];
                     }
@@ -493,7 +534,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     } else if (field.type === 'number') {
                         initialValues[field.field] = field.defaultValue || 0;
                     } else if (field.type === 'switch') {
-                        // Switch için varsayılan değer
                         initialValues[field.field] = field.defaultChecked || false;
                     } else {
                         initialValues[field.field] = '';
@@ -730,11 +770,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             />
                                         )}
                                         {field.type === 'switch' && (
-                                            <Switch
-                                                label={field.title}
-                                                checked={form.values[field.field]}
-                                                onChange={(event) => form.setFieldValue(field.field, event.currentTarget.checked)}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            <SwitchField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
                                             />
                                         )}
                                         {field.type === 'multiselect' && (
