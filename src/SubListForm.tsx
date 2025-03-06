@@ -140,7 +140,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                 {columns.map(column => (
                   <Table.Th key={column.key}>{column.title}</Table.Th>
                 ))}
-                <Table.Th style={{ width: 80 }}>İşlemler</Table.Th>
+                <Table.Th style={{ width: 80 }}></Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -154,6 +154,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                             if (Array.isArray(item[column.key])) {
                               const subColumns = column.subColumns;
                               return (
+                                subColumns.length>0 ?
                                 <Table>
                                   <Table.Thead>
                                     <Table.Tr>
@@ -174,6 +175,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                                     ))}
                                   </Table.Tbody>
                                 </Table>
+                                : null
                               );
                             }
                             return null;

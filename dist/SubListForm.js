@@ -87,16 +87,18 @@ var SubListForm = function (_a) {
                     React.createElement(Table.Thead, null,
                         React.createElement(Table.Tr, null,
                             columns.map(function (column) { return (React.createElement(Table.Th, { key: column.key }, column.title)); }),
-                            React.createElement(Table.Th, { style: { width: 80 } }, "\u0130\u015Flemler"))),
+                            React.createElement(Table.Th, { style: { width: 80 } }))),
                     React.createElement(Table.Tbody, null, items.length > 0 ? (items.map(function (item, index) { return (React.createElement(Table.Tr, { key: index },
                         columns.map(function (column) { return (React.createElement(Table.Td, { key: column.key }, (function () {
                             if (column.type === 'json' && column.subColumns) {
                                 if (Array.isArray(item[column.key])) {
                                     var subColumns_1 = column.subColumns;
-                                    return (React.createElement(Table, null,
-                                        React.createElement(Table.Thead, null,
-                                            React.createElement(Table.Tr, null, subColumns_1.map(function (subCol) { return (React.createElement(Table.Th, { key: subCol.key }, subCol.title)); }))),
-                                        React.createElement(Table.Tbody, null, item[column.key].map(function (subItem, subIndex) { return (React.createElement(Table.Tr, { key: subIndex }, subColumns_1.map(function (subCol) { return (React.createElement(Table.Td, { key: subCol.key }, String(subItem[subCol.key] || ''))); }))); }))));
+                                    return (subColumns_1.length > 0 ?
+                                        React.createElement(Table, null,
+                                            React.createElement(Table.Thead, null,
+                                                React.createElement(Table.Tr, null, subColumns_1.map(function (subCol) { return (React.createElement(Table.Th, { key: subCol.key }, subCol.title)); }))),
+                                            React.createElement(Table.Tbody, null, item[column.key].map(function (subItem, subIndex) { return (React.createElement(Table.Tr, { key: subIndex }, subColumns_1.map(function (subCol) { return (React.createElement(Table.Td, { key: subCol.key }, String(subItem[subCol.key] || ''))); }))); })))
+                                        : null);
                                 }
                                 return null;
                             }
