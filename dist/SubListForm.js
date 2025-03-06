@@ -113,7 +113,7 @@ var SubListForm = function (_a) {
                                 React.createElement(ActionIcon, { size: "sm", color: "gray", onClick: function () { return handleDelete(index); } },
                                     React.createElement(IconTrash, { size: 16 })))))); })) : (React.createElement(Table.Tr, null,
                         React.createElement(Table.Td, { colSpan: columns.length + 1, style: { textAlign: 'center' } }, "Hen\u00FCz veri eklenmemi\u015F"))))))),
-        React.createElement(Button, { leftSection: React.createElement(IconPlus, { size: 16 }), onClick: handleAdd, variant: "outline" }, field.buttonTitle || 'Ekle'),
+        React.createElement(Button, { leftSection: React.createElement(IconPlus, { size: 16 }), onClick: handleAdd, variant: "outline", color: "black" }, field.buttonTitle || 'Ekle'),
         form.errors[field.field] && (React.createElement(Text, { size: "xs", color: "red", mt: 5 }, form.errors[field.field])),
         React.createElement(OptionalPortal, { withinPortal: true },
             React.createElement(Modal, { opened: opened, onClose: function () {

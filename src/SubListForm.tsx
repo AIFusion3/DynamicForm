@@ -220,7 +220,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
       
       <Button 
         leftSection={<IconPlus size={16} />}
-        onClick={handleAdd} variant="outline"
+        onClick={handleAdd} variant="outline" color="black"
       >
         {field.buttonTitle || 'Ekle'}
       </Button>
