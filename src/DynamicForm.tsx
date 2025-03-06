@@ -475,11 +475,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         row.columns.forEach((column) => {
             column.fields.forEach((field) => {
                 if (initialData && initialData[field.field] !== undefined) {
-                    // Number tipi için özel kontrol
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     } else if (field.type === 'dropdown') {
                         initialValues[field.field] = String(initialData[field.field]);
+                    } else if (field.type === 'switch') {
+                        // Switch için boolean dönüşümü yapıyoruz
+                        initialValues[field.field] = Boolean(initialData[field.field]);
                     } else {
                         initialValues[field.field] = initialData[field.field];
                     }
@@ -490,6 +492,9 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         initialValues[field.field] = null;
                     } else if (field.type === 'number') {
                         initialValues[field.field] = field.defaultValue || 0;
+                    } else if (field.type === 'switch') {
+                        // Switch için varsayılan değer
+                        initialValues[field.field] = field.defaultChecked || false;
                     } else {
                         initialValues[field.field] = '';
                     }
@@ -727,8 +732,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                         {field.type === 'switch' && (
                                             <Switch
                                                 label={field.title}
-                                                {...form.getInputProps(field.field, { type: 'checkbox' })}
-                                                defaultChecked={field.defaultChecked}
+                                                checked={form.values[field.field]}
+                                                onChange={(event) => form.setFieldValue(field.field, event.currentTarget.checked)}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
                                             />
                                         )}

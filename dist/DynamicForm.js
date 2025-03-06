@@ -277,12 +277,15 @@ var DynamicForm = function (_a) {
         row.columns.forEach(function (column) {
             column.fields.forEach(function (field) {
                 if (initialData && initialData[field.field] !== undefined) {
-                    // Number tipi için özel kontrol
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     }
                     else if (field.type === 'dropdown') {
                         initialValues[field.field] = String(initialData[field.field]);
+                    }
+                    else if (field.type === 'switch') {
+                        // Switch için boolean dönüşümü yapıyoruz
+                        initialValues[field.field] = Boolean(initialData[field.field]);
                     }
                     else {
                         initialValues[field.field] = initialData[field.field];
@@ -297,6 +300,10 @@ var DynamicForm = function (_a) {
                     }
                     else if (field.type === 'number') {
                         initialValues[field.field] = field.defaultValue || 0;
+                    }
+                    else if (field.type === 'switch') {
+                        // Switch için varsayılan değer
+                        initialValues[field.field] = field.defaultChecked || false;
                     }
                     else {
                         initialValues[field.field] = '';
@@ -442,7 +449,7 @@ var DynamicForm = function (_a) {
                         field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
                                 form.setFieldValue(field.field, val !== '' ? Number(val) : null);
                             }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
-                        field.type === 'switch' && (React.createElement(Switch, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { defaultChecked: field.defaultChecked, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'switch' && (React.createElement(Switch, { label: field.title, checked: form.values[field.field], onChange: function (event) { return form.setFieldValue(field.field, event.currentTarget.checked); }, style: config.fieldStyle ? config.fieldStyle : undefined })),
                         field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
                         field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
