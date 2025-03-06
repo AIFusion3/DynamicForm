@@ -51,6 +51,7 @@ export interface FieldConfig {
     radius?: number | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     fullWidth?: boolean;
     orientation?: 'horizontal' | 'vertical';
+    is_dropdown?: boolean;
 }
 export interface ColumnConfig {
     span?: number;

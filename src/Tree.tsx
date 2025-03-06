@@ -19,6 +19,7 @@ export interface TreeFieldProps {
     optionsUrl?: string;
     options?: TreeNode[];
     levelOffset?: number;
+    is_dropdown?: boolean;
   };
   form: ReturnType<typeof useForm>;
   globalStyle?: React.CSSProperties;
@@ -110,49 +111,67 @@ const TreeField: React.FC<TreeFieldProps> = ({ field, form, globalStyle, getHead
   const toggleNodeCheck = (value: string, checked: boolean, tree: any) => {
     const newState = { ...checkedState };
     
-    if (checked) {
-      newState[value] = true;
-      tree.checkNode(value);
-      
-      const node = findNodeByValue(value, treeData);
-      if (node) {
-        const childrenValues = getAllChildrenValues(node);
-        childrenValues.forEach(childValue => {
-          newState[childValue] = true;
-          tree.checkNode(childValue);
-        });
-      }
-      
-      const parentPath = getParentPath(value, treeData);
-      parentPath.forEach(parentValue => {
-        newState[parentValue] = true;
-        tree.checkNode(parentValue);
+    if (field.is_dropdown) {
+      Object.keys(newState).forEach(key => {
+        delete newState[key];
+        tree.uncheckNode(key);
       });
-    } else {
-      delete newState[value];
-      tree.uncheckNode(value);
       
-      const node = findNodeByValue(value, treeData);
-      if (node) {
-        const childrenValues = getAllChildrenValues(node);
-        childrenValues.forEach(childValue => {
-          delete newState[childValue];
-          tree.uncheckNode(childValue);
-        });
-      }
-      
-      const parentPath = getParentPath(value, treeData);
-      parentPath.forEach(parentValue => {
-        const parentNode = findNodeByValue(parentValue, treeData);
-        if (parentNode && !hasCheckedChildren(parentNode, newState)) {
-          delete newState[parentValue];
-          tree.uncheckNode(parentValue);
+      if (checked) {
+        newState[value] = true;
+        tree.checkNode(value);
+        
+        const selectedNode = findNodeByValue(value, treeData);
+        if (selectedNode) {
+          form.setFieldValue(field.field + "__title", selectedNode.label);
         }
-      });
+      } else {
+        form.setFieldValue(field.field + "__title", "");
+      }
+    } else {
+      if (checked) {
+        newState[value] = true;
+        tree.checkNode(value);
+        
+        const node = findNodeByValue(value, treeData);
+        if (node) {
+          const childrenValues = getAllChildrenValues(node);
+          childrenValues.forEach(childValue => {
+            newState[childValue] = true;
+            tree.checkNode(childValue);
+          });
+        }
+        
+        const parentPath = getParentPath(value, treeData);
+        parentPath.forEach(parentValue => {
+          newState[parentValue] = true;
+          tree.checkNode(parentValue);
+        });
+      } else {
+        delete newState[value];
+        tree.uncheckNode(value);
+        
+        const node = findNodeByValue(value, treeData);
+        if (node) {
+          const childrenValues = getAllChildrenValues(node);
+          childrenValues.forEach(childValue => {
+            delete newState[childValue];
+            tree.uncheckNode(childValue);
+          });
+        }
+        
+        const parentPath = getParentPath(value, treeData);
+        parentPath.forEach(parentValue => {
+          const parentNode = findNodeByValue(parentValue, treeData);
+          if (parentNode && !hasCheckedChildren(parentNode, newState)) {
+            delete newState[parentValue];
+            tree.uncheckNode(parentValue);
+          }
+        });
+      }
     }
     
     setCheckedState(newState);
-    
     const selectedValues = Object.keys(newState);
     form.setFieldValue(field.field, selectedValues);
   };

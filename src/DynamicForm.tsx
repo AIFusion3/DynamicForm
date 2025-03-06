@@ -85,6 +85,7 @@ export interface FieldConfig {
     radius?: number | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     fullWidth?: boolean;
     orientation?: 'horizontal' | 'vertical';
+    is_dropdown?: boolean;  // Tree bileşeni için dropdown modu
 }
 
 // New: Interface defining fields in a column, added optional span

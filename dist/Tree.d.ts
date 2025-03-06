@@ -15,6 +15,7 @@ export interface TreeFieldProps {
         optionsUrl?: string;
         options?: TreeNode[];
         levelOffset?: number;
+        is_dropdown?: boolean;
     };
     form: ReturnType<typeof useForm>;
     globalStyle?: React.CSSProperties;

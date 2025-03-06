@@ -95,42 +95,61 @@ var TreeField = function (_a) {
     };
     var toggleNodeCheck = function (value, checked, tree) {
         var newState = __assign({}, checkedState);
-        if (checked) {
-            newState[value] = true;
-            tree.checkNode(value);
-            var node = findNodeByValue(value, treeData);
-            if (node) {
-                var childrenValues = getAllChildrenValues(node);
-                childrenValues.forEach(function (childValue) {
-                    newState[childValue] = true;
-                    tree.checkNode(childValue);
-                });
-            }
-            var parentPath = getParentPath(value, treeData);
-            parentPath.forEach(function (parentValue) {
-                newState[parentValue] = true;
-                tree.checkNode(parentValue);
+        if (field.is_dropdown) {
+            Object.keys(newState).forEach(function (key) {
+                delete newState[key];
+                tree.uncheckNode(key);
             });
+            if (checked) {
+                newState[value] = true;
+                tree.checkNode(value);
+                var selectedNode = findNodeByValue(value, treeData);
+                if (selectedNode) {
+                    form.setFieldValue(field.field + "__title", selectedNode.label);
+                }
+            }
+            else {
+                form.setFieldValue(field.field + "__title", "");
+            }
         }
         else {
-            delete newState[value];
-            tree.uncheckNode(value);
-            var node = findNodeByValue(value, treeData);
-            if (node) {
-                var childrenValues = getAllChildrenValues(node);
-                childrenValues.forEach(function (childValue) {
-                    delete newState[childValue];
-                    tree.uncheckNode(childValue);
+            if (checked) {
+                newState[value] = true;
+                tree.checkNode(value);
+                var node = findNodeByValue(value, treeData);
+                if (node) {
+                    var childrenValues = getAllChildrenValues(node);
+                    childrenValues.forEach(function (childValue) {
+                        newState[childValue] = true;
+                        tree.checkNode(childValue);
+                    });
+                }
+                var parentPath = getParentPath(value, treeData);
+                parentPath.forEach(function (parentValue) {
+                    newState[parentValue] = true;
+                    tree.checkNode(parentValue);
                 });
             }
-            var parentPath = getParentPath(value, treeData);
-            parentPath.forEach(function (parentValue) {
-                var parentNode = findNodeByValue(parentValue, treeData);
-                if (parentNode && !hasCheckedChildren(parentNode, newState)) {
-                    delete newState[parentValue];
-                    tree.uncheckNode(parentValue);
+            else {
+                delete newState[value];
+                tree.uncheckNode(value);
+                var node = findNodeByValue(value, treeData);
+                if (node) {
+                    var childrenValues = getAllChildrenValues(node);
+                    childrenValues.forEach(function (childValue) {
+                        delete newState[childValue];
+                        tree.uncheckNode(childValue);
+                    });
                 }
-            });
+                var parentPath = getParentPath(value, treeData);
+                parentPath.forEach(function (parentValue) {
+                    var parentNode = findNodeByValue(parentValue, treeData);
+                    if (parentNode && !hasCheckedChildren(parentNode, newState)) {
+                        delete newState[parentValue];
+                        tree.uncheckNode(parentValue);
+                    }
+                });
+            }
         }
         setCheckedState(newState);
         var selectedValues = Object.keys(newState);
