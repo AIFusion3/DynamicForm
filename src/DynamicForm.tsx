@@ -16,7 +16,10 @@ import {
     Switch,
     MultiSelect,
     SegmentedControl,
-    MantineColor
+    MantineColor,
+    Box,
+    Paper,
+    Title
 } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -28,6 +31,7 @@ import DropField from './DropField';
 import UploadCollection from './UploadCollection';
 import TreeField from './Tree';
 import SubListForm from './SubListForm';
+import ColumnField from './ColumnField';
 import { RichTextEditor } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -36,7 +40,7 @@ import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -86,6 +90,7 @@ export interface FieldConfig {
     fullWidth?: boolean;
     orientation?: 'horizontal' | 'vertical';
     is_dropdown?: boolean;  // Tree bileşeni için dropdown modu
+    style?: React.CSSProperties;
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -719,35 +724,38 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
     // Form içeriğini render eden fonksiyon
     const renderFormContent = () => (
-        <>
+        <Grid>
             {config.rows.map((row, rowIndex) => (
-                <div key={rowIndex} style={{ marginBottom: '2rem' }}>
+                <React.Fragment key={rowIndex}>
                     {row.title && (
-                        <Text size="lg" mb="sm" style={row.headerStyle}>
-                            {row.title}
-                        </Text>
+                        <Grid.Col span={12}>
+                            <div style={row.headerStyle}>
+                                <h3>{row.title}</h3>
+                            </div>
+                        </Grid.Col>
                     )}
-                    <Grid gutter="md">
-                        {row.columns.map((column, colIndex) => (
-                            <Grid.Col
-                                key={colIndex}
-                                // Eğer column.span tanımlıysa onu, tanımlı değilse 12 / row.columns.length hesaplamasını kullan.
-                                span={column.span ?? (12 / row.columns.length)}
-                            >
-                                {column.fields.map((field, fieldIndex) => (
-                                    <div key={fieldIndex} style={{ marginBottom: '1rem' }}>
-                                        {field.type === 'textbox' && (
+                    {row.columns.map((column, colIndex) => (
+                        <Grid.Col key={colIndex} span={column.span || 12}>
+                            {column.fields.map((field, fieldIndex) => {
+                                const fieldStyle = { ...config.fieldStyle, ...field.style };
+                                
+                                switch (field.type) {
+                                    case 'textbox':
+                                        return (
                                             <TextInput
+                                                key={fieldIndex}
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
                                                 {...form.getInputProps(field.field)}
                                                 required={field.required}
                                                 maxLength={field.maxLength}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                style={fieldStyle}
                                             />
-                                        )}
-                                        {field.type === 'textarea' && (
+                                        );
+                                    case 'textarea':
+                                        return (
                                             <Textarea
+                                                key={fieldIndex}
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
                                                 {...form.getInputProps(field.field)}
@@ -756,67 +764,77 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 autosize={field.autosize ?? undefined}
                                                 minRows={field.minRows ?? 1}
                                                 maxRows={field.maxRows ?? 2}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                style={fieldStyle}
                                             />
-                                        )}
-                                        {field.type === 'date' && (
+                                        );
+                                    case 'date':
+                                        return (
                                             <DatePickerInput
+                                                key={fieldIndex}
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
                                                 value={form.values[field.field]}
                                                 onChange={(value) => form.setFieldValue(field.field, value)}
                                                 required={field.required}
                                                 error={form.errors[field.field]}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                style={fieldStyle}
                                                 valueFormat={field.valueFormat || "DD.MM.YYYY"}
                                                 locale="tr"
                                             />
-                                        )}
-                                        {field.type === 'datetime' && (
+                                        );
+                                    case 'datetime':
+                                        return (
                                             <DateTimePicker
+                                                key={fieldIndex}
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
                                                 value={form.values[field.field]}
                                                 onChange={(value) => form.setFieldValue(field.field, value)}
                                                 required={field.required}
                                                 error={form.errors[field.field]}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                style={fieldStyle}
                                                 valueFormat={field.valueFormat || "DD.MM.YYYY HH:mm"}
                                                 locale="tr"
                                             />
-                                        )}
-                                        {field.type === 'checkbox' && (
+                                        );
+                                    case 'checkbox':
+                                        return (
                                             <Checkbox
+                                                key={fieldIndex}
                                                 label={field.title}
                                                 {...form.getInputProps(field.field, { type: 'checkbox' })}
-                                            // Checkbox bileşeninde style uygulanması opsiyonel olabilir;
-                                            // istenirse ekleyebilirsiniz.
                                             />
-                                        )}
-                                        {field.type === 'dropdown' && (
+                                        );
+                                    case 'dropdown':
+                                        return (
                                             <DropdownField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                                 onDropdownChange={handleDropdownChange}
                                                 options={dropdownOptions[field.field] || field.options || []}
                                                 setOptionsForField={setOptionsForField}
                                                 getHeaders={getHeaders}
                                             />
-                                        )}
-                                        {field.type === 'maskinput' && (
+                                        );
+                                    case 'maskinput':
+                                        return (
                                             <InputBase
+                                                key={fieldIndex}
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
                                                 component={IMaskInput}
                                                 mask={field.mask || ''}
                                                 {...form.getInputProps(field.field)}
                                                 required={field.required}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                                style={fieldStyle}
                                             />
-                                        )}
-                                        {field.type === 'number' && (
+                                        );
+                                    case 'number':
+                                        return (
                                             <NumberInput
+                                                key={fieldIndex}
                                                 required={field.required}
                                                 min={field.min}
                                                 max={field.max}
@@ -834,78 +852,106 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 thousandSeparator={field.thousandSeparator || ','}
                                                 decimalSeparator={field.decimalSeparator || '.'}
                                             />
-                                        )}
-                                        {field.type === 'switch' && (
+                                        );
+                                    case 'switch':
+                                        return (
                                             <SwitchField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                             />
-                                        )}
-                                        {field.type === 'multiselect' && (
+                                        );
+                                    case 'multiselect':
+                                        return (
                                             <MultiSelectField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                                 getHeaders={getHeaders}
                                             />
-                                        )}
-                                        {field.type === 'upload' && (
+                                        );
+                                    case 'upload':
+                                        return (
                                             <DropField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                                 getHeaders={getHeaders}
                                             />
-                                        )}
-                                        {field.type === 'uploadcollection' && (
+                                        );
+                                    case 'uploadcollection':
+                                        return (
                                             <UploadCollection
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                                 getHeaders={getHeaders}
                                             />
-                                        )}
-                                        {field.type === 'tree' && (
+                                        );
+                                    case 'tree':
+                                        return (
                                             <TreeField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                                 getHeaders={getHeaders}
                                             />
-                                        )}
-                                        {field.type === 'sublistform' && 'subform' in field && field.subform && (
-                                            <SubListForm
-                                                field={field as any}
-                                                form={form}
-                                                globalStyle={config.fieldStyle}
-                                                baseUrl={baseUrl}
-                                            />
-                                        )}
-                                        {field.type === 'htmleditor' && (
+                                        );
+                                    case 'sublistform':
+                                        return (
+                                            'subform' in field && field.subform && (
+                                                <SubListForm
+                                                    key={fieldIndex}
+                                                    field={field as any}
+                                                    form={form}
+                                                    globalStyle={fieldStyle}
+                                                    baseUrl={baseUrl}
+                                                />
+                                            )
+                                        );
+                                    case 'htmleditor':
+                                        return (
                                             <HTMLEditorField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                             />
-                                        )}
-                                        {field.type === 'segmentedcontrol' && (
+                                        );
+                                    case 'segmentedcontrol':
+                                        return (
                                             <SegmentedControlField
+                                                key={fieldIndex}
                                                 field={field}
                                                 form={form}
-                                                globalStyle={config.fieldStyle}
+                                                globalStyle={fieldStyle}
                                                 onDropdownChange={handleDropdownChange}
                                                 options={dropdownOptions[field.field] || field.options || []}
                                                 setOptionsForField={setOptionsForField}
                                                 getHeaders={getHeaders}
                                             />
-                                        )}
-                                    </div>
-                                ))}
-                            </Grid.Col>
-                        ))}
-                    </Grid>
-                </div>
+                                        );
+                                    case 'columnfield':
+                                        return (
+                                            <ColumnField
+                                                key={fieldIndex}
+                                                field={field}
+                                                form={form}
+                                                getHeaders={getHeaders}
+                                            />
+                                        );
+                                    default:
+                                        return null;
+                                }
+                            })}
+                        </Grid.Col>
+                    ))}
+                </React.Fragment>
             ))}
             
             <Group>
@@ -961,7 +1007,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     </pre>
                 </div>
             )}
-        </>
+        </Grid>
     );
 
     // Options güncelleme fonksiyonu

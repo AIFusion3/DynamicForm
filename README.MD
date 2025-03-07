@@ -644,6 +644,107 @@ Features of SubListForm:
 - Customizable columns
 - Nested table support for JSON array data
 
+#### ColumnField
+- type: "columnfield"
+- optionsUrl: API URL for hierarchical data
+- options: Static hierarchical data
+- columnWidth: Width of each column (default: 200)
+- columnHeight: Height of each column (default: 300)
+- border: Border style (default: '1px solid #e0e0e0')
+- borderRadius: Border radius for columns and items (default: 4)
+- backgroundColor: Background color for items (default: '#ffffff')
+- selectedColor: Background color for selected items (default: '#e6f7ff')
+- fontSize: Font size for item text (default: 12)
+
+```tsx
+// Dynamic options from API
+{
+  field: "category",
+  title: "Category Selection",
+  type: "columnfield",
+  required: true,
+  optionsUrl: "https://api.example.com/categories",
+  columnWidth: 220,
+  columnHeight: 350,
+  selectedColor: "#f0f8ff"
+}
+
+// Static options
+{
+  field: "productCategory",
+  title: "Product Category",
+  type: "columnfield",
+  required: true,
+  options: [
+    {
+      label: "Electronics",
+      value: "electronics",
+      children: [
+        {
+          label: "Computers",
+          value: "computers"
+        },
+        {
+          label: "Mobile Phones",
+          value: "phones",
+          children: [
+            {
+              label: "Smartphones",
+              value: "smartphones"
+            },
+            {
+              label: "Accessories",
+              value: "accessories"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: "Clothing",
+      value: "clothing"
+    }
+  ]
+}
+```
+
+Features of ColumnField:
+- Multi-column hierarchical data selection
+- Responsive column-based interface
+- Automatic navigation between parent and child categories
+- Visual indicators for items with children
+- Customizable appearance with styling options
+- Scrollable columns for handling large datasets
+- Form validation integration with required field support
+- Dynamic loading of hierarchical data from API
+- Support for both static and API-loaded options
+
+The component expects hierarchical data in the following format:
+
+```json
+[
+  {
+    "label": "Category Name",
+    "value": "unique_id",
+    "children": [
+      {
+        "label": "Subcategory Name",
+        "value": "sub_unique_id",
+        "children": [
+          // Further nested items
+        ]
+      }
+    ]
+  }
+]
+```
+
+When a selection is made, the form stores:
+- The selected item's value in the field
+- The selected item's label in a field named `{fieldName}__title`
+
+This allows you to capture both the ID and display name of the selected category.
+
 ## API Integration
 
 The component handles form submission to your API endpoint automatically:
