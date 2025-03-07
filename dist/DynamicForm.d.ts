@@ -52,7 +52,6 @@ export interface FieldConfig {
     fullWidth?: boolean;
     orientation?: 'horizontal' | 'vertical';
     is_dropdown?: boolean;
-    style?: React.CSSProperties;
 }
 export interface ColumnConfig {
     span?: number;

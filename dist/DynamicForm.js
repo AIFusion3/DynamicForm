@@ -58,13 +58,13 @@ import DropField from './DropField';
 import UploadCollection from './UploadCollection';
 import TreeField from './Tree';
 import SubListForm from './SubListForm';
-import ColumnField from './ColumnField';
 import { RichTextEditor } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
+import ColumnField from './ColumnField';
 var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
@@ -519,55 +519,37 @@ var DynamicForm = function (_a) {
     var cancelProps = cancelButtonProps || {};
     var submitProps = submitButtonProps || {};
     // Form içeriğini render eden fonksiyon
-    var renderFormContent = function () { return (React.createElement(Grid, null,
-        config.rows.map(function (row, rowIndex) { return (React.createElement(React.Fragment, { key: rowIndex },
-            row.title && (React.createElement(Grid.Col, { span: 12 },
-                React.createElement("div", { style: row.headerStyle },
-                    React.createElement("h3", null, row.title)))),
-            row.columns.map(function (column, colIndex) { return (React.createElement(Grid.Col, { key: colIndex, span: column.span || 12 }, column.fields.map(function (field, fieldIndex) {
-                var _a, _b, _c;
-                var fieldStyle = __assign(__assign({}, config.fieldStyle), field.style);
-                switch (field.type) {
-                    case 'textbox':
-                        return (React.createElement(TextInput, __assign({ key: fieldIndex, label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, style: fieldStyle })));
-                    case 'textarea':
-                        return (React.createElement(Textarea, __assign({ key: fieldIndex, label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: fieldStyle })));
-                    case 'date':
-                        return (React.createElement(DatePickerInput, { key: fieldIndex, label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: fieldStyle, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr" }));
-                    case 'datetime':
-                        return (React.createElement(DateTimePicker, { key: fieldIndex, label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: fieldStyle, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" }));
-                    case 'checkbox':
-                        return (React.createElement(Checkbox, __assign({ key: fieldIndex, label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }))));
-                    case 'dropdown':
-                        return (React.createElement(DropdownField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders }));
-                    case 'maskinput':
-                        return (React.createElement(InputBase, __assign({ key: fieldIndex, label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: fieldStyle })));
-                    case 'number':
-                        return (React.createElement(NumberInput, { key: fieldIndex, required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
+    var renderFormContent = function () { return (React.createElement(React.Fragment, null,
+        config.rows.map(function (row, rowIndex) { return (React.createElement("div", { key: rowIndex, style: { marginBottom: '2rem' } },
+            row.title && (React.createElement(Text, { size: "lg", mb: "sm", style: row.headerStyle }, row.title)),
+            React.createElement(Grid, { gutter: "md" }, row.columns.map(function (column, colIndex) {
+                var _a;
+                return (React.createElement(Grid.Col, { key: colIndex, 
+                    // Eğer column.span tanımlıysa onu, tanımlı değilse 12 / row.columns.length hesaplamasını kullan.
+                    span: (_a = column.span) !== null && _a !== void 0 ? _a : (12 / row.columns.length) }, column.fields.map(function (field, fieldIndex) {
+                    var _a, _b, _c;
+                    return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
+                        field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'date' && (React.createElement(DatePickerInput, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr" })),
+                        field.type === 'datetime' && (React.createElement(DateTimePicker, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" })),
+                        field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
+                        field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
+                        field.type === 'maskinput' && (React.createElement(InputBase, __assign({ label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
                                 form.setFieldValue(field.field, val !== '' ? Number(val) : null);
-                            }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' }));
-                    case 'switch':
-                        return (React.createElement(SwitchField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle }));
-                    case 'multiselect':
-                        return (React.createElement(MultiSelectField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, getHeaders: getHeaders }));
-                    case 'upload':
-                        return (React.createElement(DropField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, getHeaders: getHeaders }));
-                    case 'uploadcollection':
-                        return (React.createElement(UploadCollection, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, getHeaders: getHeaders }));
-                    case 'tree':
-                        return (React.createElement(TreeField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, getHeaders: getHeaders }));
-                    case 'sublistform':
-                        return ('subform' in field && field.subform && (React.createElement(SubListForm, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, baseUrl: baseUrl })));
-                    case 'htmleditor':
-                        return (React.createElement(HTMLEditorField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle }));
-                    case 'segmentedcontrol':
-                        return (React.createElement(SegmentedControlField, { key: fieldIndex, field: field, form: form, globalStyle: fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders }));
-                    case 'columnfield':
-                        return (React.createElement(ColumnField, { key: fieldIndex, field: field, form: form, getHeaders: getHeaders }));
-                    default:
-                        return null;
-                }
-            }))); }))); }),
+                            }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
+                        field.type === 'switch' && (React.createElement(SwitchField, { field: field, form: form, globalStyle: config.fieldStyle })),
+                        field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl })),
+                        field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle })),
+                        field.type === 'segmentedcontrol' && (React.createElement(SegmentedControlField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
+                        field.type === 'columnfield' && (React.createElement(ColumnField, { field: field, form: form, getHeaders: getHeaders }))));
+                })));
+            })))); }),
         React.createElement(Group, null,
             !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
                     form.reset();
