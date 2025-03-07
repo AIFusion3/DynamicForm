@@ -293,7 +293,6 @@ var DynamicForm = function (_a) {
     var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
     var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
-    // Checkbox için false, date için null, diğerleri için boş string
     var initialValues = {};
     config.rows.forEach(function (row) {
         row.columns.forEach(function (column) {
@@ -304,33 +303,54 @@ var DynamicForm = function (_a) {
                     }
                     else if (field.type === 'dropdown') {
                         initialValues[field.field] = String(initialData[field.field]);
+                        // __title alanını initialData'dan al
+                        var titleField = field.field + "__title";
+                        if (initialData[titleField] !== undefined) {
+                            initialValues[titleField] = initialData[titleField];
+                        }
+                    }
+                    else if (field.type === 'segmentedcontrol') {
+                        initialValues[field.field] = String(initialData[field.field]);
+                        // __title alanını initialData'dan al
+                        var titleField = field.field + "__title";
+                        if (initialData[titleField] !== undefined) {
+                            initialValues[titleField] = initialData[titleField];
+                        }
+                    }
+                    else if (field.type === 'tree') {
+                        initialValues[field.field] = Array.isArray(initialData[field.field])
+                            ? initialData[field.field]
+                            : [initialData[field.field]].filter(Boolean);
+                        // __title alanını initialData'dan al
+                        var titleField = field.field + "__title";
+                        if (initialData[titleField] !== undefined) {
+                            initialValues[titleField] = initialData[titleField];
+                        }
                     }
                     else if (field.type === 'switch') {
-                        var switchValue = Boolean(initialData[field.field]);
-                        console.log('Initial Data for Switch:', {
-                            field: field.field,
-                            rawValue: initialData[field.field],
-                            convertedValue: switchValue,
-                            type: typeof switchValue
-                        });
-                        initialValues[field.field] = switchValue;
+                        initialValues[field.field] = Boolean(initialData[field.field]);
+                    }
+                    else if (field.type === 'multiselect') {
+                        initialValues[field.field] = Array.isArray(initialData[field.field])
+                            ? initialData[field.field]
+                            : [initialData[field.field]].filter(Boolean);
                     }
                     else {
                         initialValues[field.field] = initialData[field.field];
                     }
                 }
                 else {
-                    if (field.type === 'checkbox') {
+                    if (field.type === 'checkbox' || field.type === 'switch') {
                         initialValues[field.field] = false;
                     }
-                    else if (field.type === 'date') {
+                    else if (field.type === 'date' || field.type === 'datetime') {
                         initialValues[field.field] = null;
                     }
                     else if (field.type === 'number') {
                         initialValues[field.field] = field.defaultValue || 0;
                     }
-                    else if (field.type === 'switch') {
-                        initialValues[field.field] = field.defaultChecked || false;
+                    else if (field.type === 'multiselect' || field.type === 'tree') {
+                        initialValues[field.field] = [];
                     }
                     else {
                         initialValues[field.field] = '';
@@ -398,14 +418,56 @@ var DynamicForm = function (_a) {
     };
     // Form submit edildiğinde değerleri gönderiyoruz.
     var handleSubmit = form.onSubmit(function (values) { return __awaiter(void 0, void 0, void 0, function () {
-        var requestHeaders, isPutRequest, method, url, response, result, error_1;
+        var formData, requestHeaders, isPutRequest, method, url, response, result, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    formData = __assign({}, values);
+                    // Eksik __title alanlarını tamamla
+                    config.rows.forEach(function (row) {
+                        row.columns.forEach(function (column) {
+                            column.fields.forEach(function (field) {
+                                // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
+                                if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') &&
+                                    formData[field.field] &&
+                                    formData[field.field + "__title"] === undefined) {
+                                    // Dropdown ve SegmentedControl için
+                                    if (field.type === 'dropdown' || field.type === 'segmentedcontrol') {
+                                        var options = dropdownOptions[field.field] || [];
+                                        var selectedOption = options.find(function (opt) { return String(opt.value) === String(formData[field.field]); });
+                                        if (selectedOption) {
+                                            formData[field.field + "__title"] = selectedOption.label;
+                                        }
+                                    }
+                                    // Tree için (is_dropdown modunda)
+                                    if (field.type === 'tree' && field.is_dropdown && Array.isArray(formData[field.field]) && formData[field.field].length > 0) {
+                                        var treeData = dropdownOptions[field.field] || [];
+                                        var findNode_1 = function (value, nodes) {
+                                            for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
+                                                var node = nodes_1[_i];
+                                                if (String(node.value) === String(value))
+                                                    return node;
+                                                if (node.children) {
+                                                    var found = findNode_1(value, node.children);
+                                                    if (found)
+                                                        return found;
+                                                }
+                                            }
+                                            return null;
+                                        };
+                                        var selectedNode = findNode_1(formData[field.field][0], treeData);
+                                        if (selectedNode) {
+                                            formData[field.field + "__title"] = selectedNode.label;
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    });
                     // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
                     if (noSubmit) {
                         if (onSuccess) {
-                            onSuccess(values);
+                            onSuccess(formData);
                         }
                         return [2 /*return*/];
                     }
@@ -423,7 +485,7 @@ var DynamicForm = function (_a) {
                             headers: requestHeaders,
                             credentials: 'include',
                             mode: 'cors',
-                            body: JSON.stringify(values),
+                            body: JSON.stringify(formData),
                         })];
                 case 2:
                     response = _a.sent();

@@ -505,7 +505,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
-    // Checkbox için false, date için null, diğerleri için boş string
     const initialValues: Record<string, any> = {};
     config.rows.forEach((row) => {
         row.columns.forEach((column) => {
@@ -515,27 +514,48 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         initialValues[field.field] = Number(initialData[field.field]);
                     } else if (field.type === 'dropdown') {
                         initialValues[field.field] = String(initialData[field.field]);
+                        
+                        // __title alanını initialData'dan al
+                        const titleField = field.field + "__title";
+                        if (initialData[titleField] !== undefined) {
+                            initialValues[titleField] = initialData[titleField];
+                        }
+                    } else if (field.type === 'segmentedcontrol') {
+                        initialValues[field.field] = String(initialData[field.field]);
+                        
+                        // __title alanını initialData'dan al
+                        const titleField = field.field + "__title";
+                        if (initialData[titleField] !== undefined) {
+                            initialValues[titleField] = initialData[titleField];
+                        }
+                    } else if (field.type === 'tree') {
+                        initialValues[field.field] = Array.isArray(initialData[field.field]) 
+                            ? initialData[field.field] 
+                            : [initialData[field.field]].filter(Boolean);
+                        
+                        // __title alanını initialData'dan al
+                        const titleField = field.field + "__title";
+                        if (initialData[titleField] !== undefined) {
+                            initialValues[titleField] = initialData[titleField];
+                        }
                     } else if (field.type === 'switch') {
-                        const switchValue = Boolean(initialData[field.field]);
-                        console.log('Initial Data for Switch:', {
-                            field: field.field,
-                            rawValue: initialData[field.field],
-                            convertedValue: switchValue,
-                            type: typeof switchValue
-                        });
-                        initialValues[field.field] = switchValue;
+                        initialValues[field.field] = Boolean(initialData[field.field]);
+                    } else if (field.type === 'multiselect') {
+                        initialValues[field.field] = Array.isArray(initialData[field.field]) 
+                            ? initialData[field.field] 
+                            : [initialData[field.field]].filter(Boolean);
                     } else {
                         initialValues[field.field] = initialData[field.field];
                     }
                 } else {
-                    if (field.type === 'checkbox') {
+                    if (field.type === 'checkbox' || field.type === 'switch') {
                         initialValues[field.field] = false;
-                    } else if (field.type === 'date') {
+                    } else if (field.type === 'date' || field.type === 'datetime') {
                         initialValues[field.field] = null;
                     } else if (field.type === 'number') {
                         initialValues[field.field] = field.defaultValue || 0;
-                    } else if (field.type === 'switch') {
-                        initialValues[field.field] = field.defaultChecked || false;
+                    } else if (field.type === 'multiselect' || field.type === 'tree') {
+                        initialValues[field.field] = [];
                     } else {
                         initialValues[field.field] = '';
                     }
@@ -604,10 +624,55 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
     // Form submit edildiğinde değerleri gönderiyoruz.
     const handleSubmit = form.onSubmit(async (values) => {
+        // Form değerlerini kopyala
+        const formData = { ...values };
+        
+        // Eksik __title alanlarını tamamla
+        config.rows.forEach((row) => {
+            row.columns.forEach((column) => {
+                column.fields.forEach((field) => {
+                    // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
+                    if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') && 
+                        formData[field.field] && 
+                        formData[field.field + "__title"] === undefined) {
+                        
+                        // Dropdown ve SegmentedControl için
+                        if (field.type === 'dropdown' || field.type === 'segmentedcontrol') {
+                            const options = dropdownOptions[field.field] || [];
+                            const selectedOption = options.find(opt => String(opt.value) === String(formData[field.field]));
+                            if (selectedOption) {
+                                formData[field.field + "__title"] = selectedOption.label;
+                            }
+                        }
+                        
+                        // Tree için (is_dropdown modunda)
+                        if (field.type === 'tree' && field.is_dropdown && Array.isArray(formData[field.field]) && formData[field.field].length > 0) {
+                            const treeData = dropdownOptions[field.field] || [];
+                            const findNode = (value: string, nodes: any[]): any => {
+                                for (const node of nodes) {
+                                    if (String(node.value) === String(value)) return node;
+                                    if (node.children) {
+                                        const found = findNode(value, node.children);
+                                        if (found) return found;
+                                    }
+                                }
+                                return null;
+                            };
+                            
+                            const selectedNode = findNode(formData[field.field][0], treeData);
+                            if (selectedNode) {
+                                formData[field.field + "__title"] = selectedNode.label;
+                            }
+                        }
+                    }
+                });
+            });
+        });
+        
         // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
         if (noSubmit) {
             if (onSuccess) {
-                onSuccess(values);
+                onSuccess(formData);
             }
             return;
         }
@@ -627,7 +692,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 headers: requestHeaders,
                 credentials: 'include',
                 mode: 'cors',
-                body: JSON.stringify(values),
+                body: JSON.stringify(formData),
             });
             
             const result = await response.json();
