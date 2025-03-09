@@ -708,6 +708,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             
             // pk_field kontrolü
             const isPutRequest = pk_field && initialData && initialData[pk_field];
+            console.log("isPutRequest----->", isPutRequest);
             const method = isPutRequest ? 'PUT' : 'POST';
             const url = isPutRequest 
                 ? `${baseUrl}/${endpoint}/${initialData[pk_field]}`
