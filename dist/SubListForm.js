@@ -71,6 +71,10 @@ var SubListForm = function (_a) {
     };
     // Yeni öğe ekleme
     var handleAdd = function () {
+        // isDetail true ise ve zaten bir kayıt varsa eklemeye izin verme
+        if (field.isDetail && items.length > 0) {
+            return;
+        }
         setEditingIndex(null);
         setInitialData(undefined);
         setOpened(true);
@@ -84,13 +88,17 @@ var SubListForm = function (_a) {
             field.required && React.createElement("span", { style: { color: 'red' } }, "*")),
         React.createElement(Box, { mb: 10 },
             React.createElement(ScrollArea, null,
-                React.createElement(Table, { striped: true, withTableBorder: true, withColumnBorders: true },
-                    React.createElement(Table.Thead, null,
+                React.createElement(Table, { striped: true, withTableBorder: true, withColumnBorders: true, variant: field.isDetail ? "vertical" : undefined, layout: field.isDetail ? "fixed" : undefined },
+                    !field.isDetail ? (React.createElement(Table.Thead, null,
                         React.createElement(Table.Tr, null,
                             columns.map(function (column) { return (React.createElement(Table.Th, { key: column.key }, column.title)); }),
-                            React.createElement(Table.Th, { style: { width: 80 } }))),
-                    React.createElement(Table.Tbody, null, items.length > 0 ? (items.map(function (item, index) { return (React.createElement(Table.Tr, { key: index },
-                        columns.map(function (column) { return (React.createElement(Table.Td, { key: column.key }, (function () {
+                            React.createElement(Table.Th, { style: { width: 80 } })))) : null,
+                    React.createElement(Table.Tbody, null, items.length > 0 ? (field.isDetail ? (
+                    // Detay görünümü için
+                    columns.map(function (column) { return (React.createElement(Table.Tr, { key: column.key },
+                        React.createElement(Table.Th, { w: 160 }, column.title),
+                        React.createElement(Table.Td, null, (function () {
+                            var item = items[0];
                             if (column.type === 'json' && column.subColumns) {
                                 if (Array.isArray(item[column.key])) {
                                     var subColumns_1 = column.subColumns;
@@ -106,15 +114,37 @@ var SubListForm = function (_a) {
                             return typeof item[column.key] === 'object'
                                 ? JSON.stringify(item[column.key])
                                 : String(item[column.key] || '');
+                        })()))); })) : (
+                    // Normal liste görünümü için
+                    items.map(function (item, index) { return (React.createElement(Table.Tr, { key: index },
+                        columns.map(function (column) { return (React.createElement(Table.Td, { key: column.key }, (function () {
+                            if (column.type === 'json' && column.subColumns) {
+                                if (Array.isArray(item[column.key])) {
+                                    var subColumns_2 = column.subColumns;
+                                    return (subColumns_2.length > 0 ?
+                                        React.createElement(Table, null,
+                                            React.createElement(Table.Thead, null,
+                                                React.createElement(Table.Tr, null, subColumns_2.map(function (subCol) { return (React.createElement(Table.Th, { key: subCol.key }, subCol.title)); }))),
+                                            React.createElement(Table.Tbody, null, item[column.key].map(function (subItem, subIndex) { return (React.createElement(Table.Tr, { key: subIndex }, subColumns_2.map(function (subCol) { return (React.createElement(Table.Td, { key: subCol.key }, String(subItem[subCol.key] || ''))); }))); })))
+                                        : null);
+                                }
+                                return null;
+                            }
+                            return typeof item[column.key] === 'object'
+                                ? JSON.stringify(item[column.key])
+                                : String(item[column.key] || '');
                         })())); }),
                         React.createElement(Table.Td, null,
                             React.createElement(Group, { gap: 5 },
                                 React.createElement(ActionIcon, { size: "sm", color: "black", onClick: function () { return handleEdit(index); } },
                                     React.createElement(IconEdit, { size: 16 })),
                                 React.createElement(ActionIcon, { size: "sm", color: "gray", onClick: function () { return handleDelete(index); } },
-                                    React.createElement(IconTrash, { size: 16 })))))); })) : (React.createElement(Table.Tr, null,
-                        React.createElement(Table.Td, { colSpan: columns.length + 1, style: { textAlign: 'center' } }, "Hen\u00FCz veri eklenmemi\u015F"))))))),
-        React.createElement(Button, { leftSection: React.createElement(IconPlus, { size: 16 }), onClick: handleAdd, variant: "outline", color: "black" }, field.buttonTitle || 'Ekle'),
+                                    React.createElement(IconTrash, { size: 16 })))))); }))) : (React.createElement(Table.Tr, null,
+                        React.createElement(Table.Td, { colSpan: field.isDetail ? 2 : columns.length + 1, style: { textAlign: 'center' } }, "Hen\u00FCz veri eklenmemi\u015F"))))))),
+        !(field.isDetail && items.length > 0) && (React.createElement(Button, { leftSection: React.createElement(IconPlus, { size: 16 }), onClick: handleAdd, variant: "outline", color: "black" }, field.buttonTitle || 'Ekle')),
+        field.isDetail && items.length > 0 && (React.createElement(Group, { gap: 5, mt: 10 },
+            React.createElement(Button, { leftSection: React.createElement(IconEdit, { size: 16 }), onClick: function () { return handleEdit(0); }, variant: "outline", color: "black" }, "D\u00FCzenle"),
+            React.createElement(Button, { leftSection: React.createElement(IconTrash, { size: 16 }), onClick: function () { return handleDelete(0); }, variant: "outline", color: "red" }, "Sil"))),
         form.errors[field.field] && (React.createElement(Text, { size: "xs", color: "red", mt: 5 }, form.errors[field.field])),
         React.createElement(OptionalPortal, { withinPortal: true },
             React.createElement(Modal, { opened: opened, onClose: function () {

@@ -44,6 +44,7 @@ export interface FieldConfig {
         key: string;
         title: string;
     }[];
+    isDetail?: boolean;
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     editorHeight?: number;
     valueFormat?: string;

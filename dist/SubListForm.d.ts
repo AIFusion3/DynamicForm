@@ -21,6 +21,7 @@ export interface SubListFormProps {
         subform: FormConfig;
         size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
         columns?: Column[];
+        isDetail?: boolean;
     };
     form: ReturnType<typeof useForm>;
     globalStyle?: React.CSSProperties;

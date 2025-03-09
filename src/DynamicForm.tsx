@@ -78,6 +78,7 @@ export interface FieldConfig {
     subform?: FormConfig;
     buttonTitle?: string;
     columns?: { key: string; title: string }[];
+    isDetail?: boolean; // Detay görünümü için yeni prop
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     editorHeight?: number;
     valueFormat?: string;

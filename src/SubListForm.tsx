@@ -39,6 +39,7 @@ export interface SubListFormProps {
     subform: FormConfig;
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     columns?: Column[];
+    isDetail?: boolean;
   };
   form: ReturnType<typeof useForm>;
   globalStyle?: React.CSSProperties;
@@ -117,6 +118,11 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
 
   // Yeni öğe ekleme
   const handleAdd = () => {
+    // isDetail true ise ve zaten bir kayıt varsa eklemeye izin verme
+    if (field.isDetail && items.length > 0) {
+      return;
+    }
+    
     setEditingIndex(null);
     setInitialData(undefined);
     setOpened(true);
@@ -135,22 +141,33 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
       
       <Box mb={10}>
         <ScrollArea>
-          <Table striped withTableBorder withColumnBorders>
-            <Table.Thead>
-              <Table.Tr>
-                {columns.map(column => (
-                  <Table.Th key={column.key}>{column.title}</Table.Th>
-                ))}
-                <Table.Th style={{ width: 80 }}></Table.Th>
-              </Table.Tr>
-            </Table.Thead>
+          <Table 
+            striped 
+            withTableBorder 
+            withColumnBorders
+            variant={field.isDetail ? "vertical" : undefined}
+            layout={field.isDetail ? "fixed" : undefined}
+          >
+            {!field.isDetail ? (
+              <Table.Thead>
+                <Table.Tr>
+                  {columns.map(column => (
+                    <Table.Th key={column.key}>{column.title}</Table.Th>
+                  ))}
+                  <Table.Th style={{ width: 80 }}></Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+            ) : null}
             <Table.Tbody>
               {items.length > 0 ? (
-                items.map((item, index) => (
-                  <Table.Tr key={index}>
-                    {columns.map(column => (
-                      <Table.Td key={column.key}>
+                field.isDetail ? (
+                  // Detay görünümü için
+                  columns.map(column => (
+                    <Table.Tr key={column.key}>
+                      <Table.Th w={160}>{column.title}</Table.Th>
+                      <Table.Td>
                         {(() => {
+                          const item = items[0];
                           if (column.type === 'json' && column.subColumns) {
                             if (Array.isArray(item[column.key])) {
                               const subColumns = column.subColumns;
@@ -186,30 +203,75 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                             : String(item[column.key] || '');
                         })()}
                       </Table.Td>
-                    ))}
-                    <Table.Td>
-                      <Group gap={5}>
-                        <ActionIcon 
-                          size="sm" 
-                          color="black" 
-                          onClick={() => handleEdit(index)}
-                        >
-                          <IconEdit size={16} />
-                        </ActionIcon>
-                        <ActionIcon 
-                          size="sm" 
-                          color="gray" 
-                          onClick={() => handleDelete(index)}
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                ))
+                    </Table.Tr>
+                  ))
+                ) : (
+                  // Normal liste görünümü için
+                  items.map((item, index) => (
+                    <Table.Tr key={index}>
+                      {columns.map(column => (
+                        <Table.Td key={column.key}>
+                          {(() => {
+                            if (column.type === 'json' && column.subColumns) {
+                              if (Array.isArray(item[column.key])) {
+                                const subColumns = column.subColumns;
+                                return (
+                                  subColumns.length>0 ?
+                                  <Table>
+                                    <Table.Thead>
+                                      <Table.Tr>
+                                        {subColumns.map(subCol => (
+                                          <Table.Th key={subCol.key}>{subCol.title}</Table.Th>
+                                        ))}
+                                      </Table.Tr>
+                                    </Table.Thead>
+                                    <Table.Tbody>
+                                      {item[column.key].map((subItem: any, subIndex: number) => (
+                                        <Table.Tr key={subIndex}>
+                                          {subColumns.map(subCol => (
+                                            <Table.Td key={subCol.key}>
+                                              {String(subItem[subCol.key] || '')}
+                                            </Table.Td>
+                                          ))}
+                                        </Table.Tr>
+                                      ))}
+                                    </Table.Tbody>
+                                  </Table>
+                                  : null
+                                );
+                              }
+                              return null;
+                            }
+                            return typeof item[column.key] === 'object' 
+                              ? JSON.stringify(item[column.key]) 
+                              : String(item[column.key] || '');
+                          })()}
+                        </Table.Td>
+                      ))}
+                      <Table.Td>
+                        <Group gap={5}>
+                          <ActionIcon 
+                            size="sm" 
+                            color="black" 
+                            onClick={() => handleEdit(index)}
+                          >
+                            <IconEdit size={16} />
+                          </ActionIcon>
+                          <ActionIcon 
+                            size="sm" 
+                            color="gray" 
+                            onClick={() => handleDelete(index)}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Group>
+                      </Table.Td>
+                    </Table.Tr>
+                  ))
+                )
               ) : (
                 <Table.Tr>
-                  <Table.Td colSpan={columns.length + 1} style={{ textAlign: 'center' }}>
+                  <Table.Td colSpan={field.isDetail ? 2 : columns.length + 1} style={{ textAlign: 'center' }}>
                     Henüz veri eklenmemiş
                   </Table.Td>
                 </Table.Tr>
@@ -219,12 +281,37 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
         </ScrollArea>
       </Box>
       
-      <Button 
-        leftSection={<IconPlus size={16} />}
-        onClick={handleAdd} variant="outline" color="black"
-      >
-        {field.buttonTitle || 'Ekle'}
-      </Button>
+      {/* isDetail true ve bir kayıt varsa butonu gizle */}
+      {!(field.isDetail && items.length > 0) && (
+        <Button 
+          leftSection={<IconPlus size={16} />}
+          onClick={handleAdd} variant="outline" color="black"
+        >
+          {field.buttonTitle || 'Ekle'}
+        </Button>
+      )}
+      
+      {/* Düzenleme ve silme butonlarını detay görünümünde ayrı göster */}
+      {field.isDetail && items.length > 0 && (
+        <Group gap={5} mt={10}>
+          <Button 
+            leftSection={<IconEdit size={16} />}
+            onClick={() => handleEdit(0)} 
+            variant="outline" 
+            color="black"
+          >
+            Düzenle
+          </Button>
+          <Button 
+            leftSection={<IconTrash size={16} />}
+            onClick={() => handleDelete(0)} 
+            variant="outline" 
+            color="red"
+          >
+            Sil
+          </Button>
+        </Group>
+      )}
       
       {form.errors[field.field] && (
         <Text size="xs" color="red" mt={5}>
