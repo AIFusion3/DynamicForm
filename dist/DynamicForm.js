@@ -486,6 +486,7 @@ var DynamicForm = function (_a) {
                     _a.trys.push([1, 4, , 5]);
                     requestHeaders = getHeaders();
                     isPutRequest = pk_field && initialData && initialData[pk_field];
+                    console.log("isPutRequest----->", isPutRequest);
                     method = isPutRequest ? 'PUT' : 'POST';
                     url = isPutRequest
                         ? "".concat(baseUrl, "/").concat(endpoint, "/").concat(initialData[pk_field])
