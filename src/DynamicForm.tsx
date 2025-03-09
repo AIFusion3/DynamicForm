@@ -37,7 +37,7 @@ import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -87,6 +87,8 @@ export interface FieldConfig {
     fullWidth?: boolean;
     orientation?: 'horizontal' | 'vertical';
     is_dropdown?: boolean;  // Tree bileşeni için dropdown modu
+    changeto?: ChangeToConfig[];  // Yeni özellik
+    refreshMessage?: string;  // Refresh field için özel mesaj
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -476,6 +478,28 @@ const SwitchField: React.FC<{
             }}
             style={globalStyle ? globalStyle : undefined}
         />
+    );
+};
+
+export interface ChangeToConfig {
+    target: string;     // Hedef field adı
+    updateurl: string;  // API URL
+}
+
+const RefreshField: React.FC<{
+    field: FieldConfig;
+    form: ReturnType<typeof useForm>;
+    globalStyle?: React.CSSProperties;
+}> = ({ field, form, globalStyle }) => {
+    return (
+        <div style={{ ...globalStyle }}>
+            <Text size="sm" fw={500} style={{ marginBottom: 5 }}>
+                {field.title} {field.required && <span style={{ color: 'red' }}>*</span>}
+            </Text>
+            <Text size="xs" c="dimmed">
+                {field.refreshMessage || "Bu alan diğer alanların değişimine göre güncellenecektir."}
+            </Text>
+        </div>
     );
 };
 
@@ -906,6 +930,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 field={field}
                                                 form={form}
                                                 getHeaders={getHeaders}
+                                                handleFieldChange={handleFieldChange} 
+                                            />
+                                        )}
+                                        {field.type === 'refresh' && (
+                                            <RefreshField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
                                             />
                                         )}
                                     </div>
@@ -1008,6 +1040,64 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                     .catch(error => {
                                         console.error(`Error loading options for ${field.field}:`, error);
                                     });
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    };
+
+    // DynamicForm bileşeni içinde, diğer fonksiyonların yanına
+    const handleFieldChange = async (fieldName: string, value: any) => {
+        console.log("handleFieldChange", fieldName, value);
+        // Tüm fieldları kontrol et
+        config.rows.forEach(row => {
+            row.columns.forEach(column => {
+                column.fields.forEach(async (field) => {
+                    // changeto özelliği olan field'ı bul
+                    if (field.field === fieldName && field.changeto && field.changeto.length > 0) {
+                        // Mevcut form değerlerini al
+                        const currentFormValues = form.getValues();
+                        
+                        // Her bir changeto hedefi için işlem yap
+                        for (const changeConfig of field.changeto) {
+                            try {
+                                // API isteği gönder
+                                const response = await fetch(changeConfig.updateurl, {
+                                    method: 'POST',
+                                    headers: getHeaders(),
+                                    body: JSON.stringify(currentFormValues)
+                                });
+                                
+                                const result = await response.json();
+                                
+                                if (result && result.data) {
+                                    // Hedef field'ı bul ve güncelle
+                                    config.rows.forEach(r => {
+                                        r.columns.forEach(c => {
+                                            c.fields.forEach((f, index) => {
+                                                if (f.field === changeConfig.target) {
+                                                    // Field'ı güncelle
+                                                    c.fields[index] = {
+                                                        ...result.data,
+                                                        field: f.field // Field adını koru
+                                                    };
+                                                    
+                                                    // Form değerini güncelle
+                                                    if (result.data.defaultValue !== undefined) {
+                                                        form.setFieldValue(f.field, result.data.defaultValue);
+                                                    }
+                                                    
+                                                    // Formu yeniden render etmek için state'i güncelle
+                                                    setFormValues({...form.values});
+                                                }
+                                            });
+                                        });
+                                    });
+                                }
+                            } catch (error) {
+                                console.error('Field güncelleme hatası:', error);
                             }
                         }
                     }

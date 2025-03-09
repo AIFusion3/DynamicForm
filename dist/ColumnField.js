@@ -57,7 +57,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 import React, { useState, useEffect } from 'react';
 import { Box, Text, ScrollArea, Stack, Group, Paper, Loader, Flex } from '@mantine/core';
 export var ColumnField = function (_a) {
-    var field = _a.field, form = _a.form, getHeaders = _a.getHeaders;
+    var field = _a.field, form = _a.form, getHeaders = _a.getHeaders, handleFieldChange = _a.handleFieldChange;
     var _b = useState([]), columns = _b[0], setColumns = _b[1];
     var _c = useState([]), selectedValues = _c[0], setSelectedValues = _c[1];
     var _d = useState(false), loading = _d[0], setLoading = _d[1];
@@ -147,17 +147,22 @@ export var ColumnField = function (_a) {
                 form.clearFieldError(field.field);
             }
         }
+        var formValue = newSelectedValues.join(',');
+        form.setFieldValue(field.field, formValue);
+        console.log("formValue----->", formValue);
+        console.log("field.field----->", field.field);
+        if (handleFieldChange && field.changeto && field.changeto.length > 0) {
+            console.log("handleFieldChange----->", formValue);
+            handleFieldChange(field.field, formValue);
+        }
     };
     var handleItemSelect = function (item, columnIndex) {
-        console.log("item----->", item);
-        console.log("columnIndex----->", columnIndex);
         var newSelectedValues = __spreadArray([], selectedValues, true);
         newSelectedValues[columnIndex] = item.value;
         if (newSelectedValues.length > columnIndex + 1) {
             newSelectedValues.splice(columnIndex + 1);
         }
         var newColumns = __spreadArray([], columns, true);
-        console.log("newColumns----->", newColumns);
         if (item.children && item.children.length > 0) {
             if (newColumns.length > columnIndex + 1) {
                 newColumns[columnIndex + 1] = item.children;
@@ -174,9 +179,9 @@ export var ColumnField = function (_a) {
                 newColumns.splice(columnIndex + 1);
             }
         }
+        updateFormValue(newSelectedValues, newColumns);
         setSelectedValues(newSelectedValues);
         setColumns(newColumns);
-        updateFormValue(newSelectedValues, newColumns);
     };
     useEffect(function () {
         if (columns.length > 0) {

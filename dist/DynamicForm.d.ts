@@ -4,7 +4,7 @@ import { useForm } from '@mantine/form';
 import '@mantine/dates/styles.css';
 import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
 export interface FieldConfig {
     field: string;
     title: string;
@@ -52,6 +52,8 @@ export interface FieldConfig {
     fullWidth?: boolean;
     orientation?: 'horizontal' | 'vertical';
     is_dropdown?: boolean;
+    changeto?: ChangeToConfig[];
+    refreshMessage?: string;
 }
 export interface ColumnConfig {
     span?: number;
@@ -97,6 +99,10 @@ export interface DropdownFieldProps {
     options?: DropdownOption[];
     setOptionsForField?: (fieldName: string, options: DropdownOption[]) => void;
     getHeaders?: () => Record<string, string>;
+}
+export interface ChangeToConfig {
+    target: string;
+    updateurl: string;
 }
 /**
  * DynamicForm Bileşeni:

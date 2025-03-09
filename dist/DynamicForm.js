@@ -281,6 +281,15 @@ var SwitchField = function (_a) {
             form.setFieldValue(field.field, newValue);
         }, style: globalStyle ? globalStyle : undefined }));
 };
+var RefreshField = function (_a) {
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle;
+    return (React.createElement("div", { style: __assign({}, globalStyle) },
+        React.createElement(Text, { size: "sm", fw: 500, style: { marginBottom: 5 } },
+            field.title,
+            " ",
+            field.required && React.createElement("span", { style: { color: 'red' } }, "*")),
+        React.createElement(Text, { size: "xs", c: "dimmed" }, field.refreshMessage || "Bu alan diğer alanların değişimine göre güncellenecektir.")));
+};
 /**
  * DynamicForm Bileşeni:
  * - JSON konfigürasyona göre form alanlarını oluşturur.
@@ -547,7 +556,8 @@ var DynamicForm = function (_a) {
                         field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl })),
                         field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'segmentedcontrol' && (React.createElement(SegmentedControlField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
-                        field.type === 'columnfield' && (React.createElement(ColumnField, { field: field, form: form, getHeaders: getHeaders }))));
+                        field.type === 'columnfield' && (React.createElement(ColumnField, { field: field, form: form, getHeaders: getHeaders, handleFieldChange: handleFieldChange })),
+                        field.type === 'refresh' && (React.createElement(RefreshField, { field: field, form: form, globalStyle: config.fieldStyle }))));
                 })));
             })))); }),
         React.createElement(Group, null,
@@ -620,6 +630,86 @@ var DynamicForm = function (_a) {
             });
         });
     };
+    // DynamicForm bileşeni içinde, diğer fonksiyonların yanına
+    var handleFieldChange = function (fieldName, value) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            console.log("handleFieldChange", fieldName, value);
+            // Tüm fieldları kontrol et
+            config.rows.forEach(function (row) {
+                row.columns.forEach(function (column) {
+                    column.fields.forEach(function (field) { return __awaiter(void 0, void 0, void 0, function () {
+                        var currentFormValues, _loop_1, _i, _a, changeConfig;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    if (!(field.field === fieldName && field.changeto && field.changeto.length > 0)) return [3 /*break*/, 4];
+                                    currentFormValues = form.getValues();
+                                    _loop_1 = function (changeConfig) {
+                                        var response, result_1, error_2;
+                                        return __generator(this, function (_c) {
+                                            switch (_c.label) {
+                                                case 0:
+                                                    _c.trys.push([0, 3, , 4]);
+                                                    return [4 /*yield*/, fetch(changeConfig.updateurl, {
+                                                            method: 'POST',
+                                                            headers: getHeaders(),
+                                                            body: JSON.stringify(currentFormValues)
+                                                        })];
+                                                case 1:
+                                                    response = _c.sent();
+                                                    return [4 /*yield*/, response.json()];
+                                                case 2:
+                                                    result_1 = _c.sent();
+                                                    if (result_1 && result_1.data) {
+                                                        // Hedef field'ı bul ve güncelle
+                                                        config.rows.forEach(function (r) {
+                                                            r.columns.forEach(function (c) {
+                                                                c.fields.forEach(function (f, index) {
+                                                                    if (f.field === changeConfig.target) {
+                                                                        // Field'ı güncelle
+                                                                        c.fields[index] = __assign(__assign({}, result_1.data), { field: f.field // Field adını koru
+                                                                         });
+                                                                        // Form değerini güncelle
+                                                                        if (result_1.data.defaultValue !== undefined) {
+                                                                            form.setFieldValue(f.field, result_1.data.defaultValue);
+                                                                        }
+                                                                        // Formu yeniden render etmek için state'i güncelle
+                                                                        setFormValues(__assign({}, form.values));
+                                                                    }
+                                                                });
+                                                            });
+                                                        });
+                                                    }
+                                                    return [3 /*break*/, 4];
+                                                case 3:
+                                                    error_2 = _c.sent();
+                                                    console.error('Field güncelleme hatası:', error_2);
+                                                    return [3 /*break*/, 4];
+                                                case 4: return [2 /*return*/];
+                                            }
+                                        });
+                                    };
+                                    _i = 0, _a = field.changeto;
+                                    _b.label = 1;
+                                case 1:
+                                    if (!(_i < _a.length)) return [3 /*break*/, 4];
+                                    changeConfig = _a[_i];
+                                    return [5 /*yield**/, _loop_1(changeConfig)];
+                                case 2:
+                                    _b.sent();
+                                    _b.label = 3;
+                                case 3:
+                                    _i++;
+                                    return [3 /*break*/, 1];
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                });
+            });
+            return [2 /*return*/];
+        });
+    }); };
     return (React.createElement(MantineProvider, null,
         React.createElement(Notifications, null),
         noForm ? (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, ScrollArea, Stack, Group, Paper, Loader, Flex } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { FieldType } from './DynamicForm';
+import { FieldType, ChangeToConfig } from './DynamicForm';
 
 export interface ColumnNode {
   label: string;
@@ -25,15 +25,18 @@ export interface ColumnFieldProps {
     hoverColor?: string;
     selectedColor?: string;
     fontSize?: number;
+    changeto?: ChangeToConfig[];
   };
   form: ReturnType<typeof useForm>;
   getHeaders?: () => Record<string, string>;
+  handleFieldChange?: (fieldName: string, value: any) => void;
 }
 
 export const ColumnField: React.FC<ColumnFieldProps> = ({
   field,
   form,
-  getHeaders
+  getHeaders,
+  handleFieldChange
 }) => {
   const [columns, setColumns] = useState<ColumnNode[][]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -118,11 +121,19 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
         form.clearFieldError(field.field);
       }
     }
+
+    const formValue = newSelectedValues.join(',');
+    form.setFieldValue(field.field, formValue);
+    console.log("formValue----->", formValue);
+    console.log("field.field----->", field.field);
+    
+    if (handleFieldChange && field.changeto && field.changeto.length > 0) {
+        console.log("handleFieldChange----->", formValue);
+      handleFieldChange(field.field, formValue);
+    }
   };
 
   const handleItemSelect = (item: ColumnNode, columnIndex: number) => {
-    console.log("item----->", item);
-    console.log("columnIndex----->", columnIndex);
 
     const newSelectedValues = [...selectedValues];
     newSelectedValues[columnIndex] = item.value;
@@ -132,7 +143,6 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
     }
     
     const newColumns = [...columns];
-    console.log("newColumns----->", newColumns);
 
     if (item.children && item.children.length > 0) {
       if (newColumns.length > columnIndex + 1) {
@@ -150,10 +160,10 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
       }
     }
     
+    updateFormValue(newSelectedValues, newColumns);
+    
     setSelectedValues(newSelectedValues);
     setColumns(newColumns);
-    
-    updateFormValue(newSelectedValues, newColumns);
   };
 
   useEffect(() => {

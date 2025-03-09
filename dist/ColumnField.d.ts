@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from '@mantine/form';
-import { FieldType } from './DynamicForm';
+import { FieldType, ChangeToConfig } from './DynamicForm';
 export interface ColumnNode {
     label: string;
     value: string;
@@ -22,9 +22,11 @@ export interface ColumnFieldProps {
         hoverColor?: string;
         selectedColor?: string;
         fontSize?: number;
+        changeto?: ChangeToConfig[];
     };
     form: ReturnType<typeof useForm>;
     getHeaders?: () => Record<string, string>;
+    handleFieldChange?: (fieldName: string, value: any) => void;
 }
 export declare const ColumnField: React.FC<ColumnFieldProps>;
 export default ColumnField;
