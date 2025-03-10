@@ -667,16 +667,13 @@ var DynamicForm = function (_a) {
                                                             r.columns.forEach(function (c) {
                                                                 c.fields.forEach(function (f, index) {
                                                                     if (f.field === changeConfig.target) {
-                                                                        // Field'ı güncelle
-                                                                        c.fields[index] = __assign(__assign({}, result_1.data), { field: f.field // Field adını koru
-                                                                         });
                                                                         if (initialData && initialData[f.field] !== undefined) {
                                                                             form.setFieldValue(f.field, initialData[f.field]);
                                                                         }
                                                                         else {
-                                                                            form.setFieldValue(f.field, '');
+                                                                            form.setFieldValue(f.field, null);
                                                                         }
-                                                                        // Formu yeniden render etmek için state'i güncelle
+                                                                        c.fields[index] = __assign(__assign({}, result_1.data), { field: f.field });
                                                                         setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
