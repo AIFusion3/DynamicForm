@@ -634,9 +634,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         const headers: Record<string, string> = {
             'Content-Type': 'application/json'
         };
-
+        console.log("useToken----->", useToken);
         if (useToken) {
             const token = localStorage.getItem('token');
+            console.log("token----->", token);
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             } else {

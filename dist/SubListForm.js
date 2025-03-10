@@ -152,7 +152,7 @@ var SubListForm = function (_a) {
                     setEditingIndex(null);
                     setInitialData(undefined);
                 }, title: editingIndex !== null ? 'Düzenle' : 'Yeni Ekle', size: field.size || 'md' },
-                React.createElement(DynamicForm, { config: field.subform, baseUrl: baseUrl, endpoint: "/fake/account", useToken: true, initialData: initialData, onSuccess: handleSubFormSuccess, noSubmit: true, noForm: true, submitButtonProps: {
+                React.createElement(DynamicForm, { config: field.subform, baseUrl: baseUrl, endpoint: "/", useToken: true, initialData: initialData, onSuccess: handleSubFormSuccess, noSubmit: true, noForm: true, submitButtonProps: {
                         children: editingIndex !== null ? 'Güncelle' : 'Ekle',
                     }, cancelButtonProps: {
                         onClick: function () { return setOpened(false); },

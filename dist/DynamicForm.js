@@ -414,8 +414,10 @@ var DynamicForm = function (_a) {
         var headers = {
             'Content-Type': 'application/json'
         };
+        console.log("useToken----->", useToken);
         if (useToken) {
             var token = localStorage.getItem('token');
+            console.log("token----->", token);
             if (token) {
                 headers['Authorization'] = "Bearer ".concat(token);
             }

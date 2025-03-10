@@ -332,7 +332,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
             <DynamicForm
                 config={field.subform}
                 baseUrl={baseUrl}
-                endpoint="/fake/account"
+                endpoint="/"
                 useToken={true}
                 initialData={initialData}
                 onSuccess={handleSubFormSuccess}
