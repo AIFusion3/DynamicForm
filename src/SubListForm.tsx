@@ -333,6 +333,7 @@ const SubListForm: React.FC<SubListFormProps> = ({ field, form, globalStyle, bas
                 config={field.subform}
                 baseUrl={baseUrl}
                 endpoint="/fake/account"
+                useToken={true}
                 initialData={initialData}
                 onSuccess={handleSubFormSuccess}
                 noSubmit={true}

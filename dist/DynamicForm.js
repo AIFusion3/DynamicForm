@@ -510,6 +510,7 @@ var DynamicForm = function (_a) {
                         }
                     }
                     else {
+                        console.log("result----->", result);
                         notifications.show({
                             title: 'Hata',
                             message: result.message || 'Bir hata oluştu',
