@@ -10,7 +10,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 import React from 'react';
-import { Text, Grid, Image, Group, MantineProvider, Paper } from '@mantine/core';
+import { Text, Grid, Image, Group, MantineProvider, Paper, Table } from '@mantine/core';
 import { IconFile } from '@tabler/icons-react';
 var formatValue = function (value, field) {
     if (value === null || value === undefined)
@@ -54,6 +54,16 @@ var formatValue = function (value, field) {
             return value ? 'Evet' : 'Hayır';
         case 'number':
             return value.toLocaleString('tr-TR');
+        case 'table':
+            if (!Array.isArray(value) || !field.columns)
+                return '-';
+            return (React.createElement(Table, { striped: true, highlightOnHover: true, withTableBorder: true, withColumnBorders: true },
+                React.createElement(Table.Thead, null,
+                    React.createElement(Table.Tr, null, field.columns.map(function (column, idx) { return (React.createElement(Table.Th, { key: idx }, column.title)); }))),
+                React.createElement(Table.Tbody, null, value.map(function (row, rowIdx) {
+                    var _a;
+                    return (React.createElement(Table.Tr, { key: rowIdx }, (_a = field.columns) === null || _a === void 0 ? void 0 : _a.map(function (column, colIdx) { return (React.createElement(Table.Td, { key: colIdx }, row[column.key] !== undefined ? String(row[column.key]) : '-')); })));
+                }))));
         default:
             return String(value);
     }

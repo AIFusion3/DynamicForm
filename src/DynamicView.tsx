@@ -1,8 +1,8 @@
 import React from 'react';
-import { Text, Grid, Image, Group, MantineProvider, Paper, MantineSize } from '@mantine/core';
+import { Text, Grid, Image, Group, MantineProvider, Paper, MantineSize, Table } from '@mantine/core';
 import { IconFile } from '@tabler/icons-react';
 
-export type ViewFieldType = 'text' | 'date' | 'datetime' | 'image' | 'file' | 'gallery' | 'html' | 'number' | 'boolean';
+export type ViewFieldType = 'text' | 'date' | 'datetime' | 'image' | 'file' | 'gallery' | 'html' | 'number' | 'boolean' | 'table';
 
 export interface ViewFieldConfig {
     field: string;
@@ -11,6 +11,7 @@ export interface ViewFieldConfig {
     format?: string;
     imageWidth?: number;
     imageHeight?: number;
+    columns?: Array<{key: string, title: string}>;  // Tablo sütunları için
 }
 
 export interface ViewColumnConfig {
@@ -109,6 +110,30 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
             return value ? 'Evet' : 'Hayır';
         case 'number':
             return value.toLocaleString('tr-TR');
+        case 'table':
+            if (!Array.isArray(value) || !field.columns) return '-';
+            return (
+                <Table striped highlightOnHover withTableBorder withColumnBorders>
+                    <Table.Thead>
+                        <Table.Tr>
+                            {field.columns.map((column, idx) => (
+                                <Table.Th key={idx}>{column.title}</Table.Th>
+                            ))}
+                        </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                        {value.map((row, rowIdx) => (
+                            <Table.Tr key={rowIdx}>
+                                {field.columns?.map((column, colIdx) => (
+                                    <Table.Td key={colIdx}>
+                                        {row[column.key] !== undefined ? String(row[column.key]) : '-'}
+                                    </Table.Td>
+                                ))}
+                            </Table.Tr>
+                        ))}
+                    </Table.Tbody>
+                </Table>
+            );
         default:
             return String(value);
     }

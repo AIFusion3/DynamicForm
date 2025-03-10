@@ -1,6 +1,6 @@
 import React from 'react';
 import { MantineSize } from '@mantine/core';
-export type ViewFieldType = 'text' | 'date' | 'datetime' | 'image' | 'file' | 'gallery' | 'html' | 'number' | 'boolean';
+export type ViewFieldType = 'text' | 'date' | 'datetime' | 'image' | 'file' | 'gallery' | 'html' | 'number' | 'boolean' | 'table';
 export interface ViewFieldConfig {
     field: string;
     title: string;
@@ -8,6 +8,10 @@ export interface ViewFieldConfig {
     format?: string;
     imageWidth?: number;
     imageHeight?: number;
+    columns?: Array<{
+        key: string;
+        title: string;
+    }>;
 }
 export interface ViewColumnConfig {
     span?: number;
