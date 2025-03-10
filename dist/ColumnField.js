@@ -71,7 +71,7 @@ export var ColumnField = function (_a) {
     var fontSize = field.fontSize || 12;
     useEffect(function () {
         var fetchData = function () { return __awaiter(void 0, void 0, void 0, function () {
-            var resultData, headers, response, result, err_1;
+            var resultData, headers, response, result, formValue, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -107,6 +107,12 @@ export var ColumnField = function (_a) {
                         _a.label = 5;
                     case 5:
                         setColumns([resultData]);
+                        if (form.values[field.field]) {
+                            formValue = form.values[field.field].toString();
+                            if (formValue && formValue.length > 0) {
+                                processInitialValue(formValue, [resultData]);
+                            }
+                        }
                         return [3 /*break*/, 8];
                     case 6:
                         err_1 = _a.sent();
@@ -122,6 +128,34 @@ export var ColumnField = function (_a) {
         }); };
         fetchData();
     }, [field.optionsUrl, field.options]);
+    var processInitialValue = function (formValue, initialColumns) {
+        var valueArray = formValue.split(',');
+        var currentColumns = __spreadArray([], initialColumns, true);
+        var newSelectedValues = [];
+        var _loop_1 = function (i) {
+            var value = valueArray[i];
+            if (currentColumns[i]) {
+                var item = currentColumns[i].find(function (node) { return node.value === value; });
+                if (item) {
+                    newSelectedValues[i] = value;
+                    if (item.children && item.children.length > 0) {
+                        if (currentColumns.length <= i + 1) {
+                            currentColumns.push(item.children);
+                        }
+                        else {
+                            currentColumns[i + 1] = item.children;
+                        }
+                    }
+                }
+            }
+        };
+        for (var i = 0; i < valueArray.length; i++) {
+            _loop_1(i);
+        }
+        setColumns(currentColumns);
+        setSelectedValues(newSelectedValues);
+        updateFormValue(newSelectedValues, currentColumns);
+    };
     var updateFormValue = function (newSelectedValues, newColumns) {
         if (newSelectedValues.length === 0) {
             if (field.required) {

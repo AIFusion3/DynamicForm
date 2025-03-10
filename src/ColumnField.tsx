@@ -83,6 +83,13 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
                 }
 
                 setColumns([resultData]);
+                
+                if (form.values[field.field]) {
+                    const formValue = form.values[field.field].toString();
+                    if (formValue && formValue.length > 0) {
+                        processInitialValue(formValue, [resultData]);
+                    }
+                }
             } catch (err) {
                 console.error("Veri alma hatası:", err);
                 setError(err instanceof Error ? err.message : 'Veri yüklenirken hata oluştu');
@@ -93,6 +100,37 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
 
         fetchData();
     }, [field.optionsUrl, field.options]);
+
+    const processInitialValue = (formValue: string, initialColumns: ColumnNode[][]) => {
+        const valueArray = formValue.split(',');
+        let currentColumns = [...initialColumns];
+        let newSelectedValues: string[] = [];
+        
+        for (let i = 0; i < valueArray.length; i++) {
+            const value = valueArray[i];
+            
+            if (currentColumns[i]) {
+                const item = currentColumns[i].find(node => node.value === value);
+                
+                if (item) {
+                    newSelectedValues[i] = value;
+                    
+                    if (item.children && item.children.length > 0) {
+                        if (currentColumns.length <= i + 1) {
+                            currentColumns.push(item.children);
+                        } else {
+                            currentColumns[i + 1] = item.children;
+                        }
+                    }
+                }
+            }
+        }
+        
+        setColumns(currentColumns);
+        setSelectedValues(newSelectedValues);
+        
+        updateFormValue(newSelectedValues, currentColumns);
+    };
 
     const updateFormValue = (newSelectedValues: string[], newColumns: ColumnNode[][]) => {
         if (newSelectedValues.length === 0) {
