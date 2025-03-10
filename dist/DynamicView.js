@@ -12,7 +12,7 @@ var __assign = (this && this.__assign) || function () {
 import React from 'react';
 import { Text, Grid, Image, Group, MantineProvider, Paper, Table } from '@mantine/core';
 import { IconFile } from '@tabler/icons-react';
-var formatValue = function (value, field) {
+var formatValue = function (value, field, data) {
     if (value === null || value === undefined)
         return '-';
     switch (field.type) {
@@ -47,10 +47,23 @@ var formatValue = function (value, field) {
                 React.createElement(IconFile, { size: 20 }),
                 React.createElement(Text, { component: "a", href: value, target: "_blank" }, "Dosyay\u0131 G\u00F6r\u00FCnt\u00FCle"))) : '-';
         case 'gallery':
-            return Array.isArray(value) ? (React.createElement(Group, null, value.map(function (item, idx) {
-                var imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
-                return (React.createElement(Image, { key: idx, src: imgSrc, width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" }));
-            }))) : '-';
+            value = data[field.field];
+            if (field.field.includes('.')) {
+                var fieldParts = field.field.split('.');
+                var arrayField = fieldParts[0];
+                var propertyField_1 = fieldParts[1];
+                var arrayData = data[arrayField];
+                if (Array.isArray(arrayData)) {
+                    return (React.createElement(Group, null, arrayData.map(function (item, idx) { return (React.createElement(Image, { key: idx, src: item[propertyField_1], width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" })); })));
+                }
+            }
+            if (Array.isArray(value)) {
+                return (React.createElement(Group, null, value.map(function (item, idx) {
+                    var imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
+                    return (React.createElement(Image, { key: idx, src: imgSrc, width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" }));
+                })));
+            }
+            return '-';
         case 'html':
             return React.createElement("div", { dangerouslySetInnerHTML: { __html: value } });
         case 'boolean':
@@ -98,9 +111,9 @@ var DynamicView = function (_a) {
                         React.createElement(Text, { ta: (_b = config.labelStyle) === null || _b === void 0 ? void 0 : _b.align, size: ((_c = config.labelStyle) === null || _c === void 0 ? void 0 : _c.size) || 'sm', fw: ((_d = config.labelStyle) === null || _d === void 0 ? void 0 : _d.weight) || 600, c: (_e = config.labelStyle) === null || _e === void 0 ? void 0 : _e.color, lineClamp: (_f = config.labelStyle) === null || _f === void 0 ? void 0 : _f.lineClamp, inline: (_g = config.labelStyle) === null || _g === void 0 ? void 0 : _g.inline, inherit: (_h = config.labelStyle) === null || _h === void 0 ? void 0 : _h.inherit },
                             field.title,
                             ":")),
-                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(getNestedValue(data, field.field), field)))) : (React.createElement(React.Fragment, null,
+                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(getNestedValue(data, field.field), field, data)))) : (React.createElement(React.Fragment, null,
                     React.createElement(Text, { ta: (_j = config.labelStyle) === null || _j === void 0 ? void 0 : _j.align, size: (_k = config.labelStyle) === null || _k === void 0 ? void 0 : _k.size, fw: (_l = config.labelStyle) === null || _l === void 0 ? void 0 : _l.weight, c: (_m = config.labelStyle) === null || _m === void 0 ? void 0 : _m.color, lineClamp: (_o = config.labelStyle) === null || _o === void 0 ? void 0 : _o.lineClamp, inline: (_p = config.labelStyle) === null || _p === void 0 ? void 0 : _p.inline, inherit: (_q = config.labelStyle) === null || _q === void 0 ? void 0 : _q.inherit, mb: 8 }, field.title),
-                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(getNestedValue(data, field.field), field))))));
+                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(getNestedValue(data, field.field), field, data))))));
             })));
         })))); })));
 };

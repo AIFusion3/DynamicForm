@@ -46,7 +46,7 @@ export interface DynamicViewProps {
     data: Record<string, any>;
 }
 
-const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
+const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, any>): React.ReactNode => {
     if (value === null || value === undefined) return '-';
 
     switch (field.type) {
@@ -91,22 +91,51 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
                 </Group>
             ) : '-';
         case 'gallery':
-            return Array.isArray(value) ? (
-                <Group>
-                    {value.map((item, idx) => {
-                        const imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
-                        return (
-                            <Image
-                                key={idx}
-                                src={imgSrc}
-                                width={field.imageWidth || 100}
-                                height={field.imageHeight || 100}
-                                fit="contain"
-                            />
-                        );
-                    })}
-                </Group>
-            ) : '-';
+            value = data[field.field];
+            
+            if (field.field.includes('.')) {
+                const fieldParts = field.field.split('.');
+                const arrayField = fieldParts[0];
+                const propertyField = fieldParts[1];
+                
+                const arrayData = data[arrayField];
+                
+                if (Array.isArray(arrayData)) {
+                    return (
+                        <Group>
+                            {arrayData.map((item, idx) => (
+                                <Image
+                                    key={idx}
+                                    src={item[propertyField]}
+                                    width={field.imageWidth || 100}
+                                    height={field.imageHeight || 100}
+                                    fit="contain"
+                                />
+                            ))}
+                        </Group>
+                    );
+                }
+            }
+            
+            if (Array.isArray(value)) {
+                return (
+                    <Group>
+                        {value.map((item, idx) => {
+                            const imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
+                            return (
+                                <Image
+                                    key={idx}
+                                    src={imgSrc}
+                                    width={field.imageWidth || 100}
+                                    height={field.imageHeight || 100}
+                                    fit="contain"
+                                />
+                            );
+                        })}
+                    </Group>
+                );
+            }
+            return '-';
         case 'html':
             return <div dangerouslySetInnerHTML={{ __html: value }} />;
         case 'boolean':
@@ -201,7 +230,7 @@ const DynamicView: React.FC<DynamicViewProps> = ({ config, data }) => {
                                                     </Text>
                                                 </div>
                                                 <Paper shadow="0" style={valueStyle}>
-                                                    {formatValue(getNestedValue(data, field.field), field)}
+                                                    {formatValue(getNestedValue(data, field.field), field, data)}
                                                 </Paper>
                                             </Group>
                                         ) : (
@@ -219,7 +248,7 @@ const DynamicView: React.FC<DynamicViewProps> = ({ config, data }) => {
                                                     {field.title}
                                                 </Text>
                                                 <Paper shadow="0" style={valueStyle}>
-                                                {formatValue(getNestedValue(data, field.field), field)}
+                                                {formatValue(getNestedValue(data, field.field), field, data)}
                                                 </Paper>
                                             </>
                                         )}
