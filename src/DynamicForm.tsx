@@ -729,6 +729,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     onSuccess(result.data);
                 }
             } else {
+                console.log("result----->", result);
                 notifications.show({
                     title: 'Hata',
                     message: result.message || 'Bir hata oluştu',
