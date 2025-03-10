@@ -58,6 +58,18 @@ var formatValue = function (value, field) {
             return String(value);
     }
 };
+// Nokta notasyonu ile iç içe objelere erişim sağlayan yardımcı fonksiyon
+var getNestedValue = function (obj, path) {
+    var keys = path.split('.');
+    var current = obj;
+    for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+        var key = keys_1[_i];
+        if (current === null || current === undefined)
+            return undefined;
+        current = current[key];
+    }
+    return current;
+};
 var DynamicView = function (_a) {
     var config = _a.config, data = _a.data;
     var isHorizontal = config.layout === 'horizontal';
@@ -73,9 +85,9 @@ var DynamicView = function (_a) {
                         React.createElement(Text, { ta: (_b = config.labelStyle) === null || _b === void 0 ? void 0 : _b.align, size: ((_c = config.labelStyle) === null || _c === void 0 ? void 0 : _c.size) || 'sm', fw: ((_d = config.labelStyle) === null || _d === void 0 ? void 0 : _d.weight) || 600, c: (_e = config.labelStyle) === null || _e === void 0 ? void 0 : _e.color, lineClamp: (_f = config.labelStyle) === null || _f === void 0 ? void 0 : _f.lineClamp, inline: (_g = config.labelStyle) === null || _g === void 0 ? void 0 : _g.inline, inherit: (_h = config.labelStyle) === null || _h === void 0 ? void 0 : _h.inherit },
                             field.title,
                             ":")),
-                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(data[field.field], field)))) : (React.createElement(React.Fragment, null,
+                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(getNestedValue(data, field.field), field)))) : (React.createElement(React.Fragment, null,
                     React.createElement(Text, { ta: (_j = config.labelStyle) === null || _j === void 0 ? void 0 : _j.align, size: (_k = config.labelStyle) === null || _k === void 0 ? void 0 : _k.size, fw: (_l = config.labelStyle) === null || _l === void 0 ? void 0 : _l.weight, c: (_m = config.labelStyle) === null || _m === void 0 ? void 0 : _m.color, lineClamp: (_o = config.labelStyle) === null || _o === void 0 ? void 0 : _o.lineClamp, inline: (_p = config.labelStyle) === null || _p === void 0 ? void 0 : _p.inline, inherit: (_q = config.labelStyle) === null || _q === void 0 ? void 0 : _q.inherit, mb: 8 }, field.title),
-                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(data[field.field], field))))));
+                    React.createElement(Paper, { shadow: "0", style: valueStyle }, formatValue(getNestedValue(data, field.field), field))))));
             })));
         })))); })));
 };

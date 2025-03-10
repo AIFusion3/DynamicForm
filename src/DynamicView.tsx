@@ -114,6 +114,19 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
     }
 };
 
+// Nokta notasyonu ile iç içe objelere erişim sağlayan yardımcı fonksiyon
+const getNestedValue = (obj: any, path: string) => {
+    const keys = path.split('.');
+    let current = obj;
+    
+    for (const key of keys) {
+        if (current === null || current === undefined) return undefined;
+        current = current[key];
+    }
+    
+    return current;
+};
+
 const DynamicView: React.FC<DynamicViewProps> = ({ config, data }) => {
     const isHorizontal = config.layout === 'horizontal';
 
@@ -160,7 +173,7 @@ const DynamicView: React.FC<DynamicViewProps> = ({ config, data }) => {
                                                     </Text>
                                                 </div>
                                                 <Paper shadow="0" style={valueStyle}>
-                                                    {formatValue(data[field.field], field)}
+                                                    {formatValue(getNestedValue(data, field.field), field)}
                                                 </Paper>
                                             </Group>
                                         ) : (
@@ -178,7 +191,7 @@ const DynamicView: React.FC<DynamicViewProps> = ({ config, data }) => {
                                                     {field.title}
                                                 </Text>
                                                 <Paper shadow="0" style={valueStyle}>
-                                                    {formatValue(data[field.field], field)}
+                                                {formatValue(getNestedValue(data, field.field), field)}
                                                 </Paper>
                                             </>
                                         )}
