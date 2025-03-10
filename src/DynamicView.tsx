@@ -159,7 +159,7 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
                             <Table.Tr key={rowIdx}>
                                 {field.columns?.map((column, colIdx) => (
                                     <Table.Td key={colIdx}>
-                                        {row[column.key] !== undefined ? String(row[column.key]) : '-'}
+                                        {row[column.key] !== undefined ? <div dangerouslySetInnerHTML={{ __html: String(row[column.key]) }} /> : '-'}
                                     </Table.Td>
                                 ))}
                             </Table.Tr>
