@@ -157,11 +157,18 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
                     <Table.Tbody>
                         {value.map((row, rowIdx) => (
                             <Table.Tr key={rowIdx}>
-                                {field.columns?.map((column, colIdx) => (
-                                    <Table.Td key={colIdx}>
-                                        {row[column.key] !== undefined ? <div dangerouslySetInnerHTML={{ __html: String(row[column.key]) }} /> : '-'}
-                                    </Table.Td>
-                                ))}
+                                {field.columns?.map((column, colIdx) => {
+                                    const cellValue = row[column.key];
+                                    return (
+                                        <Table.Td key={colIdx}>
+                                            {cellValue !== undefined ? 
+                                                (typeof cellValue === 'string' && cellValue.includes('<') && cellValue.includes('>')) ? 
+                                                    <div dangerouslySetInnerHTML={{ __html: cellValue }} /> : 
+                                                    String(cellValue) 
+                                                : '-'}
+                                        </Table.Td>
+                                    );
+                                })}
                             </Table.Tr>
                         ))}
                     </Table.Tbody>
