@@ -93,15 +93,18 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
         case 'gallery':
             return Array.isArray(value) ? (
                 <Group>
-                    {value.map((img, idx) => (
-                        <Image
-                            key={idx}
-                            src={img}
-                            width={field.imageWidth || 100}
-                            height={field.imageHeight || 100}
-                            fit="contain"
-                        />
-                    ))}
+                    {value.map((item, idx) => {
+                        const imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
+                        return (
+                            <Image
+                                key={idx}
+                                src={imgSrc}
+                                width={field.imageWidth || 100}
+                                height={field.imageHeight || 100}
+                                fit="contain"
+                            />
+                        );
+                    })}
                 </Group>
             ) : '-';
         case 'html':
@@ -111,7 +114,6 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
         case 'number':
             return value.toLocaleString('tr-TR');
         case 'table':
-            console.log("value----->", value);
             if (!Array.isArray(value) || !field.columns) return '-';
             return (
                 <Table striped highlightOnHover withTableBorder withColumnBorders>

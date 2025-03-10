@@ -47,7 +47,10 @@ var formatValue = function (value, field) {
                 React.createElement(IconFile, { size: 20 }),
                 React.createElement(Text, { component: "a", href: value, target: "_blank" }, "Dosyay\u0131 G\u00F6r\u00FCnt\u00FCle"))) : '-';
         case 'gallery':
-            return Array.isArray(value) ? (React.createElement(Group, null, value.map(function (img, idx) { return (React.createElement(Image, { key: idx, src: img, width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" })); }))) : '-';
+            return Array.isArray(value) ? (React.createElement(Group, null, value.map(function (item, idx) {
+                var imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
+                return (React.createElement(Image, { key: idx, src: imgSrc, width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" }));
+            }))) : '-';
         case 'html':
             return React.createElement("div", { dangerouslySetInnerHTML: { __html: value } });
         case 'boolean':
@@ -55,7 +58,6 @@ var formatValue = function (value, field) {
         case 'number':
             return value.toLocaleString('tr-TR');
         case 'table':
-            console.log("value----->", value);
             if (!Array.isArray(value) || !field.columns)
                 return '-';
             return (React.createElement(Table, { striped: true, highlightOnHover: true, withTableBorder: true, withColumnBorders: true },
