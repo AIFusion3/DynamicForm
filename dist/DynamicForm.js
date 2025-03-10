@@ -677,7 +677,7 @@ var DynamicForm = function (_a) {
                                                                             form.setFieldValue(f.field, '');
                                                                         }
                                                                         // Formu yeniden render etmek için state'i güncelle
-                                                                        //setFormValues({...form.values});
+                                                                        setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
                                                             });
@@ -714,7 +714,7 @@ var DynamicForm = function (_a) {
                                                                             }
                                                                         }
                                                                         // Formu yeniden render etmek için state'i güncelle
-                                                                        //setFormValues({...form.values});
+                                                                        setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
                                                             });

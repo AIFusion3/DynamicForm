@@ -1093,7 +1093,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                     }
                                                     
                                                     // Formu yeniden render etmek için state'i güncelle
-                                                    //setFormValues({...form.values});
+                                                    setFormValues({...form.values});
                                                 }
                                             });
                                         });
@@ -1130,7 +1130,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                     }
                                                     
                                                     // Formu yeniden render etmek için state'i güncelle
-                                                    //setFormValues({...form.values});
+                                                    setFormValues({...form.values});
                                                 }
                                             });
                                         });
