@@ -90,7 +90,12 @@ var formatValue = function (value, field, data) {
                     React.createElement(Table.Tr, null, field.columns.map(function (column, idx) { return (React.createElement(Table.Th, { key: idx }, column.title)); }))),
                 React.createElement(Table.Tbody, null, value.map(function (row, rowIdx) {
                     var _a;
-                    return (React.createElement(Table.Tr, { key: rowIdx }, (_a = field.columns) === null || _a === void 0 ? void 0 : _a.map(function (column, colIdx) { return (React.createElement(Table.Td, { key: colIdx }, row[column.key] !== undefined ? String(row[column.key]) : '-')); })));
+                    return (React.createElement(Table.Tr, { key: rowIdx }, (_a = field.columns) === null || _a === void 0 ? void 0 : _a.map(function (column, colIdx) {
+                        var cellValue = row[column.key];
+                        return (React.createElement(Table.Td, { key: colIdx }, cellValue !== undefined ?
+                            React.createElement("div", { dangerouslySetInnerHTML: { __html: String(cellValue) } }) :
+                            '-'));
+                    })));
                 }))));
         default:
             return String(value);

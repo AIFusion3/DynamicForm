@@ -162,10 +162,8 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
                                     return (
                                         <Table.Td key={colIdx}>
                                             {cellValue !== undefined ? 
-                                                (typeof cellValue === 'string' && cellValue.includes('<') && cellValue.includes('>')) ? 
-                                                    <div dangerouslySetInnerHTML={{ __html: cellValue }} /> : 
-                                                    String(cellValue) 
-                                                : '-'}
+                                                <div dangerouslySetInnerHTML={{ __html: String(cellValue) }} /> : 
+                                                '-'}
                                         </Table.Td>
                                     );
                                 })}
