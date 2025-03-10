@@ -47,7 +47,7 @@ export interface DynamicViewProps {
 }
 
 const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, any>): React.ReactNode => {
-    if (value === null || value === undefined) return '-';
+    if (field.type != 'gallery' && (value === null || value === undefined)) return '-';
 
     switch (field.type) {
         case 'date':
@@ -91,8 +91,10 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
                 </Group>
             ) : '-';
         case 'gallery':
-            value = data[field.field];
+            let galleryItems: any[] = [];
+            let imageSource = '';
             
+            // Noktalı alan adı kontrolü (productImages.list)
             if (field.field.includes('.')) {
                 const fieldParts = field.field.split('.');
                 const arrayField = fieldParts[0];
@@ -101,27 +103,25 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
                 const arrayData = data[arrayField];
                 
                 if (Array.isArray(arrayData)) {
-                    return (
-                        <Group>
-                            {arrayData.map((item, idx) => (
-                                <Image
-                                    key={idx}
-                                    src={item[propertyField]}
-                                    width={field.imageWidth || 100}
-                                    height={field.imageHeight || 100}
-                                    fit="contain"
-                                />
-                            ))}
-                        </Group>
-                    );
+                    galleryItems = arrayData;
+                    imageSource = propertyField;
+                }
+            } else {
+                // Normal dizi kontrolü
+                value = data[field.field];
+                if (Array.isArray(value)) {
+                    galleryItems = value;
                 }
             }
             
-            if (Array.isArray(value)) {
+            if (galleryItems.length > 0) {
                 return (
                     <Group>
-                        {value.map((item, idx) => {
-                            const imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
+                        {galleryItems.map((item, idx) => {
+                            const imgSrc = imageSource ? item[imageSource] : 
+                                          (typeof item === 'string' ? item : 
+                                          (field.format ? getNestedValue(item, field.format) : item));
+                            
                             return (
                                 <Image
                                     key={idx}
@@ -135,7 +135,8 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
                     </Group>
                 );
             }
-            return '-';
+            
+            return field.field;
         case 'html':
             return <div dangerouslySetInnerHTML={{ __html: value }} />;
         case 'boolean':

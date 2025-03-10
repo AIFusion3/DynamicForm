@@ -13,7 +13,7 @@ import React from 'react';
 import { Text, Grid, Image, Group, MantineProvider, Paper, Table } from '@mantine/core';
 import { IconFile } from '@tabler/icons-react';
 var formatValue = function (value, field, data) {
-    if (value === null || value === undefined)
+    if (field.type != 'gallery' && (value === null || value === undefined))
         return '-';
     switch (field.type) {
         case 'date':
@@ -47,23 +47,35 @@ var formatValue = function (value, field, data) {
                 React.createElement(IconFile, { size: 20 }),
                 React.createElement(Text, { component: "a", href: value, target: "_blank" }, "Dosyay\u0131 G\u00F6r\u00FCnt\u00FCle"))) : '-';
         case 'gallery':
-            value = data[field.field];
+            var galleryItems = [];
+            var imageSource_1 = '';
+            // Noktalı alan adı kontrolü (productImages.list)
             if (field.field.includes('.')) {
                 var fieldParts = field.field.split('.');
                 var arrayField = fieldParts[0];
-                var propertyField_1 = fieldParts[1];
+                var propertyField = fieldParts[1];
                 var arrayData = data[arrayField];
                 if (Array.isArray(arrayData)) {
-                    return (React.createElement(Group, null, arrayData.map(function (item, idx) { return (React.createElement(Image, { key: idx, src: item[propertyField_1], width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" })); })));
+                    galleryItems = arrayData;
+                    imageSource_1 = propertyField;
                 }
             }
-            if (Array.isArray(value)) {
-                return (React.createElement(Group, null, value.map(function (item, idx) {
-                    var imgSrc = typeof item === 'string' ? item : (field.format ? getNestedValue(item, field.format) : item);
+            else {
+                // Normal dizi kontrolü
+                value = data[field.field];
+                if (Array.isArray(value)) {
+                    galleryItems = value;
+                }
+            }
+            if (galleryItems.length > 0) {
+                return (React.createElement(Group, null, galleryItems.map(function (item, idx) {
+                    var imgSrc = imageSource_1 ? item[imageSource_1] :
+                        (typeof item === 'string' ? item :
+                            (field.format ? getNestedValue(item, field.format) : item));
                     return (React.createElement(Image, { key: idx, src: imgSrc, width: field.imageWidth || 100, height: field.imageHeight || 100, fit: "contain" }));
                 })));
             }
-            return '-';
+            return field.field;
         case 'html':
             return React.createElement("div", { dangerouslySetInnerHTML: { __html: value } });
         case 'boolean':
