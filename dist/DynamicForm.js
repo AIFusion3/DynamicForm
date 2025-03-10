@@ -670,12 +670,14 @@ var DynamicForm = function (_a) {
                                                                         // Field'ı güncelle
                                                                         c.fields[index] = __assign(__assign({}, result_1.data), { field: f.field // Field adını koru
                                                                          });
-                                                                        // Form değerini güncelle
-                                                                        if (result_1.data.defaultValue !== undefined) {
-                                                                            form.setFieldValue(f.field, result_1.data.defaultValue);
+                                                                        if (initialData && initialData[f.field] !== undefined) {
+                                                                            form.setFieldValue(f.field, initialData[f.field]);
+                                                                        }
+                                                                        else {
+                                                                            form.setFieldValue(f.field, '');
                                                                         }
                                                                         // Formu yeniden render etmek için state'i güncelle
-                                                                        setFormValues(__assign({}, form.values));
+                                                                        //setFormValues({...form.values});
                                                                     }
                                                                 });
                                                             });
@@ -712,7 +714,7 @@ var DynamicForm = function (_a) {
                                                                             }
                                                                         }
                                                                         // Formu yeniden render etmek için state'i güncelle
-                                                                        setFormValues(__assign({}, form.values));
+                                                                        //setFormValues({...form.values});
                                                                     }
                                                                 });
                                                             });

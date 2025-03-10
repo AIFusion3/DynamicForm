@@ -1086,13 +1086,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                         field: f.field // Field adını koru
                                                     };
                                                     
-                                                    // Form değerini güncelle
-                                                    if (result.data.defaultValue !== undefined) {
-                                                        form.setFieldValue(f.field, result.data.defaultValue);
+                                                    if (initialData && initialData[f.field] !== undefined) {
+                                                        form.setFieldValue(f.field, initialData[f.field]);
+                                                    } else {
+                                                        form.setFieldValue(f.field, '');
                                                     }
                                                     
                                                     // Formu yeniden render etmek için state'i güncelle
-                                                    setFormValues({...form.values});
+                                                    //setFormValues({...form.values});
                                                 }
                                             });
                                         });
@@ -1129,7 +1130,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                     }
                                                     
                                                     // Formu yeniden render etmek için state'i güncelle
-                                                    setFormValues({...form.values});
+                                                    //setFormValues({...form.values});
                                                 }
                                             });
                                         });
