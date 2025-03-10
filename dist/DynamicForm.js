@@ -681,6 +681,43 @@ var DynamicForm = function (_a) {
                                                             });
                                                         });
                                                     }
+                                                    else {
+                                                        // Hatalı response veya data field yoksa
+                                                        config.rows.forEach(function (r) {
+                                                            r.columns.forEach(function (c) {
+                                                                c.fields.forEach(function (f, index) {
+                                                                    if (f.field === changeConfig.target) {
+                                                                        // Field'ı refresh field olarak güncelle
+                                                                        c.fields[index] = __assign(__assign({}, f), { type: 'refresh', field: f.field });
+                                                                        // initialData'da değer varsa onu kullan, yoksa sıfırla
+                                                                        if (initialData && initialData[f.field] !== undefined) {
+                                                                            form.setFieldValue(f.field, initialData[f.field]);
+                                                                        }
+                                                                        else {
+                                                                            // Field tipine göre sıfırlama
+                                                                            if (f.type === 'number') {
+                                                                                form.setFieldValue(f.field, 0);
+                                                                            }
+                                                                            else if (f.type === 'checkbox' || f.type === 'switch') {
+                                                                                form.setFieldValue(f.field, false);
+                                                                            }
+                                                                            else if (f.type === 'multiselect' || f.type === 'tree') {
+                                                                                form.setFieldValue(f.field, []);
+                                                                            }
+                                                                            else if (f.type === 'date' || f.type === 'datetime') {
+                                                                                form.setFieldValue(f.field, null);
+                                                                            }
+                                                                            else {
+                                                                                form.setFieldValue(f.field, '');
+                                                                            }
+                                                                        }
+                                                                        // Formu yeniden render etmek için state'i güncelle
+                                                                        setFormValues(__assign({}, form.values));
+                                                                    }
+                                                                });
+                                                            });
+                                                        });
+                                                    }
                                                     return [3 /*break*/, 4];
                                                 case 3:
                                                     error_2 = _c.sent();

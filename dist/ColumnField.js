@@ -145,16 +145,13 @@ export var ColumnField = function (_a) {
                 form.setFieldValue(field.field, lastSelectedItem.value);
                 form.setFieldValue("".concat(field.field, "__title"), lastSelectedItem.label);
                 form.clearFieldError(field.field);
+                if (handleFieldChange && field.changeto && field.changeto.length > 0) {
+                    handleFieldChange(field.field, lastSelectedItem.value);
+                }
             }
         }
         var formValue = newSelectedValues.join(',');
         form.setFieldValue(field.field, formValue);
-        console.log("formValue----->", formValue);
-        console.log("field.field----->", field.field);
-        if (handleFieldChange && field.changeto && field.changeto.length > 0) {
-            console.log("handleFieldChange----->", formValue);
-            handleFieldChange(field.field, formValue);
-        }
     };
     var handleItemSelect = function (item, columnIndex) {
         var newSelectedValues = __spreadArray([], selectedValues, true);
