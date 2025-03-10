@@ -111,6 +111,7 @@ const formatValue = (value: any, field: ViewFieldConfig): React.ReactNode => {
         case 'number':
             return value.toLocaleString('tr-TR');
         case 'table':
+            console.log("value----->", value);
             if (!Array.isArray(value) || !field.columns) return '-';
             return (
                 <Table striped highlightOnHover withTableBorder withColumnBorders>

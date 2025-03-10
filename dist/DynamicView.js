@@ -55,6 +55,7 @@ var formatValue = function (value, field) {
         case 'number':
             return value.toLocaleString('tr-TR');
         case 'table':
+            console.log("value----->", value);
             if (!Array.isArray(value) || !field.columns)
                 return '-';
             return (React.createElement(Table, { striped: true, highlightOnHover: true, withTableBorder: true, withColumnBorders: true },
