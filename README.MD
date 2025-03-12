@@ -23,6 +23,7 @@ A flexible and customizable form component built with Mantine UI.
   - UploadCollection (Multiple file uploads with preview and ordering)
   - HTMLEditor (Rich text editor)
   - SubListForm (Nested table support with JSON data)
+  - Refresh (Dynamic field type changing based on other field values)
 - Automatic form validation
 - Dependent fields support
 - API integration with customizable endpoints
@@ -744,6 +745,146 @@ When a selection is made, the form stores:
 - The selected item's label in a field named `{fieldName}__title`
 
 This allows you to capture both the ID and display name of the selected category.
+
+#### Refresh Field
+- type: "refresh"
+- refreshMessage: Custom message to display
+- changeto: Array of ChangeToConfig objects for dynamic field type changes
+
+```tsx
+{
+  field: "productType",
+  title: "Product Type",
+  type: "dropdown",
+  required: true,
+  options: [
+    { value: "physical", label: "Physical Product" },
+    { value: "digital", label: "Digital Product" }
+  ],
+  changeto: [
+    {
+      target: "productDetails",
+      updateurl: "/api/product/field-config"
+    }
+  ]
+},
+{
+  field: "productDetails",
+  title: "Product Details",
+  type: "refresh",
+  refreshMessage: "Bu alan ürün tipine göre değişecektir."
+}
+```
+
+Features of Refresh Field:
+- Dynamic field type changing based on other field values
+- Server-side field configuration
+- Automatic field updates when dependent fields change
+- Customizable placeholder message
+- Seamless integration with form validation
+
+The Refresh field works in conjunction with the `changeto` property on other fields. When a field with a `changeto` property changes, it triggers an API call to get a new field configuration for the target field.
+
+The `changeto` property is an array of objects with the following properties:
+- `target`: The field name to update
+- `updateurl`: The API URL to call to get the new field configuration
+
+The API should return a response with the following format:
+
+```json
+{
+  "data": {
+    "field": "productDetails",
+    "title": "Physical Product Details",
+    "type": "sublistform",
+    "required": true,
+    // Other field properties based on the new type
+  }
+}
+```
+
+The component will replace the target field with the new configuration returned by the API. This allows for dynamic form behavior based on user selections.
+
+## URL Handling and baseUrl Integration
+
+The DynamicForm component provides a centralized way to handle URLs for API requests through the `baseUrl` prop. This simplifies development and deployment across different environments.
+
+### How baseUrl Works
+
+The `baseUrl` prop is used as the base URL for all API requests made by the component, including:
+
+1. Form submission (POST/PUT requests)
+2. Options loading for dropdown, multiselect, and other fields
+3. File uploads
+4. Dynamic field configuration updates
+
+### URL Resolution Logic
+
+When a URL is specified in a field configuration (like `optionsUrl` or `uploadUrl`), it is processed as follows:
+
+1. If the URL starts with "http://" or "https://", it is used as-is (absolute URL)
+2. Otherwise, it is combined with the `baseUrl` (relative URL)
+
+For example:
+
+```tsx
+// With baseUrl="https://api.example.com"
+
+// Absolute URL - used as-is
+optionsUrl: "https://other-api.com/options" // -> https://other-api.com/options
+
+// Relative URL - combined with baseUrl
+optionsUrl: "/options" // -> https://api.example.com/options
+optionsUrl: "options" // -> https://api.example.com/options
+```
+
+This approach allows you to:
+- Use the same form configuration across different environments (development, staging, production)
+- Override specific endpoints when needed
+- Maintain a clean configuration without repeating the base URL
+
+### URL Parameters and Templates
+
+Some URL properties support parameter templates, like the `{0}` placeholder in dependent dropdowns:
+
+```tsx
+{
+  field: "country",
+  title: "Country",
+  type: "dropdown",
+  optionsUrl: "/countries"
+},
+{
+  field: "city",
+  title: "City",
+  type: "dropdown",
+  optionsUrl: "/cities/{0}", // {0} will be replaced with the country value
+  refField: "country"
+}
+```
+
+When the user selects a country, the `{0}` in the city dropdown's `optionsUrl` is replaced with the selected country value before being combined with the `baseUrl`.
+
+### URL Usage in Different Field Types
+
+| Field Type | URL Property | Purpose |
+|------------|-------------|---------|
+| dropdown | optionsUrl | Load dropdown options |
+| multiselect | optionsUrl | Load multiselect options |
+| segmentedcontrol | optionsUrl | Load segmented control options |
+| upload | uploadUrl | Upload file endpoint |
+| uploadcollection | uploadUrl | Upload multiple files endpoint |
+| tree | optionsUrl | Load hierarchical data |
+| columnfield | optionsUrl | Load hierarchical column data |
+| refresh (via changeto) | updateurl | Get dynamic field configuration |
+
+### Best Practices
+
+1. Use relative URLs in your field configurations whenever possible
+2. Set the `baseUrl` prop to match your current environment
+3. Use absolute URLs only when you need to call a different API domain
+4. For dependent fields, use the `{0}` placeholder consistently
+5. When using the `changeto` property, ensure the `updateurl` follows the same pattern
 
 ## API Integration
 
