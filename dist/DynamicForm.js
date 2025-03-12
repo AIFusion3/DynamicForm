@@ -65,8 +65,17 @@ import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
+// URL yardımcı fonksiyonu
+export var getFullUrl = function (url, baseUrl) {
+    if (!url)
+        return '';
+    if (url.startsWith && (url.startsWith('http://') || url.startsWith('https://'))) {
+        return url;
+    }
+    return "".concat(baseUrl).concat(url.startsWith && url.startsWith('/') ? '' : '/').concat(url);
+};
 var DropdownField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
     var _d = useState(form.values[field.field] || ''), thisValue = _d[0], setThisValue = _d[1];
     useEffect(function () {
@@ -78,7 +87,7 @@ var DropdownField = function (_a) {
             var url = (_a = field.optionsUrl) === null || _a === void 0 ? void 0 : _a.replace('{0}', String(form.values[field.refField]));
             if (url) {
                 setLoading(true);
-                fetch(url, {
+                fetch(getFullUrl(url, baseUrl), {
                     method: 'GET',
                     headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -94,7 +103,7 @@ var DropdownField = function (_a) {
         }
         else if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl, {
+            fetch(getFullUrl(field.optionsUrl, baseUrl), {
                 method: 'GET',
                 headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -131,7 +140,7 @@ var DropdownField = function (_a) {
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
 var MultiSelectField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
     var _b = useState(field.options || []), options = _b[0], setOptions = _b[1];
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
     var _d = useState(Array.isArray(form.values[field.field]) ? form.values[field.field].map(String) : []), selectedValues = _d[0], setSelectedValues = _d[1];
@@ -141,7 +150,7 @@ var MultiSelectField = function (_a) {
         }
         else if (field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl, {
+            fetch(getFullUrl(field.optionsUrl, baseUrl), {
                 method: 'GET',
                 headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -218,12 +227,12 @@ var HTMLEditorField = function (_a) {
 };
 // SegmentedControlField bileşenini oluşturuyoruz
 var SegmentedControlField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
     var _c = useState(false), loading = _c[0], setLoading = _c[1];
     useEffect(function () {
         if (field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl, {
+            fetch(getFullUrl(field.optionsUrl, baseUrl), {
                 method: 'GET',
                 headers: (getHeaders === null || getHeaders === void 0 ? void 0 : getHeaders()) || { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -547,20 +556,20 @@ var DynamicForm = function (_a) {
                         field.type === 'date' && (React.createElement(DatePickerInput, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr" })),
                         field.type === 'datetime' && (React.createElement(DateTimePicker, { label: field.title, placeholder: field.placeholder || field.title, value: form.values[field.field], onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" })),
                         field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
-                        field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
+                        field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),
                         field.type === 'maskinput' && (React.createElement(InputBase, __assign({ label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'number' && (React.createElement(NumberInput, { required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder, value: form.values[field.field], onChange: function (val) {
                                 form.setFieldValue(field.field, val !== '' ? Number(val) : null);
                             }, error: form.errors[field.field], thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' })),
                         field.type === 'switch' && (React.createElement(SwitchField, { field: field, form: form, globalStyle: config.fieldStyle })),
-                        field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                        field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                        field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
-                        field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders })),
+                        field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),
+                        field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),
+                        field.type === 'uploadcollection' && (React.createElement(UploadCollection, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),
+                        field.type === 'tree' && (React.createElement(TreeField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),
                         field.type === 'sublistform' && 'subform' in field && field.subform && (React.createElement(SubListForm, { field: field, form: form, globalStyle: config.fieldStyle, baseUrl: baseUrl })),
                         field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle })),
-                        field.type === 'segmentedcontrol' && (React.createElement(SegmentedControlField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders })),
-                        field.type === 'columnfield' && (React.createElement(ColumnField, { field: field, form: form, getHeaders: getHeaders, handleFieldChange: handleFieldChange })),
+                        field.type === 'segmentedcontrol' && (React.createElement(SegmentedControlField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),
+                        field.type === 'columnfield' && (React.createElement(ColumnField, { field: field, form: form, getHeaders: getHeaders, handleFieldChange: handleFieldChange, baseUrl: baseUrl })),
                         field.type === 'refresh' && (React.createElement(RefreshField, { field: field, form: form, globalStyle: config.fieldStyle }))));
                 })));
             })))); }),
@@ -614,7 +623,7 @@ var DynamicForm = function (_a) {
                             if (value) {
                                 var url = field.optionsUrl.replace('{0}', String(value));
                                 var requestHeaders = getHeaders();
-                                fetch(url, {
+                                fetch(getFullUrl(url, baseUrl), {
                                     method: 'GET',
                                     headers: requestHeaders,
                                     credentials: 'include',
@@ -654,7 +663,7 @@ var DynamicForm = function (_a) {
                                             switch (_c.label) {
                                                 case 0:
                                                     _c.trys.push([0, 3, , 4]);
-                                                    return [4 /*yield*/, fetch(changeConfig.updateurl, {
+                                                    return [4 /*yield*/, fetch(getFullUrl(changeConfig.updateurl, baseUrl), {
                                                             method: 'POST',
                                                             headers: getHeaders(),
                                                             body: JSON.stringify(currentFormValues)

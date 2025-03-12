@@ -15,6 +15,7 @@ export interface DropFieldProps {
     form: ReturnType<typeof useForm>;
     globalStyle?: React.CSSProperties;
     getHeaders?: () => Record<string, string>;
+    baseUrl?: string;
 }
 declare const DropField: React.FC<DropFieldProps>;
 export default DropField;

@@ -18,6 +18,7 @@ import {
 import { IconUpload, IconRefresh, IconTrash, IconFile } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { getFullUrl } from './DynamicForm';
 
 interface UploadResponse {
   data: {
@@ -49,9 +50,10 @@ export interface DropFieldProps {
   form: ReturnType<typeof useForm>;
   globalStyle?: React.CSSProperties;
   getHeaders?: () => Record<string, string>;
+  baseUrl?: string;
 }
 
-const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHeaders }) => {
+const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHeaders, baseUrl = '' }) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -138,7 +140,7 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
         });
       }, 100);
 
-      const response = await fetch(field.uploadUrl, {
+      const response = await fetch(getFullUrl(field.uploadUrl, baseUrl), {
         method: 'POST',
         headers: getHeaders ? {
           ...Object.fromEntries(

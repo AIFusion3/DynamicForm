@@ -59,15 +59,16 @@ import React, { useState, useEffect } from 'react';
 import { Dropzone } from '@mantine/dropzone';
 import { Text, Group, Progress, Box, Loader, Overlay, Image as MantineImage, Button, ActionIcon, Flex, ScrollArea, Paper } from '@mantine/core';
 import { IconUpload, IconTrash, IconArrowLeft, IconArrowRight, IconRefresh } from '@tabler/icons-react';
+import { getFullUrl } from './DynamicForm';
 // Tek bir resim yükleme kutusu için bileşen
 var ImageUploadBox = function (_a) {
-    var index = _a.index, imageData = _a.imageData, uploadUrl = _a.uploadUrl, title = _a.title, maxSize = _a.maxSize, acceptedFileTypes = _a.acceptedFileTypes, width = _a.width, height = _a.height, uploadContext = _a.uploadContext, getHeaders = _a.getHeaders, onImageUploaded = _a.onImageUploaded, onImageRemoved = _a.onImageRemoved, onMoveImage = _a.onMoveImage, totalImages = _a.totalImages;
-    var _b = useState(false), loading = _b[0], setLoading = _b[1];
-    var _c = useState(0), progress = _c[0], setProgress = _c[1];
-    var _d = useState(''), error = _d[0], setError = _d[1];
-    var _e = useState(false), showOverlay = _e[0], setShowOverlay = _e[1];
-    var _f = useState(''), preview = _f[0], setPreview = _f[1];
-    var _g = useState(null), file = _g[0], setFile = _g[1];
+    var index = _a.index, imageData = _a.imageData, uploadUrl = _a.uploadUrl, title = _a.title, maxSize = _a.maxSize, acceptedFileTypes = _a.acceptedFileTypes, width = _a.width, height = _a.height, uploadContext = _a.uploadContext, getHeaders = _a.getHeaders, onImageUploaded = _a.onImageUploaded, onImageRemoved = _a.onImageRemoved, onMoveImage = _a.onMoveImage, totalImages = _a.totalImages, _b = _a.baseUrl, baseUrl = _b === void 0 ? '' : _b;
+    var _c = useState(false), loading = _c[0], setLoading = _c[1];
+    var _d = useState(0), progress = _d[0], setProgress = _d[1];
+    var _e = useState(''), error = _e[0], setError = _e[1];
+    var _f = useState(false), showOverlay = _f[0], setShowOverlay = _f[1];
+    var _g = useState(''), preview = _g[0], setPreview = _g[1];
+    var _h = useState(null), file = _h[0], setFile = _h[1];
     var handleDrop = function (files) { return __awaiter(void 0, void 0, void 0, function () {
         var selectedFile, previewUrl;
         return __generator(this, function (_a) {
@@ -123,7 +124,7 @@ var ImageUploadBox = function (_a) {
                             return prev + 5;
                         });
                     }, 100);
-                    return [4 /*yield*/, fetch(uploadUrl, {
+                    return [4 /*yield*/, fetch(getFullUrl(uploadUrl, baseUrl), {
                             method: 'POST',
                             headers: getHeaders ? __assign({}, Object.fromEntries(Object.entries(getHeaders()).filter(function (_a) {
                                 var key = _a[0];
@@ -249,9 +250,9 @@ var ImageUploadBox = function (_a) {
         error && (React.createElement(Text, { c: "red", size: "xs", ta: "center", pos: "absolute", bottom: 5, left: 0, right: 0 }, error))));
 };
 var UploadCollection = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders, _b = _a.baseUrl, baseUrl = _b === void 0 ? '' : _b;
     // Local state ekleyelim
-    var _b = useState([]), localImages = _b[0], setLocalImages = _b[1];
+    var _c = useState([]), localImages = _c[0], setLocalImages = _c[1];
     // Form değerlerinden mevcut resimleri al
     var getImagesFromForm = function () {
         var formValue = form.values[field.field];
@@ -334,7 +335,7 @@ var UploadCollection = function (_a) {
     var totalBoxes = maxImages;
     return (React.createElement("div", null,
         React.createElement(ScrollArea, { type: "scroll", scrollbarSize: 6, offsetScrollbars: true },
-            React.createElement(Flex, { gap: "md", wrap: "nowrap", style: { overflowX: 'auto', paddingBottom: '10px' } }, Array.from({ length: totalBoxes }).map(function (_, index) { return (React.createElement(ImageUploadBox, { key: index, index: index, imageData: index < images.length ? images[index] : null, uploadUrl: field.uploadUrl || '', maxSize: field.maxSize, title: field.title, acceptedFileTypes: field.acceptedFileTypes, width: width, height: height, uploadContext: field.uploadContext, getHeaders: getHeaders, onImageUploaded: handleImageUploaded, onImageRemoved: handleImageRemoved, onMoveImage: handleMoveImage, totalImages: images.length })); }))),
+            React.createElement(Flex, { gap: "md", wrap: "nowrap", style: { overflowX: 'auto', paddingBottom: '10px' } }, Array.from({ length: totalBoxes }).map(function (_, index) { return (React.createElement(ImageUploadBox, { key: index, index: index, imageData: index < images.length ? images[index] : null, uploadUrl: field.uploadUrl || '', maxSize: field.maxSize, title: field.title, acceptedFileTypes: field.acceptedFileTypes, width: width, height: height, uploadContext: field.uploadContext, getHeaders: getHeaders, onImageUploaded: handleImageUploaded, onImageRemoved: handleImageRemoved, onMoveImage: handleMoveImage, totalImages: images.length, baseUrl: baseUrl })); }))),
         form.errors[field.field] && (React.createElement(Text, { c: "red", size: "xs", mt: "xs" }, form.errors[field.field]))));
 };
 export default UploadCollection;

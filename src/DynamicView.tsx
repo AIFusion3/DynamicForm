@@ -146,7 +146,7 @@ const formatValue = (value: any, field: ViewFieldConfig, data: Record<string, an
         case 'table':
             if (!Array.isArray(value) || !field.columns) return '-';
             return (
-                <Table striped highlightOnHover withTableBorder withColumnBorders>
+                <Table withTableBorder withColumnBorders>
                     <Table.Thead>
                         <Table.Tr>
                             {field.columns.map((column, idx) => (

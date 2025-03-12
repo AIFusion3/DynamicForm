@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, ScrollArea, Stack, Group, Paper, Loader, Flex } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { FieldType, ChangeToConfig } from './DynamicForm';
+import { FieldType, ChangeToConfig, getFullUrl } from './DynamicForm';
 
 export interface ColumnNode {
     label: string;
@@ -30,13 +30,15 @@ export interface ColumnFieldProps {
     form: ReturnType<typeof useForm>;
     getHeaders?: () => Record<string, string>;
     handleFieldChange?: (fieldName: string, value: any) => void;
+    baseUrl?: string;
 }
 
 export const ColumnField: React.FC<ColumnFieldProps> = ({
     field,
     form,
     getHeaders,
-    handleFieldChange
+    handleFieldChange,
+    baseUrl = ''
 }) => {
     const [columns, setColumns] = useState<ColumnNode[][]>([]);
     const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -64,7 +66,7 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
                         ...(getHeaders ? getHeaders() : {})
                     };
 
-                    const response = await fetch(field.optionsUrl, {
+                    const response = await fetch(getFullUrl(field.optionsUrl, baseUrl), {
                         method: 'GET',
                         headers,
                         credentials: 'include',
@@ -99,7 +101,7 @@ export const ColumnField: React.FC<ColumnFieldProps> = ({
         };
 
         fetchData();
-    }, [field.optionsUrl, field.options]);
+    }, [field.optionsUrl, field.options, baseUrl]);
 
     const processInitialValue = (formValue: string, initialColumns: ColumnNode[][]) => {
         const valueArray = formValue.split(',');

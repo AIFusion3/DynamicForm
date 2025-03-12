@@ -56,12 +56,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import React, { useState, useEffect } from 'react';
 import { Box, Text, ScrollArea, Stack, Group, Paper, Loader, Flex } from '@mantine/core';
+import { getFullUrl } from './DynamicForm';
 export var ColumnField = function (_a) {
-    var field = _a.field, form = _a.form, getHeaders = _a.getHeaders, handleFieldChange = _a.handleFieldChange;
-    var _b = useState([]), columns = _b[0], setColumns = _b[1];
-    var _c = useState([]), selectedValues = _c[0], setSelectedValues = _c[1];
-    var _d = useState(false), loading = _d[0], setLoading = _d[1];
-    var _e = useState(null), error = _e[0], setError = _e[1];
+    var field = _a.field, form = _a.form, getHeaders = _a.getHeaders, handleFieldChange = _a.handleFieldChange, _b = _a.baseUrl, baseUrl = _b === void 0 ? '' : _b;
+    var _c = useState([]), columns = _c[0], setColumns = _c[1];
+    var _d = useState([]), selectedValues = _d[0], setSelectedValues = _d[1];
+    var _e = useState(false), loading = _e[0], setLoading = _e[1];
+    var _f = useState(null), error = _f[0], setError = _f[1];
     var columnWidth = field.columnWidth || 200;
     var columnHeight = field.columnHeight || 300;
     var border = field.border || '1px solid #e0e0e0';
@@ -83,7 +84,7 @@ export var ColumnField = function (_a) {
                         resultData = [];
                         if (!field.optionsUrl) return [3 /*break*/, 4];
                         headers = __assign({ 'Content-Type': 'application/json' }, (getHeaders ? getHeaders() : {}));
-                        return [4 /*yield*/, fetch(field.optionsUrl, {
+                        return [4 /*yield*/, fetch(getFullUrl(field.optionsUrl, baseUrl), {
                                 method: 'GET',
                                 headers: headers,
                                 credentials: 'include',
@@ -127,7 +128,7 @@ export var ColumnField = function (_a) {
             });
         }); };
         fetchData();
-    }, [field.optionsUrl, field.options]);
+    }, [field.optionsUrl, field.options, baseUrl]);
     var processInitialValue = function (formValue, initialColumns) {
         var valueArray = formValue.split(',');
         var currentColumns = __spreadArray([], initialColumns, true);

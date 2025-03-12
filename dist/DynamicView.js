@@ -85,7 +85,7 @@ var formatValue = function (value, field, data) {
         case 'table':
             if (!Array.isArray(value) || !field.columns)
                 return '-';
-            return (React.createElement(Table, { striped: true, highlightOnHover: true, withTableBorder: true, withColumnBorders: true },
+            return (React.createElement(Table, { withTableBorder: true, withColumnBorders: true },
                 React.createElement(Table.Thead, null,
                     React.createElement(Table.Tr, null, field.columns.map(function (column, idx) { return (React.createElement(Table.Th, { key: idx }, column.title)); }))),
                 React.createElement(Table.Tbody, null, value.map(function (row, rowIdx) {

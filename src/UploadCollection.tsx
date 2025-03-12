@@ -21,6 +21,7 @@ import {
 import { IconUpload, IconTrash, IconArrowLeft, IconArrowRight, IconPlus, IconRefresh } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { getFullUrl } from './DynamicForm';
 
 interface ImageData {
   list: string;
@@ -54,6 +55,7 @@ export interface UploadCollectionProps {
   form: ReturnType<typeof useForm>;
   globalStyle?: React.CSSProperties;
   getHeaders?: () => Record<string, string>;
+  baseUrl?: string;
 }
 
 // Tek bir resim yükleme kutusu için bileşen
@@ -72,6 +74,7 @@ const ImageUploadBox: React.FC<{
   onImageRemoved: (index: number) => void;
   onMoveImage: (index: number, direction: 'left' | 'right') => void;
   totalImages: number;
+  baseUrl?: string;
 }> = ({ 
   index, 
   imageData, 
@@ -86,7 +89,8 @@ const ImageUploadBox: React.FC<{
   onImageUploaded,
   onImageRemoved,
   onMoveImage,
-  totalImages
+  totalImages,
+  baseUrl = ''
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
@@ -147,7 +151,7 @@ const ImageUploadBox: React.FC<{
         });
       }, 100);
 
-      const response = await fetch(uploadUrl, {
+      const response = await fetch(getFullUrl(uploadUrl, baseUrl), {
         method: 'POST',
         headers: getHeaders ? {
           ...Object.fromEntries(
@@ -443,7 +447,7 @@ const ImageUploadBox: React.FC<{
   );
 };
 
-const UploadCollection: React.FC<UploadCollectionProps> = ({ field, form, globalStyle, getHeaders }) => {
+const UploadCollection: React.FC<UploadCollectionProps> = ({ field, form, globalStyle, getHeaders, baseUrl = '' }) => {
   // Local state ekleyelim
   const [localImages, setLocalImages] = useState<ImageData[]>([]);
   
@@ -559,6 +563,7 @@ const UploadCollection: React.FC<UploadCollectionProps> = ({ field, form, global
               onImageRemoved={handleImageRemoved}
               onMoveImage={handleMoveImage}
               totalImages={images.length}
+              baseUrl={baseUrl}
             />
           ))}
         </Flex>

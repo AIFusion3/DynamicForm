@@ -1,272 +1,251 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Tree, Checkbox, Group, RenderTreeNodePayload, Text } from '@mantine/core';
-import { IconChevronDown } from '@tabler/icons-react';
+import React, { useState, useEffect } from 'react';
+import { Text, Loader, Box, Checkbox, Group, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { FieldType } from './DynamicForm';
+import { getFullUrl } from './DynamicForm';
 
-export interface TreeNode {
-  value: string;
-  label: string;
-  children?: TreeNode[];
+interface TreeNode {
+    value: string;
+    label: string;
+    children?: TreeNode[];
+    level?: number;
 }
 
-export interface TreeFieldProps {
-  field: {
-    field: string;
-    title: string;
-    type: FieldType;
-    required?: boolean;
-    optionsUrl?: string;
-    options?: TreeNode[];
-    levelOffset?: number;
-    is_dropdown?: boolean;
-  };
-  form: ReturnType<typeof useForm>;
-  globalStyle?: React.CSSProperties;
-  getHeaders?: () => Record<string, string>;
+interface TreeFieldProps {
+    field: {
+        field: string;
+        title: string;
+        required?: boolean;
+        optionsUrl?: string;
+        options?: TreeNode[];
+        levelOffset?: number;
+        is_dropdown?: boolean;
+    };
+    form: ReturnType<typeof useForm>;
+    globalStyle?: React.CSSProperties;
+    getHeaders?: () => Record<string, string>;
+    baseUrl?: string;
 }
 
-const TreeField: React.FC<TreeFieldProps> = ({ field, form, globalStyle, getHeaders }) => {
-  const [treeData, setTreeData] = useState<TreeNode[]>(field.options || []);
-  const [loading, setLoading] = useState(false);
-  
-  const [checkedState, setCheckedState] = useState<Record<string, boolean>>({});
-  
-  const treeRef = useRef<any>(null);
+const TreeField: React.FC<TreeFieldProps> = ({ 
+    field, 
+    form, 
+    globalStyle,
+    getHeaders,
+    baseUrl = ''
+}) => {
+    const [treeData, setTreeData] = useState<TreeNode[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [selectedValues, setSelectedValues] = useState<string[]>([]);
+    const [dropdownOptions, setDropdownOptions] = useState<{ value: string; label: string }[]>([]);
 
-  useEffect(() => {
-    if (field.options) {
-      setTreeData(field.options);
-    } else if (field.optionsUrl) {
-      setLoading(true);
-      fetch(field.optionsUrl, {
-        method: 'GET',
-        headers: getHeaders?.() || { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        mode: 'cors'
-      })
-        .then((res) => res.json())
-        .then((data: TreeNode[]) => {
-          setTreeData(data);
-        })
-        .catch(error => {
-          console.error('Error loading tree data:', error);
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [field.optionsUrl, field.options]);
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
+            
+            try {
+                let data: TreeNode[] = [];
+                
+                if (field.options) {
+                    data = field.options;
+                } else if (field.optionsUrl) {
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        ...(getHeaders ? getHeaders() : {})
+                    };
+                    
+                    const response = await fetch(getFullUrl(field.optionsUrl, baseUrl), {
+                        method: 'GET',
+                        headers,
+                        credentials: 'include',
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    data = result.data || result;
+                }
+                
+                const processedData = processTreeLevels(data, 0);
+                setTreeData(processedData);
+                
+                if (field.is_dropdown) {
+                    const flatOptions = flattenTreeForDropdown(processedData);
+                    setDropdownOptions(flatOptions);
+                }
+                
+                if (form.values[field.field]) {
+                    const values = Array.isArray(form.values[field.field]) 
+                        ? form.values[field.field] 
+                        : [form.values[field.field]];
+                    
+                    setSelectedValues(values.map(String));
+                }
+            } catch (err) {
+                console.error('Error loading tree data:', err);
+                setError(err instanceof Error ? err.message : 'Veri yüklenirken hata oluştu');
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchData();
+    }, [field.optionsUrl, field.options, baseUrl]);
 
-  useEffect(() => {
-    if (form.values[field.field] && Array.isArray(form.values[field.field])) {
-      const newState: Record<string, boolean> = {};
-      form.values[field.field].forEach((value: string) => {
-        newState[value] = true;
-      });
-      setCheckedState(newState);
-    }
-  }, []);
+    const processTreeLevels = (nodes: TreeNode[], level: number): TreeNode[] => {
+        return nodes.map(node => {
+            const newNode = { 
+                ...node, 
+                level: level + (field.levelOffset || 0)
+            };
+            
+            if (node.children && node.children.length > 0) {
+                newNode.children = processTreeLevels(node.children, level + 1);
+            }
+            
+            return newNode;
+        });
+    };
 
-  const getAllNodes = (nodes: TreeNode[]): TreeNode[] => {
-    let result: TreeNode[] = [];
-    
-    nodes.forEach(node => {
-      result.push(node);
-      if (node.children && node.children.length > 0) {
-        result = [...result, ...getAllNodes(node.children)];
-      }
-    });
-    
-    return result;
-  };
+    const flattenTreeForDropdown = (nodes: TreeNode[], prefix = ''): { value: string; label: string }[] => {
+        let result: { value: string; label: string }[] = [];
+        
+        nodes.forEach(node => {
+            const indent = '—'.repeat(node.level || 0);
+            const label = node.level ? `${indent} ${node.label}` : node.label;
+            
+            result.push({
+                value: node.value,
+                label: label
+            });
+            
+            if (node.children && node.children.length > 0) {
+                result = [...result, ...flattenTreeForDropdown(node.children)];
+            }
+        });
+        
+        return result;
+    };
 
-  const getAllChildrenValues = (node: TreeNode): string[] => {
-    let values: string[] = [node.value];
-    
-    if (node.children && node.children.length > 0) {
-      node.children.forEach(child => {
-        values = [...values, ...getAllChildrenValues(child)];
-      });
-    }
-    
-    return values;
-  };
-
-  const getParentPath = (value: string, nodes: TreeNode[], path: string[] = []): string[] => {
-    for (const node of nodes) {
-      if (node.value === value) {
-        return path;
-      }
-      
-      if (node.children && node.children.length > 0) {
-        const foundPath = getParentPath(value, node.children, [...path, node.value]);
-        if (foundPath.length > 0) {
-          return foundPath;
+    const handleCheckboxChange = (node: TreeNode, checked: boolean) => {
+        let newSelectedValues = [...selectedValues];
+        
+        if (checked) {
+            if (!newSelectedValues.includes(node.value)) {
+                newSelectedValues.push(node.value);
+            }
+        } else {
+            newSelectedValues = newSelectedValues.filter(val => val !== node.value);
         }
-      }
-    }
-    
-    return [];
-  };
+        
+        setSelectedValues(newSelectedValues);
+        form.setFieldValue(field.field, newSelectedValues);
+        
+        if (newSelectedValues.length > 0) {
+            const selectedNode = findNodeByValue(treeData, newSelectedValues[0]);
+            if (selectedNode) {
+                form.setFieldValue(field.field + "__title", selectedNode.label);
+            }
+        } else {
+            form.setFieldValue(field.field + "__title", '');
+        }
+    };
 
-  const toggleNodeCheck = (value: string, checked: boolean, tree: any) => {
-    const newState = { ...checkedState };
-    
+    const handleDropdownChange = (value: string | null) => {
+        const newSelectedValues = value ? [value] : [];
+        setSelectedValues(newSelectedValues);
+        form.setFieldValue(field.field, newSelectedValues);
+        
+        if (value) {
+            const selectedOption = dropdownOptions.find(opt => opt.value === value);
+            if (selectedOption) {
+                form.setFieldValue(field.field + "__title", selectedOption.label);
+            }
+        } else {
+            form.setFieldValue(field.field + "__title", '');
+        }
+    };
+
+    const findNodeByValue = (nodes: TreeNode[], value: string): TreeNode | null => {
+        for (const node of nodes) {
+            if (node.value === value) return node;
+            if (node.children) {
+                const found = findNodeByValue(node.children, value);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const renderTreeNode = (node: TreeNode) => {
+        const isSelected = selectedValues.includes(node.value);
+        const level = node.level || 0;
+        
+        return (
+            <Box key={node.value} ml={level * 20} mb={5}>
+                <Checkbox
+                    label={node.label}
+                    checked={isSelected}
+                    onChange={(event) => handleCheckboxChange(node, event.currentTarget.checked)}
+                />
+                
+                {node.children && node.children.length > 0 && (
+                    <Box ml={20}>
+                        {node.children.map(child => renderTreeNode(child))}
+                    </Box>
+                )}
+            </Box>
+        );
+    };
+
     if (field.is_dropdown) {
-      Object.keys(newState).forEach(key => {
-        delete newState[key];
-        tree.uncheckNode(key);
-      });
-      
-      if (checked) {
-        newState[value] = true;
-        tree.checkNode(value);
-        
-        const selectedNode = findNodeByValue(value, treeData);
-        if (selectedNode) {
-          form.setFieldValue(field.field + "__title", selectedNode.label);
-        }
-      } else {
-        form.setFieldValue(field.field + "__title", "");
-      }
-    } else {
-      if (checked) {
-        newState[value] = true;
-        tree.checkNode(value);
-        
-        const node = findNodeByValue(value, treeData);
-        if (node) {
-          const childrenValues = getAllChildrenValues(node);
-          childrenValues.forEach(childValue => {
-            newState[childValue] = true;
-            tree.checkNode(childValue);
-          });
-        }
-        
-        const parentPath = getParentPath(value, treeData);
-        parentPath.forEach(parentValue => {
-          newState[parentValue] = true;
-          tree.checkNode(parentValue);
-        });
-      } else {
-        delete newState[value];
-        tree.uncheckNode(value);
-        
-        const node = findNodeByValue(value, treeData);
-        if (node) {
-          const childrenValues = getAllChildrenValues(node);
-          childrenValues.forEach(childValue => {
-            delete newState[childValue];
-            tree.uncheckNode(childValue);
-          });
-        }
-        
-        const parentPath = getParentPath(value, treeData);
-        parentPath.forEach(parentValue => {
-          const parentNode = findNodeByValue(parentValue, treeData);
-          if (parentNode && !hasCheckedChildren(parentNode, newState)) {
-            delete newState[parentValue];
-            tree.uncheckNode(parentValue);
-          }
-        });
-      }
+        return (
+            <Box style={globalStyle}>
+                <Select
+                    label={field.title}
+                    placeholder="Seçiniz"
+                    data={dropdownOptions}
+                    value={selectedValues.length > 0 ? selectedValues[0] : null}
+                    onChange={handleDropdownChange}
+                    searchable
+                    clearable
+                    required={field.required}
+                    error={form.errors[field.field]}
+                    disabled={loading}
+                />
+                {loading && <Loader size="xs" mt={5} />}
+                {error && <Text color="red" size="xs" mt={5}>{error}</Text>}
+            </Box>
+        );
     }
-    
-    setCheckedState(newState);
-    const selectedValues = Object.keys(newState);
-    form.setFieldValue(field.field, selectedValues);
-  };
-
-  const findNodeByValue = (value: string, nodes: TreeNode[]): TreeNode | null => {
-    for (const node of nodes) {
-      if (node.value === value) {
-        return node;
-      }
-      
-      if (node.children && node.children.length > 0) {
-        const foundNode = findNodeByValue(value, node.children);
-        if (foundNode) {
-          return foundNode;
-        }
-      }
-    }
-    
-    return null;
-  };
-
-  const hasCheckedChildren = (node: TreeNode, state: Record<string, boolean>): boolean => {
-    if (node.children && node.children.length > 0) {
-      return node.children.some(child => 
-        state[child.value] || hasCheckedChildren(child, state)
-      );
-    }
-    return false;
-  };
-
-  const renderTreeNode = ({
-    node,
-    expanded,
-    hasChildren,
-    elementProps,
-    tree,
-  }: RenderTreeNodePayload) => {
-    const checked = checkedState[node.value] || false;
-    
-    const hasCheckedChildren = node.children?.some(child => 
-      checkedState[child.value] || false
-    ) || false;
-    
-    const indeterminate = !checked && hasCheckedChildren;
 
     return (
-      <Group gap="xs" {...elementProps}>
-        <Checkbox.Indicator
-          checked={checked}
-          style={{ fontSize: '13px' }}
-          color='var(--mantine-color-blue-6)'
-          mb={2}
-          mt={2}
-          indeterminate={indeterminate}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleNodeCheck(node.value, !checked, tree);
-          }}
-        />
-
-        <Group gap={5} onClick={() => tree.toggleExpanded(node.value)}>
-          <span>{node.label}</span>
-
-          {hasChildren && (
-            <IconChevronDown
-              size={14}
-              style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-            />
-          )}
-        </Group>
-      </Group>
+        <Box style={globalStyle}>
+            <Text size="sm" fw={500} mb={10}>
+                {field.title} {field.required && <span style={{ color: 'red' }}>*</span>}
+            </Text>
+            
+            {loading ? (
+                <Loader size="sm" />
+            ) : error ? (
+                <Text color="red" size="sm">{error}</Text>
+            ) : (
+                <Box>
+                    {treeData.map(node => renderTreeNode(node))}
+                </Box>
+            )}
+            
+            {form.errors[field.field] && (
+                <Text color="red" size="xs" mt={5}>
+                    {form.errors[field.field]}
+                </Text>
+            )}
+        </Box>
     );
-  };
-
-  return (
-    <div style={globalStyle}>
-      <Text size="sm" fw={500} mb={5}>
-        {field.title} {field.required && <span style={{ color: 'red' }}>*</span>}
-      </Text>
-      
-      {loading ? (
-        <Text size="sm" color="dimmed">Yükleniyor...</Text>
-      ) : (
-        <Tree
-          ref={treeRef}
-          style={{ fontSize: '13px' }}
-          data={treeData}
-          levelOffset={field.levelOffset || 23}
-          expandOnClick={false}
-          renderNode={renderTreeNode}
-        />
-      )}
-      
-    </div>
-  );
 };
 
 export default TreeField;

@@ -35,9 +35,19 @@ import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
+import { ColumnFieldProps } from './ColumnField';
 
 // Supported field types
 export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
+
+// URL yardımcı fonksiyonu
+export const getFullUrl = (url: string | undefined, baseUrl: string): string => {
+  if (!url) return '';
+  if (url.startsWith && (url.startsWith('http://') || url.startsWith('https://'))) {
+    return url;
+  }
+  return `${baseUrl}${url.startsWith && url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 export interface FieldConfig {
     field: string;      // Field name
@@ -139,7 +149,8 @@ export interface DropdownFieldProps {
     onDropdownChange?: (fieldName: string, value: string | number) => void;
     options?: DropdownOption[];
     setOptionsForField?: (fieldName: string, options: DropdownOption[]) => void;
-    getHeaders?: () => Record<string, string>;  // Yeni prop
+    getHeaders?: () => Record<string, string>;
+    baseUrl: string; // baseUrl zorunlu prop olarak değiştirildi
 }
 
 const DropdownField: React.FC<DropdownFieldProps> = ({
@@ -149,7 +160,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     onDropdownChange,
     options = [],
     setOptionsForField,
-    getHeaders
+    getHeaders,
+    baseUrl
 }) => {
     const [loading, setLoading] = useState(false);
     const [thisValue, setThisValue] = useState(form.values[field.field] || '');
@@ -163,7 +175,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
             const url = field.optionsUrl?.replace('{0}', String(form.values[field.refField]));
             if (url) {
                 setLoading(true);
-                fetch(url, {
+                fetch(getFullUrl(url, baseUrl), {
                     method: 'GET',
                     headers: getHeaders?.() || { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -181,7 +193,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
             }
         } else if (!field.refField && !field.options && field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl, {
+            fetch(getFullUrl(field.optionsUrl, baseUrl), {
                 method: 'GET',
                 headers: getHeaders?.() || { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -242,7 +254,8 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
     field, 
     form, 
     globalStyle,
-    getHeaders 
+    getHeaders,
+    baseUrl
 }) => {
     const [options, setOptions] = useState<DropdownOption[]>(field.options || []);
     const [loading, setLoading] = useState(false);
@@ -255,7 +268,7 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
             setOptions(field.options);
         } else if (field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl, {
+            fetch(getFullUrl(field.optionsUrl, baseUrl), {
                 method: 'GET',
                 headers: getHeaders?.() || { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -383,14 +396,15 @@ const SegmentedControlField: React.FC<DropdownFieldProps> = ({
     onDropdownChange,
     options = [],
     setOptionsForField,
-    getHeaders
+    getHeaders,
+    baseUrl
 }) => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (field.optionsUrl) {
             setLoading(true);
-            fetch(field.optionsUrl, {
+            fetch(getFullUrl(field.optionsUrl, baseUrl), {
                 method: 'GET',
                 headers: getHeaders?.() || { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -831,6 +845,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 options={dropdownOptions[field.field] || field.options || []}
                                                 setOptionsForField={setOptionsForField}
                                                 getHeaders={getHeaders}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'maskinput' && (
@@ -877,6 +892,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 form={form}
                                                 globalStyle={config.fieldStyle}
                                                 getHeaders={getHeaders}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'upload' && (
@@ -885,6 +901,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 form={form}
                                                 globalStyle={config.fieldStyle}
                                                 getHeaders={getHeaders}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'uploadcollection' && (
@@ -893,6 +910,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 form={form}
                                                 globalStyle={config.fieldStyle}
                                                 getHeaders={getHeaders}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'tree' && (
@@ -901,6 +919,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 form={form}
                                                 globalStyle={config.fieldStyle}
                                                 getHeaders={getHeaders}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'sublistform' && 'subform' in field && field.subform && (
@@ -927,6 +946,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 options={dropdownOptions[field.field] || field.options || []}
                                                 setOptionsForField={setOptionsForField}
                                                 getHeaders={getHeaders}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'columnfield' && (
@@ -934,7 +954,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 field={field}
                                                 form={form}
                                                 getHeaders={getHeaders}
-                                                handleFieldChange={handleFieldChange} 
+                                                handleFieldChange={handleFieldChange}
+                                                baseUrl={baseUrl}
                                             />
                                         )}
                                         {field.type === 'refresh' && (
@@ -1031,7 +1052,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                 const url = field.optionsUrl.replace('{0}', String(value));
                                 const requestHeaders = getHeaders();
                                 
-                                fetch(url, {
+                                fetch(getFullUrl(url, baseUrl), {
                                     method: 'GET',
                                     headers: requestHeaders,
                                     credentials: 'include',
@@ -1068,7 +1089,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         for (const changeConfig of field.changeto) {
                             try {
                                 // API isteği gönder
-                                const response = await fetch(changeConfig.updateurl, {
+                                const response = await fetch(getFullUrl(changeConfig.updateurl, baseUrl), {
                                     method: 'POST',
                                     headers: getHeaders(),
                                     body: JSON.stringify(currentFormValues)

@@ -1,16 +1,15 @@
 import React from 'react';
 import { useForm } from '@mantine/form';
-import { FieldType } from './DynamicForm';
-export interface TreeNode {
+interface TreeNode {
     value: string;
     label: string;
     children?: TreeNode[];
+    level?: number;
 }
-export interface TreeFieldProps {
+interface TreeFieldProps {
     field: {
         field: string;
         title: string;
-        type: FieldType;
         required?: boolean;
         optionsUrl?: string;
         options?: TreeNode[];
@@ -20,6 +19,7 @@ export interface TreeFieldProps {
     form: ReturnType<typeof useForm>;
     globalStyle?: React.CSSProperties;
     getHeaders?: () => Record<string, string>;
+    baseUrl?: string;
 }
 declare const TreeField: React.FC<TreeFieldProps>;
 export default TreeField;

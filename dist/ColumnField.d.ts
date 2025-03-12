@@ -27,6 +27,7 @@ export interface ColumnFieldProps {
     form: ReturnType<typeof useForm>;
     getHeaders?: () => Record<string, string>;
     handleFieldChange?: (fieldName: string, value: any) => void;
+    baseUrl?: string;
 }
 export declare const ColumnField: React.FC<ColumnFieldProps>;
 export default ColumnField;

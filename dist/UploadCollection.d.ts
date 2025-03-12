@@ -16,6 +16,7 @@ export interface UploadCollectionProps {
     form: ReturnType<typeof useForm>;
     globalStyle?: React.CSSProperties;
     getHeaders?: () => Record<string, string>;
+    baseUrl?: string;
 }
 declare const UploadCollection: React.FC<UploadCollectionProps>;
 export default UploadCollection;

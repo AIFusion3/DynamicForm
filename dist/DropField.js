@@ -50,16 +50,17 @@ import React, { useState } from 'react';
 import { Dropzone } from '@mantine/dropzone';
 import { Text, Group, Progress, Paper, Box, Loader, Overlay, Image as MantineImage, Button } from '@mantine/core';
 import { IconUpload, IconRefresh, IconTrash, IconFile } from '@tabler/icons-react';
+import { getFullUrl } from './DynamicForm';
 var DropField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders;
-    var _b = useState(null), file = _b[0], setFile = _b[1];
-    var _c = useState(''), preview = _c[0], setPreview = _c[1];
-    var _d = useState(false), loading = _d[0], setLoading = _d[1];
-    var _e = useState(0), progress = _e[0], setProgress = _e[1];
-    var _f = useState(false), uploadSuccess = _f[0], setUploadSuccess = _f[1];
-    var _g = useState(''), error = _g[0], setError = _g[1];
-    var _h = useState(null), imageUrls = _h[0], setImageUrls = _h[1];
-    var _j = useState(false), showOverlay = _j[0], setShowOverlay = _j[1];
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, getHeaders = _a.getHeaders, _b = _a.baseUrl, baseUrl = _b === void 0 ? '' : _b;
+    var _c = useState(null), file = _c[0], setFile = _c[1];
+    var _d = useState(''), preview = _d[0], setPreview = _d[1];
+    var _e = useState(false), loading = _e[0], setLoading = _e[1];
+    var _f = useState(0), progress = _f[0], setProgress = _f[1];
+    var _g = useState(false), uploadSuccess = _g[0], setUploadSuccess = _g[1];
+    var _h = useState(''), error = _h[0], setError = _h[1];
+    var _j = useState(null), imageUrls = _j[0], setImageUrls = _j[1];
+    var _k = useState(false), showOverlay = _k[0], setShowOverlay = _k[1];
     var isImageUpload = React.useMemo(function () {
         var _a, _b;
         var imageTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/jpg'];
@@ -136,7 +137,7 @@ var DropField = function (_a) {
                             return prev + 5;
                         });
                     }, 100);
-                    return [4 /*yield*/, fetch(field.uploadUrl, {
+                    return [4 /*yield*/, fetch(getFullUrl(field.uploadUrl, baseUrl), {
                             method: 'POST',
                             headers: getHeaders ? __assign({}, Object.fromEntries(Object.entries(getHeaders()).filter(function (_a) {
                                 var key = _a[0];
