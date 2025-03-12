@@ -69,9 +69,23 @@ import ColumnField from './ColumnField';
 export var getFullUrl = function (url, baseUrl) {
     if (!url)
         return '';
+    // Tam URL kontrolü (http:// veya https:// ile başlıyor)
     if (url.startsWith && (url.startsWith('http://') || url.startsWith('https://'))) {
         return url;
     }
+    // Çift slash ile başlayan URL kontrolü (//api/product gibi)
+    if (url.startsWith && url.startsWith('//')) {
+        // Burada baseUrl'i kullanmak yerine, mevcut alan adının kökünü kullanmalıyız
+        // Tarayıcı ortamında, window.location.origin bize "http://localhost:8000" gibi tam kök URL'yi verir
+        if (typeof window !== 'undefined') {
+            return "".concat(window.location.origin).concat(url.substring(1)); // İlk slash'ı kaldırıyoruz
+        }
+        else {
+            // Sunucu tarafında çalışırken, baseUrl'i kullanabiliriz
+            return "".concat(url.substring(1));
+        }
+    }
+    // Göreceli URL, baseUrl ile birleştir
     return "".concat(baseUrl).concat(url.startsWith && url.startsWith('/') ? '' : '/').concat(url);
 };
 var DropdownField = function (_a) {

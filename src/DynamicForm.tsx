@@ -43,9 +43,25 @@ export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown
 // URL yardımcı fonksiyonu
 export const getFullUrl = (url: string | undefined, baseUrl: string): string => {
   if (!url) return '';
+  
+  // Tam URL kontrolü (http:// veya https:// ile başlıyor)
   if (url.startsWith && (url.startsWith('http://') || url.startsWith('https://'))) {
     return url;
   }
+  
+  // Çift slash ile başlayan URL kontrolü (//api/product gibi)
+  if (url.startsWith && url.startsWith('//')) {
+    // Burada baseUrl'i kullanmak yerine, mevcut alan adının kökünü kullanmalıyız
+    // Tarayıcı ortamında, window.location.origin bize "http://localhost:8000" gibi tam kök URL'yi verir
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}${url.substring(1)}`; // İlk slash'ı kaldırıyoruz
+    } else {
+      // Sunucu tarafında çalışırken, baseUrl'i kullanabiliriz
+      return `${url.substring(1)}`;
+    }
+  }
+  
+  // Göreceli URL, baseUrl ile birleştir
   return `${baseUrl}${url.startsWith && url.startsWith('/') ? '' : '/'}${url}`;
 };
 
