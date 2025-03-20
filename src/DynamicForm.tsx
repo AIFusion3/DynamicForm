@@ -822,7 +822,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             <DatePickerInput
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
-                                                value={form.values[field.field]}
+                                               //value={form.values[field.field]}
+                                                {...form.getInputProps(field.field)}
                                                 onChange={(value) => form.setFieldValue(field.field, value)}
                                                 required={field.required}
                                                 error={form.errors[field.field]}
@@ -835,7 +836,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             <DateTimePicker
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
-                                                value={form.values[field.field]}
+                                                //value={form.values[field.field]}
+                                                {...form.getInputProps(field.field)}
                                                 onChange={(value) => form.setFieldValue(field.field, value)}
                                                 required={field.required}
                                                 error={form.errors[field.field]}
