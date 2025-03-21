@@ -36,6 +36,7 @@ import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
 import { ColumnFieldProps } from './ColumnField';
+import { IconX } from '@tabler/icons-react';
 
 // Supported field types
 export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
@@ -319,7 +320,7 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
         <>
             <MultiSelect
                 label={field.title}
-                placeholder={field.placeholder || "Select options"}
+                placeholder={field.placeholder || "Seçim yapınız"}
                 data={options.map(item => ({ value: String(item.value), label: item.label }))}
                 value={selectedValues}
                 onChange={handleValueChange}
@@ -764,7 +765,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 notifications.show({
                     title: 'Hata',
                     message: result.message || 'Bir hata oluştu',
-                    color: 'red'
+                    color: 'red',
+                    autoClose: 7000,
+                    icon: <IconX />,
+                    withCloseButton: true,
+                    position: 'bottom-right',
                 });
             }
         } catch (error) {

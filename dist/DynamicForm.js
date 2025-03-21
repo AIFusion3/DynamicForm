@@ -65,6 +65,7 @@ import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
+import { IconX } from '@tabler/icons-react';
 // URL yardımcı fonksiyonu
 export var getFullUrl = function (url, baseUrl) {
     if (!url)
@@ -188,7 +189,7 @@ var MultiSelectField = function (_a) {
         form.setFieldValue(field.field, value);
     };
     return (React.createElement(React.Fragment, null,
-        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Select options", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
+        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Seçim yapınız", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // HTMLEditor bileşenini oluşturalım
@@ -539,7 +540,11 @@ var DynamicForm = function (_a) {
                         notifications.show({
                             title: 'Hata',
                             message: result.message || 'Bir hata oluştu',
-                            color: 'red'
+                            color: 'red',
+                            autoClose: 7000,
+                            icon: React.createElement(IconX, null),
+                            withCloseButton: true,
+                            position: 'bottom-right',
                         });
                     }
                     return [3 /*break*/, 5];
