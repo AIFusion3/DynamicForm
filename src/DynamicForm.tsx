@@ -235,7 +235,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
         <>
             <Select
                 label={field.title}
-                placeholder={field.placeholder || "Select an option"}
+                placeholder={field.placeholder || "Bir seçim yapınız"}
                 data={options.map((item: DropdownOption) => ({
                     value: String(item.value),
                     label: item.label,
@@ -320,7 +320,7 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
         <>
             <MultiSelect
                 label={field.title}
-                placeholder={field.placeholder || "Seçim yapınız"}
+                placeholder={field.placeholder || "Bir seçim yapınız"}
                 data={options.map(item => ({ value: String(item.value), label: item.label }))}
                 value={selectedValues}
                 onChange={handleValueChange}

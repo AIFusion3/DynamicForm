@@ -135,7 +135,7 @@ var DropdownField = function (_a) {
     // Form state'inden ilgili alanın güncel değerini alıyoruz.
     var currentValue = form.values[field.field];
     return (React.createElement(React.Fragment, null,
-        React.createElement(Select, __assign({ label: field.title, placeholder: field.placeholder || "Select an option", data: options.map(function (item) { return ({
+        React.createElement(Select, __assign({ label: field.title, placeholder: field.placeholder || "Bir seçim yapınız", data: options.map(function (item) { return ({
                 value: String(item.value),
                 label: item.label,
             }); }) }, form.getInputProps(field.field), { value: thisValue, onChange: function (val) {
@@ -189,7 +189,7 @@ var MultiSelectField = function (_a) {
         form.setFieldValue(field.field, value);
     };
     return (React.createElement(React.Fragment, null,
-        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Seçim yapınız", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
+        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Bir seçim yapınız", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // HTMLEditor bileşenini oluşturalım
