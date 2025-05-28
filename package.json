@@ -1,6 +1,6 @@
 {
   "name": "dynamic-form",
-  "version": "2.15.1",
+  "version": "2.16.0",
   "main": "dist/DynamicForm.js",
   "types": "dist/DynamicForm.d.ts",
   "scripts": {
@@ -19,13 +19,12 @@
   "description": "",
   "dependencies": {
     "@emotion/react": "^11.14.0",
-    "@mantine/core": "^7.16.2",
-    "@mantine/dates": "^7.16.2",
-    "@mantine/dropzone": "^7.17.0",
-    "@mantine/form": "^7.16.2",
-    "@mantine/hooks": "^7.16.2",
-    "@mantine/notifications": "^7.16.2",
-    "@mantine/tiptap": "^7.16.2",
+    "@mantine/core": "^7.17.7",
+    "@mantine/dropzone": "^7.17.7",
+    "@mantine/form": "^7.17.7",
+    "@mantine/hooks": "^7.17.7",
+    "@mantine/notifications": "^7.17.7",
+    "@mantine/tiptap": "^7.17.7",
     "@tabler/icons-react": "^3.29.0",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/pm": "^2.11.5",
@@ -38,9 +37,9 @@
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
-    "@mantine/dates": "^7.16.2",
-    "@mantine/form": "^7.16.2",
-    "@mantine/notifications": "^7.16.2",
+    "@mantine/dates": "^7.17.7",
+    "@mantine/form": "^7.17.7",
+    "@mantine/notifications": "^7.17.7",
     "@tabler/icons-react": "^3.29.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -1028,8 +1028,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 )}
                 <Button 
                     type={noForm ? "button" : "submit"} 
-                    loading={isSubmitting}
-                    disabled={isSubmitting}
+                    loading={false}
                     {...submitProps}
                     onClick={(event) => {
                         if (noForm) {
