@@ -562,7 +562,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(true);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
@@ -1026,7 +1026,36 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         {cancelProps.children || 'İptal'}
                     </Button>
                 )}
-                
+                <Button 
+                    type={noForm ? "button" : "submit"} 
+                    loading={isSubmitting}
+                    disabled={isSubmitting}
+                    {...submitProps}
+                    onClick={(event) => {
+                        if (noForm) {
+                            // Form elementi yoksa manuel validation yap
+                            const validationResult = form.validate();
+                            
+                            if (!validationResult.hasErrors) {
+                                // Validation başarılıysa ve noSubmit=true ise
+                                // form değerlerini doğrudan onSuccess'e gönder
+                                if (noSubmit && onSuccess) {
+                                    console.log("Manuel submit: değerler gönderiliyor", form.getValues());
+                                    onSuccess(form.getValues());
+                                } 
+                                // Normal API submit
+                                else if (!noSubmit) {
+                                    handleSubmit(new Event('submit') as any);
+                                }
+                            }
+                        }
+                        if (submitProps.onClick) {
+                            submitProps.onClick(event);
+                        }
+                    }}
+                >
+                    {submitProps.children || 'Save'}
+                </Button>
             </Group>
 
             {showDebug === true && (

@@ -327,7 +327,7 @@ var DynamicForm = function (_a) {
     // Form değerlerini takip etmek için state ekliyoruz
     var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
     var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
-    var _j = useState(false), isSubmitting = _j[0], setIsSubmitting = _j[1];
+    var _j = useState(true), isSubmitting = _j[0], setIsSubmitting = _j[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = {};
     config.rows.forEach(function (row) {
@@ -612,10 +612,32 @@ var DynamicForm = function (_a) {
                         field.type === 'refresh' && (React.createElement(RefreshField, { field: field, form: form, globalStyle: config.fieldStyle }))));
                 })));
             })))); }),
-        React.createElement(Group, null, !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
-                form.reset();
-                cancelProps.onClick && cancelProps.onClick(event);
-            } }), cancelProps.children || 'İptal'))),
+        React.createElement(Group, null,
+            !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
+                    form.reset();
+                    cancelProps.onClick && cancelProps.onClick(event);
+                } }), cancelProps.children || 'İptal')),
+            React.createElement(Button, __assign({ type: noForm ? "button" : "submit", loading: isSubmitting, disabled: isSubmitting }, submitProps, { onClick: function (event) {
+                    if (noForm) {
+                        // Form elementi yoksa manuel validation yap
+                        var validationResult = form.validate();
+                        if (!validationResult.hasErrors) {
+                            // Validation başarılıysa ve noSubmit=true ise
+                            // form değerlerini doğrudan onSuccess'e gönder
+                            if (noSubmit && onSuccess) {
+                                console.log("Manuel submit: değerler gönderiliyor", form.getValues());
+                                onSuccess(form.getValues());
+                            }
+                            // Normal API submit
+                            else if (!noSubmit) {
+                                handleSubmit(new Event('submit'));
+                            }
+                        }
+                    }
+                    if (submitProps.onClick) {
+                        submitProps.onClick(event);
+                    }
+                } }), submitProps.children || 'Save')),
         showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
             React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
             React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))); };
