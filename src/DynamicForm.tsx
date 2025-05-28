@@ -562,6 +562,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
@@ -694,60 +695,62 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
     // Form submit edildiğinde değerleri gönderiyoruz.
     const handleSubmit = form.onSubmit(async (values) => {
-        // Form değerlerini kopyala
-        const formData = { ...values };
+        setIsSubmitting(true);
         
-        // Eksik __title alanlarını tamamla
-        config.rows.forEach((row) => {
-            row.columns.forEach((column) => {
-                column.fields.forEach((field) => {
-                    // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
-                    if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') && 
-                        formData[field.field] && 
-                        formData[field.field + "__title"] === undefined) {
-                        
-                        // Dropdown ve SegmentedControl için
-                        if (field.type === 'dropdown' || field.type === 'segmentedcontrol') {
-                            const options = dropdownOptions[field.field] || [];
-                            const selectedOption = options.find(opt => String(opt.value) === String(formData[field.field]));
-                            if (selectedOption) {
-                                formData[field.field + "__title"] = selectedOption.label;
-                            }
-                        }
-                        
-                        // Tree için (is_dropdown modunda)
-                        if (field.type === 'tree' && field.is_dropdown && Array.isArray(formData[field.field]) && formData[field.field].length > 0) {
-                            const treeData = dropdownOptions[field.field] || [];
-                            const findNode = (value: string, nodes: any[]): any => {
-                                for (const node of nodes) {
-                                    if (String(node.value) === String(value)) return node;
-                                    if (node.children) {
-                                        const found = findNode(value, node.children);
-                                        if (found) return found;
-                                    }
-                                }
-                                return null;
-                            };
+        try {
+            // Form değerlerini kopyala
+            const formData = { ...values };
+            
+            // Eksik __title alanlarını tamamla
+            config.rows.forEach((row) => {
+                row.columns.forEach((column) => {
+                    column.fields.forEach((field) => {
+                        // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
+                        if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') && 
+                            formData[field.field] && 
+                            formData[field.field + "__title"] === undefined) {
                             
-                            const selectedNode = findNode(formData[field.field][0], treeData);
-                            if (selectedNode) {
-                                formData[field.field + "__title"] = selectedNode.label;
+                            // Dropdown ve SegmentedControl için
+                            if (field.type === 'dropdown' || field.type === 'segmentedcontrol') {
+                                const options = dropdownOptions[field.field] || [];
+                                const selectedOption = options.find(opt => String(opt.value) === String(formData[field.field]));
+                                if (selectedOption) {
+                                    formData[field.field + "__title"] = selectedOption.label;
+                                }
+                            }
+                            
+                            // Tree için (is_dropdown modunda)
+                            if (field.type === 'tree' && field.is_dropdown && Array.isArray(formData[field.field]) && formData[field.field].length > 0) {
+                                const treeData = dropdownOptions[field.field] || [];
+                                const findNode = (value: string, nodes: any[]): any => {
+                                    for (const node of nodes) {
+                                        if (String(node.value) === String(value)) return node;
+                                        if (node.children) {
+                                            const found = findNode(value, node.children);
+                                            if (found) return found;
+                                        }
+                                    }
+                                    return null;
+                                };
+                                
+                                const selectedNode = findNode(formData[field.field][0], treeData);
+                                if (selectedNode) {
+                                    formData[field.field + "__title"] = selectedNode.label;
+                                }
                             }
                         }
-                    }
+                    });
                 });
             });
-        });
-        
-        // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
-        if (noSubmit) {
-            if (onSuccess) {
-                onSuccess(formData);
+            
+            // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
+            if (noSubmit) {
+                if (onSuccess) {
+                    onSuccess(formData);
+                }
+                return;
             }
-            return;
-        }
 
-        try {
             const requestHeaders = getHeaders();
             
             // pk_field kontrolü
@@ -786,6 +789,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             }
         } catch (error) {
             console.error('Error submitting form:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     });
 
@@ -1023,6 +1028,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 )}
                 <Button 
                     type={noForm ? "button" : "submit"} 
+                    loading={isSubmitting}
+                    disabled={isSubmitting}
                     {...submitProps}
                     onClick={(event) => {
                         if (noForm) {

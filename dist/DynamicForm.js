@@ -327,6 +327,7 @@ var DynamicForm = function (_a) {
     // Form değerlerini takip etmek için state ekliyoruz
     var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
     var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
+    var _j = useState(false), isSubmitting = _j[0], setIsSubmitting = _j[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = {};
     config.rows.forEach(function (row) {
@@ -469,29 +470,33 @@ var DynamicForm = function (_a) {
     };
     // Form submit edildiğinde değerleri gönderiyoruz.
     var handleSubmit = form.onSubmit(function (values) { return __awaiter(void 0, void 0, void 0, function () {
-        var formData, requestHeaders, isPutRequest, method, url, response, result, error_1;
+        var formData_1, requestHeaders, isPutRequest, method, url, response, result, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    formData = __assign({}, values);
+                    setIsSubmitting(true);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, 5, 6]);
+                    formData_1 = __assign({}, values);
                     // Eksik __title alanlarını tamamla
                     config.rows.forEach(function (row) {
                         row.columns.forEach(function (column) {
                             column.fields.forEach(function (field) {
                                 // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                                 if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') &&
-                                    formData[field.field] &&
-                                    formData[field.field + "__title"] === undefined) {
+                                    formData_1[field.field] &&
+                                    formData_1[field.field + "__title"] === undefined) {
                                     // Dropdown ve SegmentedControl için
                                     if (field.type === 'dropdown' || field.type === 'segmentedcontrol') {
                                         var options = dropdownOptions[field.field] || [];
-                                        var selectedOption = options.find(function (opt) { return String(opt.value) === String(formData[field.field]); });
+                                        var selectedOption = options.find(function (opt) { return String(opt.value) === String(formData_1[field.field]); });
                                         if (selectedOption) {
-                                            formData[field.field + "__title"] = selectedOption.label;
+                                            formData_1[field.field + "__title"] = selectedOption.label;
                                         }
                                     }
                                     // Tree için (is_dropdown modunda)
-                                    if (field.type === 'tree' && field.is_dropdown && Array.isArray(formData[field.field]) && formData[field.field].length > 0) {
+                                    if (field.type === 'tree' && field.is_dropdown && Array.isArray(formData_1[field.field]) && formData_1[field.field].length > 0) {
                                         var treeData = dropdownOptions[field.field] || [];
                                         var findNode_1 = function (value, nodes) {
                                             for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
@@ -506,9 +511,9 @@ var DynamicForm = function (_a) {
                                             }
                                             return null;
                                         };
-                                        var selectedNode = findNode_1(formData[field.field][0], treeData);
+                                        var selectedNode = findNode_1(formData_1[field.field][0], treeData);
                                         if (selectedNode) {
-                                            formData[field.field + "__title"] = selectedNode.label;
+                                            formData_1[field.field + "__title"] = selectedNode.label;
                                         }
                                     }
                                 }
@@ -518,13 +523,10 @@ var DynamicForm = function (_a) {
                     // noSubmit true ise, API çağrısı yapmadan direkt olarak form değerlerini döndür
                     if (noSubmit) {
                         if (onSuccess) {
-                            onSuccess(formData);
+                            onSuccess(formData_1);
                         }
                         return [2 /*return*/];
                     }
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 4, , 5]);
                     requestHeaders = getHeaders();
                     isPutRequest = pk_field && initialData && initialData[pk_field];
                     console.log("isPutRequest----->", isPutRequest);
@@ -537,7 +539,7 @@ var DynamicForm = function (_a) {
                             headers: requestHeaders,
                             credentials: 'include',
                             mode: 'cors',
-                            body: JSON.stringify(formData),
+                            body: JSON.stringify(formData_1),
                         })];
                 case 2:
                     response = _a.sent();
@@ -562,12 +564,15 @@ var DynamicForm = function (_a) {
                             position: 'bottom-right',
                         });
                     }
-                    return [3 /*break*/, 5];
+                    return [3 /*break*/, 6];
                 case 4:
                     error_1 = _a.sent();
                     console.error('Error submitting form:', error_1);
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/];
+                    return [3 /*break*/, 6];
+                case 5:
+                    setIsSubmitting(false);
+                    return [7 /*endfinally*/];
+                case 6: return [2 /*return*/];
             }
         });
     }); });
@@ -612,7 +617,7 @@ var DynamicForm = function (_a) {
                     form.reset();
                     cancelProps.onClick && cancelProps.onClick(event);
                 } }), cancelProps.children || 'İptal')),
-            React.createElement(Button, __assign({ type: noForm ? "button" : "submit" }, submitProps, { onClick: function (event) {
+            React.createElement(Button, __assign({ type: noForm ? "button" : "submit", loading: isSubmitting, disabled: isSubmitting }, submitProps, { onClick: function (event) {
                     if (noForm) {
                         // Form elementi yoksa manuel validation yap
                         var validationResult = form.validate();
