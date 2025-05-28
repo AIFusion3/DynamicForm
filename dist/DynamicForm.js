@@ -90,9 +90,10 @@ export var getFullUrl = function (url, baseUrl) {
     return "".concat(baseUrl).concat(url.startsWith && url.startsWith('/') ? '' : '/').concat(url);
 };
 var DropdownField = function (_a) {
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _b = _a.options, options = _b === void 0 ? [] : _b, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
-    var _c = useState(false), loading = _c[0], setLoading = _c[1];
-    var _d = useState(form.values[field.field] || ''), thisValue = _d[0], setThisValue = _d[1];
+    var _b;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _c = _a.options, options = _c === void 0 ? [] : _c, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
+    var _d = useState(false), loading = _d[0], setLoading = _d[1];
+    var _e = useState((_b = form.values[field.field]) !== null && _b !== void 0 ? _b : ''), thisValue = _e[0], setThisValue = _e[1];
     useEffect(function () {
         var _a;
         if (form.values[field.field]) {
@@ -139,18 +140,18 @@ var DropdownField = function (_a) {
                 value: String(item.value),
                 label: item.label,
             }); }) }, form.getInputProps(field.field), { value: thisValue, onChange: function (val) {
-                form.setFieldValue(field.field, val);
-                // Seçilen öğenin title değerini ayrı bir alana kaydet
-                var selectedOption = options.find(function (opt) { return String(opt.value) === val; });
+                var safeValue = val === null ? null : val;
+                form.setFieldValue(field.field, safeValue);
+                var selectedOption = options.find(function (opt) { return String(opt.value) === String(safeValue); });
                 if (selectedOption) {
                     form.setFieldValue(field.field + "__title", selectedOption.label);
                 }
                 else {
                     form.setFieldValue(field.field + "__title", '');
                 }
-                onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, val || '');
-                setThisValue(val || '');
-            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, allowDeselect: false, clearable: true, searchable: true })),
+                onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, safeValue || '');
+                setThisValue(safeValue !== null && safeValue !== void 0 ? safeValue : '');
+            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, allowDeselect: true, clearable: true, searchable: true })),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
@@ -336,19 +337,33 @@ var DynamicForm = function (_a) {
                         initialValues[field.field] = Number(initialData[field.field]);
                     }
                     else if (field.type === 'dropdown') {
-                        initialValues[field.field] = String(initialData[field.field]);
-                        // __title alanını initialData'dan al
+                        if (initialData[field.field] != null) {
+                            initialValues[field.field] = String(initialData[field.field]);
+                        }
+                        else {
+                            initialValues[field.field] = null;
+                        }
                         var titleField = field.field + "__title";
                         if (initialData[titleField] !== undefined) {
                             initialValues[titleField] = initialData[titleField];
                         }
+                        else {
+                            initialValues[titleField] = '';
+                        }
                     }
                     else if (field.type === 'segmentedcontrol') {
-                        initialValues[field.field] = String(initialData[field.field]);
-                        // __title alanını initialData'dan al
+                        if (initialData[field.field] != null) {
+                            initialValues[field.field] = String(initialData[field.field]);
+                        }
+                        else {
+                            initialValues[field.field] = null;
+                        }
                         var titleField = field.field + "__title";
                         if (initialData[titleField] !== undefined) {
                             initialValues[titleField] = initialData[titleField];
+                        }
+                        else {
+                            initialValues[titleField] = '';
                         }
                     }
                     else if (field.type === 'tree') {

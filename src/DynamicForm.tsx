@@ -181,7 +181,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     baseUrl
 }) => {
     const [loading, setLoading] = useState(false);
-    const [thisValue, setThisValue] = useState(form.values[field.field] || '');
+    const [thisValue, setThisValue] = useState(form.values[field.field] ?? '');
     
     useEffect(() => {
         if(form.values[field.field]) {
@@ -243,21 +243,23 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 {...form.getInputProps(field.field)}
                 value={thisValue}
                 onChange={(val) => {
-                    form.setFieldValue(field.field, val);
-                    // Seçilen öğenin title değerini ayrı bir alana kaydet
-                    const selectedOption = options.find(opt => String(opt.value) === val);
+                    const safeValue = val === null ? null : val;
+                    form.setFieldValue(field.field, safeValue);
+                    
+                    const selectedOption = options.find(opt => String(opt.value) === String(safeValue));
                     if (selectedOption) {
                         form.setFieldValue(field.field + "__title", selectedOption.label);
                     } else {
                         form.setFieldValue(field.field + "__title", '');
                     }
-                    onDropdownChange?.(field.field, val || '');
-                    setThisValue(val || '');
+                    
+                    onDropdownChange?.(field.field, safeValue || '');
+                    setThisValue(safeValue ?? '');
                 }}
                 error={form.errors[field.field]}
                 required={field.required}
                 style={globalStyle ? globalStyle : undefined}
-                allowDeselect={false}
+                allowDeselect={true}
                 clearable={true}
                 searchable
             />
@@ -570,20 +572,30 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     } else if (field.type === 'dropdown') {
-                        initialValues[field.field] = String(initialData[field.field]);
+                        if (initialData[field.field] != null) {
+                            initialValues[field.field] = String(initialData[field.field]);
+                        } else {
+                            initialValues[field.field] = null;
+                        }
                         
-                        // __title alanını initialData'dan al
                         const titleField = field.field + "__title";
                         if (initialData[titleField] !== undefined) {
                             initialValues[titleField] = initialData[titleField];
+                        } else {
+                            initialValues[titleField] = '';
                         }
                     } else if (field.type === 'segmentedcontrol') {
-                        initialValues[field.field] = String(initialData[field.field]);
+                        if (initialData[field.field] != null) {
+                            initialValues[field.field] = String(initialData[field.field]);
+                        } else {
+                            initialValues[field.field] = null;
+                        }
                         
-                        // __title alanını initialData'dan al
                         const titleField = field.field + "__title";
                         if (initialData[titleField] !== undefined) {
                             initialValues[titleField] = initialData[titleField];
+                        } else {
+                            initialValues[titleField] = '';
                         }
                     } else if (field.type === 'tree') {
                         initialValues[field.field] = Array.isArray(initialData[field.field]) 
