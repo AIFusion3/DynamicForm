@@ -562,7 +562,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
-    const [isSubmitting, setIsSubmitting] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
@@ -1029,7 +1029,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 <Button 
                     type={noForm ? "button" : "submit"} 
                     loading={isSubmitting}
-                    disabled={isSubmitting}
                     {...submitProps}
                     onClick={(event) => {
                         if (noForm) {

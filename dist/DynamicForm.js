@@ -327,7 +327,7 @@ var DynamicForm = function (_a) {
     // Form değerlerini takip etmek için state ekliyoruz
     var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
     var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
-    var _j = useState(true), isSubmitting = _j[0], setIsSubmitting = _j[1];
+    var _j = useState(false), isSubmitting = _j[0], setIsSubmitting = _j[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = {};
     config.rows.forEach(function (row) {
@@ -617,7 +617,7 @@ var DynamicForm = function (_a) {
                     form.reset();
                     cancelProps.onClick && cancelProps.onClick(event);
                 } }), cancelProps.children || 'İptal')),
-            React.createElement(Button, __assign({ type: noForm ? "button" : "submit", loading: isSubmitting, disabled: isSubmitting }, submitProps, { onClick: function (event) {
+            React.createElement(Button, __assign({ type: noForm ? "button" : "submit", loading: isSubmitting }, submitProps, { onClick: function (event) {
                     if (noForm) {
                         // Form elementi yoksa manuel validation yap
                         var validationResult = form.validate();
