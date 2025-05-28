@@ -612,33 +612,10 @@ var DynamicForm = function (_a) {
                         field.type === 'refresh' && (React.createElement(RefreshField, { field: field, form: form, globalStyle: config.fieldStyle }))));
                 })));
             })))); }),
-        React.createElement(Group, null,
-            !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
-                    form.reset();
-                    cancelProps.onClick && cancelProps.onClick(event);
-                } }), cancelProps.children || 'İptal')),
-            React.createElement(Button, __assign({ type: noForm ? "button" : "submit", loading: isSubmitting, disabled: isSubmitting }, submitProps, { onClick: function (event) {
-                    if (noForm) {
-                        // Form elementi yoksa manuel validation yap
-                        var validationResult = form.validate();
-                        if (!validationResult.hasErrors) {
-                            // Validation başarılıysa ve noSubmit=true ise
-                            // form değerlerini doğrudan onSuccess'e gönder
-                            if (noSubmit && onSuccess) {
-                                console.log("Manuel submit: değerler gönderiliyor", form.getValues());
-                                onSuccess(form.getValues());
-                            }
-                            // Normal API submit
-                            else if (!noSubmit) {
-                                handleSubmit(new Event('submit'));
-                            }
-                        }
-                    }
-                    // Dışarıdan verilen onClick varsa çalıştır
-                    if (submitProps.onClick) {
-                        submitProps.onClick(event);
-                    }
-                } }), submitProps.children || 'Save')),
+        React.createElement(Group, null, !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
+                form.reset();
+                cancelProps.onClick && cancelProps.onClick(event);
+            } }), cancelProps.children || 'İptal'))),
         showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
             React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
             React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))); };

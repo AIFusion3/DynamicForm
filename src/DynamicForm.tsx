@@ -1026,37 +1026,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         {cancelProps.children || 'İptal'}
                     </Button>
                 )}
-                <Button 
-                    type={noForm ? "button" : "submit"} 
-                    loading={false}
-                    {...submitProps}
-                    onClick={(event) => {
-                        if (noForm) {
-                            // Form elementi yoksa manuel validation yap
-                            const validationResult = form.validate();
-                            
-                            if (!validationResult.hasErrors) {
-                                // Validation başarılıysa ve noSubmit=true ise
-                                // form değerlerini doğrudan onSuccess'e gönder
-                                if (noSubmit && onSuccess) {
-                                    console.log("Manuel submit: değerler gönderiliyor", form.getValues());
-                                    onSuccess(form.getValues());
-                                } 
-                                // Normal API submit
-                                else if (!noSubmit) {
-                                    handleSubmit(new Event('submit') as any);
-                                }
-                            }
-                        }
-                        
-                        // Dışarıdan verilen onClick varsa çalıştır
-                        if (submitProps.onClick) {
-                            submitProps.onClick(event);
-                        }
-                    }}
-                >
-                    {submitProps.children || 'Save'}
-                </Button>
+                
             </Group>
 
             {showDebug === true && (
