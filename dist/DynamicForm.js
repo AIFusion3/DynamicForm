@@ -63,9 +63,12 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
+import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
 import { IconX } from '@tabler/icons-react';
+// Dayjs plugins
+dayjs.locale('tr');
 // URL yardımcı fonksiyonu
 export var getFullUrl = function (url, baseUrl) {
     if (!url)
@@ -484,13 +487,8 @@ var DynamicForm = function (_a) {
                         row.columns.forEach(function (column) {
                             column.fields.forEach(function (field) {
                                 if (field.type === 'date' && formData_1[field.field]) {
-                                    if (formData_1[field.field]) {
-                                        var correctedDate = new Date(formData_1[field.field].getTime() - formData_1[field.field].getTimezoneOffset() * 60000);
-                                        form.setFieldValue(field.field, correctedDate);
-                                    }
-                                    else {
-                                        form.setFieldValue(field.field, null);
-                                    }
+                                    var date = new Date(formData_1[field.field]);
+                                    formData_1[field.field] = date.toISOString().split('T')[0];
                                 }
                                 // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                                 if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') &&
@@ -601,7 +599,16 @@ var DynamicForm = function (_a) {
                     return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
                         field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                        field.type === 'date' && (React.createElement(DatePickerInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr" }))),
+                        field.type === 'date' && (React.createElement(DatePickerInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) {
+                                if (value) {
+                                    // Local tarih olarak formatla (timezone problemi olmadan)
+                                    var localDate = dayjs(value).format('YYYY-MM-DD');
+                                    form.setFieldValue(field.field, localDate);
+                                }
+                                else {
+                                    form.setFieldValue(field.field, null);
+                                }
+                            }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr", clearable: true }))),
                         field.type === 'datetime' && (React.createElement(DateTimePicker, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" }))),
                         field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
                         field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),

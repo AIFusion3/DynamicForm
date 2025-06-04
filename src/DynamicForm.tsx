@@ -33,10 +33,14 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import '@mantine/tiptap/styles.css';
+import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
 import { ColumnFieldProps } from './ColumnField';
 import { IconX } from '@tabler/icons-react';
+
+// Dayjs plugins
+dayjs.locale('tr');
 
 // Supported field types
 export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
@@ -707,12 +711,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     column.fields.forEach((field) => {
 
                         if (field.type === 'date' && formData[field.field]) {
-                            if (formData[field.field]) {
-                                const correctedDate = new Date(formData[field.field].getTime() - formData[field.field].getTimezoneOffset() * 60000);
-                                form.setFieldValue(field.field, correctedDate);
-                            } else {
-                                form.setFieldValue(field.field, null);
-                            }
+                            const date = new Date(formData[field.field]);
+                            formData[field.field] = date.toISOString().split('T')[0];
                         }
                         // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                         if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') && 
@@ -855,12 +855,21 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 placeholder={field.placeholder || field.title}
                                                //value={form.values[field.field]}
                                                 {...form.getInputProps(field.field)}
-                                                onChange={(value) => form.setFieldValue(field.field, value)}
+                                                onChange={(value) => {
+                                                    if (value) {
+                                                        // Local tarih olarak formatla (timezone problemi olmadan)
+                                                        const localDate = dayjs(value).format('YYYY-MM-DD');
+                                                        form.setFieldValue(field.field, localDate);
+                                                    } else {
+                                                        form.setFieldValue(field.field, null);
+                                                    }
+                                                }}
                                                 required={field.required}
                                                 error={form.errors[field.field]}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
                                                 valueFormat={field.valueFormat || "DD.MM.YYYY"}
                                                 locale="tr"
+                                                clearable
                                             />
                                         )}
                                         {field.type === 'datetime' && (
