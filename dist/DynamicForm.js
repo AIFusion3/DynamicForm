@@ -483,6 +483,10 @@ var DynamicForm = function (_a) {
                     config.rows.forEach(function (row) {
                         row.columns.forEach(function (column) {
                             column.fields.forEach(function (field) {
+                                if (field.type === 'date' && formData_1[field.field]) {
+                                    var date = new Date(formData_1[field.field]);
+                                    formData_1[field.field] = date.toISOString().split('T')[0];
+                                }
                                 // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                                 if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') &&
                                     formData_1[field.field] &&

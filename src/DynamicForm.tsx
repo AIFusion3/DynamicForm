@@ -705,6 +705,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             config.rows.forEach((row) => {
                 row.columns.forEach((column) => {
                     column.fields.forEach((field) => {
+
+                        if (field.type === 'date' && formData[field.field]) {
+                            const date = new Date(formData[field.field]);
+                            formData[field.field] = date.toISOString().split('T')[0];
+                        }
                         // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                         if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') && 
                             formData[field.field] && 
