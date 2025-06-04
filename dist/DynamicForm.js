@@ -484,8 +484,13 @@ var DynamicForm = function (_a) {
                         row.columns.forEach(function (column) {
                             column.fields.forEach(function (field) {
                                 if (field.type === 'date' && formData_1[field.field]) {
-                                    var date = new Date(formData_1[field.field]);
-                                    formData_1[field.field] = date.toISOString().split('T')[0];
+                                    if (formData_1[field.field]) {
+                                        var correctedDate = new Date(formData_1[field.field].getTime() - formData_1[field.field].getTimezoneOffset() * 60000);
+                                        form.setFieldValue(field.field, correctedDate);
+                                    }
+                                    else {
+                                        form.setFieldValue(field.field, null);
+                                    }
                                 }
                                 // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                                 if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') &&

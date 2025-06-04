@@ -707,8 +707,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     column.fields.forEach((field) => {
 
                         if (field.type === 'date' && formData[field.field]) {
-                            const date = new Date(formData[field.field]);
-                            formData[field.field] = date.toISOString().split('T')[0];
+                            if (formData[field.field]) {
+                                const correctedDate = new Date(formData[field.field].getTime() - formData[field.field].getTimezoneOffset() * 60000);
+                                form.setFieldValue(field.field, correctedDate);
+                            } else {
+                                form.setFieldValue(field.field, null);
+                            }
                         }
                         // Dropdown, SegmentedControl ve Tree için __title alanlarını kontrol et
                         if ((field.type === 'dropdown' || field.type === 'segmentedcontrol' || field.type === 'tree') && 
