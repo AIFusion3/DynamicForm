@@ -564,16 +564,41 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     hiddenCancel = false
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
-    const [formValues, setFormValues] = useState<Record<string, any>>({});
+    const [formValues, setFormValues] = useState<Record<string, any>>(() => {
+        // localStorage'dan form değerlerini al
+        const savedValues = localStorage.getItem(`form_${endpoint}_${pk_field}`);
+        return savedValues ? JSON.parse(savedValues) : {};
+    });
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Form değerleri değiştiğinde localStorage'a kaydet
+    useEffect(() => {
+        localStorage.setItem(`form_${endpoint}_${pk_field}`, JSON.stringify(formValues));
+    }, [formValues, endpoint, pk_field]);
+
+    // Sayfa kapatıldığında veya yenilendiğinde localStorage'ı temizle
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            localStorage.removeItem(`form_${endpoint}_${pk_field}`);
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [endpoint, pk_field]);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
     config.rows.forEach((row) => {
         row.columns.forEach((column) => {
             column.fields.forEach((field) => {
-                if (initialData && initialData[field.field] !== undefined) {
+                // Önce localStorage'dan değeri kontrol et
+                const savedValue = formValues[field.field];
+                if (savedValue !== undefined) {
+                    initialValues[field.field] = savedValue;
+                } else if (initialData && initialData[field.field] !== undefined) {
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     } else if (field.type === 'dropdown') {
@@ -607,7 +632,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                             ? initialData[field.field] 
                             : [initialData[field.field]].filter(Boolean);
                         
-                        // __title alanını initialData'dan al
                         const titleField = field.field + "__title";
                         if (initialData[titleField] !== undefined) {
                             initialValues[titleField] = initialData[titleField];
