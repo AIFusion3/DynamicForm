@@ -46,7 +46,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 // components/DynamicForm.tsx
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -327,26 +327,14 @@ var RefreshField = function (_a) {
  */
 var DynamicForm = function (_a) {
     var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e, _f = _a.hiddenCancel, hiddenCancel = _f === void 0 ? false : _f;
-    // Form değerlerini takip etmek için state ve ref ekliyoruz
-    var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
-    var formValuesRef = useRef({});
-    var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
-    var _j = useState(false), isSubmitting = _j[0], setIsSubmitting = _j[1];
-    // Form değerleri değiştiğinde ref'i güncelle
-    useEffect(function () {
-        formValuesRef.current = formValues;
-    }, [formValues]);
+    var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
+    var _h = useState(false), isSubmitting = _h[0], setIsSubmitting = _h[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = {};
     config.rows.forEach(function (row) {
         row.columns.forEach(function (column) {
             column.fields.forEach(function (field) {
-                // Önce ref'ten değeri kontrol et
-                var savedValue = formValuesRef.current[field.field];
-                if (savedValue !== undefined) {
-                    initialValues[field.field] = savedValue;
-                }
-                else if (initialData && initialData[field.field] !== undefined) {
+                if (initialData && initialData[field.field] !== undefined) {
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     }
@@ -456,9 +444,6 @@ var DynamicForm = function (_a) {
                 }
             });
             return cleanedValues;
-        },
-        onValuesChange: function (values) {
-            setFormValues(values);
         }
     });
     // Helper function to get headers
@@ -665,7 +650,7 @@ var DynamicForm = function (_a) {
                 } }), submitProps.children || 'Save')),
         showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
             React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
-            React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))); };
+            React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(form.getValues(), null, 2)))))); };
     // Options güncelleme fonksiyonu
     var setOptionsForField = function (fieldName, options) {
         setDropdownOptions(function (prev) {
@@ -749,7 +734,6 @@ var DynamicForm = function (_a) {
                                                                             form.setFieldValue(f.field, null);
                                                                         }
                                                                         c.fields[index] = __assign(__assign({}, result_1.data), { field: f.field });
-                                                                        setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
                                                             });
@@ -785,8 +769,6 @@ var DynamicForm = function (_a) {
                                                                                 form.setFieldValue(f.field, '');
                                                                             }
                                                                         }
-                                                                        // Formu yeniden render etmek için state'i güncelle
-                                                                        setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
                                                             });

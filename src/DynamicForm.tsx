@@ -563,27 +563,15 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     noForm = false,
     hiddenCancel = false
 }) => {
-    // Form değerlerini takip etmek için state ve ref ekliyoruz
-    const [formValues, setFormValues] = useState<Record<string, any>>({});
-    const formValuesRef = useRef<Record<string, any>>({});
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Form değerleri değiştiğinde ref'i güncelle
-    useEffect(() => {
-        formValuesRef.current = formValues;
-    }, [formValues]);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
     config.rows.forEach((row) => {
         row.columns.forEach((column) => {
             column.fields.forEach((field) => {
-                // Önce ref'ten değeri kontrol et
-                const savedValue = formValuesRef.current[field.field];
-                if (savedValue !== undefined) {
-                    initialValues[field.field] = savedValue;
-                } else if (initialData && initialData[field.field] !== undefined) {
+                if (initialData && initialData[field.field] !== undefined) {
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     } else if (field.type === 'dropdown') {
@@ -680,9 +668,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 }
             });
             return cleanedValues;
-        },
-        onValuesChange: (values: Record<string, any>) => {
-            setFormValues(values);
         }
     });
 
@@ -1088,7 +1073,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
                     <Text size="sm" mb={8}>Debug - Form Values:</Text>
                     <pre style={{ margin: 0 }}>
-                        {JSON.stringify(formValues, null, 2)}
+                        {JSON.stringify(form.getValues(), null, 2)}
                     </pre>
                 </div>
             )}
@@ -1179,7 +1164,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                         ...result.data,
                                                         field: f.field  
                                                     };
-                                                    setFormValues({...form.values});
+
                                                 }
                                             });
                                         });
@@ -1214,9 +1199,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                             form.setFieldValue(f.field, '');
                                                         }
                                                     }
-                                                    
-                                                    // Formu yeniden render etmek için state'i güncelle
-                                                    setFormValues({...form.values});
+
                                                 }
                                             });
                                         });
