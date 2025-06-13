@@ -46,7 +46,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 // components/DynamicForm.tsx
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -329,15 +329,6 @@ var DynamicForm = function (_a) {
     var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e, _f = _a.hiddenCancel, hiddenCancel = _f === void 0 ? false : _f;
     var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
     var _h = useState(false), isSubmitting = _h[0], setIsSubmitting = _h[1];
-    // Debug: Render sayısını takip et
-    var renderCountRef = useRef(0);
-    renderCountRef.current += 1;
-    console.log('DynamicForm render edildi:', {
-        renderCount: renderCountRef.current,
-        configChanged: !!config,
-        initialDataChanged: !!initialData,
-        timestamp: new Date().toISOString()
-    });
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = useMemo(function () {
         var values = {};
@@ -463,34 +454,6 @@ var DynamicForm = function (_a) {
         validate: validate,
         transformValues: transformValues
     });
-    // Form'un initialize edilmesini ve sıfırlanmasını engelle
-    var formInitializedRef = useRef(false);
-    useEffect(function () {
-        if (!formInitializedRef.current) {
-            formInitializedRef.current = true;
-            console.log('Form ilk kez initialize edildi');
-        }
-        else {
-            console.log('Form yeniden initialize edilmeye çalışıldı - engellenecek');
-            // Form zaten initialize edildiyse, sadece değerleri güncelle
-            if (initialData) {
-                Object.keys(initialData).forEach(function (key) {
-                    var currentValue = form.getValues()[key];
-                    if (currentValue === undefined || currentValue === null || currentValue === '') {
-                        form.setFieldValue(key, initialData[key]);
-                    }
-                });
-            }
-        }
-    }, [initialValues, form, initialData]);
-    // Form değerlerindeki değişiklikleri izle
-    useEffect(function () {
-        var currentValues = form.getValues();
-        console.log('Form değerleri değişti:', {
-            values: currentValues,
-            timestamp: new Date().toISOString()
-        });
-    }, [JSON.stringify(form.getValues())]);
     // Helper function to get headers
     var getHeaders = function () {
         var headers = {
@@ -669,7 +632,6 @@ var DynamicForm = function (_a) {
             })))); }),
         React.createElement(Group, null,
             !hiddenCancel && (React.createElement(Button, __assign({ type: "button", variant: "outline" }, cancelProps, { onClick: function (event) {
-                    console.log('Cancel button clicked - form reset edildi');
                     form.reset();
                     cancelProps.onClick && cancelProps.onClick(event);
                 } }), cancelProps.children || 'İptal')),
