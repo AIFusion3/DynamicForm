@@ -563,17 +563,41 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     noForm = false,
     hiddenCancel = false
 }) => {
-    // Form değerlerini takip etmek için state ekliyoruz
+    // Form değerlerini takip etmek için state ve ref ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>({});
+    const formValuesRef = useRef<Record<string, any>>({});
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Form değerleri değiştiğinde ref'i güncelle
+    useEffect(() => {
+        formValuesRef.current = formValues;
+    }, [formValues]);
+
+    // Sayfa odağını kaybettiğinde ve geri geldiğinde form değerlerini koru
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                setFormValues(formValuesRef.current);
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
     config.rows.forEach((row) => {
         row.columns.forEach((column) => {
             column.fields.forEach((field) => {
-                if (initialData && initialData[field.field] !== undefined) {
+                // Önce ref'ten değeri kontrol et
+                const savedValue = formValuesRef.current[field.field];
+                if (savedValue !== undefined) {
+                    initialValues[field.field] = savedValue;
+                } else if (initialData && initialData[field.field] !== undefined) {
                     if (field.type === 'number') {
                         initialValues[field.field] = Number(initialData[field.field]);
                     } else if (field.type === 'dropdown') {
@@ -607,7 +631,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                             ? initialData[field.field] 
                             : [initialData[field.field]].filter(Boolean);
                         
-                        // __title alanını initialData'dan al
                         const titleField = field.field + "__title";
                         if (initialData[titleField] !== undefined) {
                             initialValues[titleField] = initialData[titleField];
