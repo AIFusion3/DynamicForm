@@ -565,28 +565,35 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 }) => {
     // Form değerlerini takip etmek için state ekliyoruz
     const [formValues, setFormValues] = useState<Record<string, any>>(() => {
-        // localStorage'dan form değerlerini al
-        const savedValues = localStorage.getItem(`form_${endpoint}_${pk_field}`);
-        return savedValues ? JSON.parse(savedValues) : {};
+        // Tarayıcı kontrolü
+        if (typeof window !== 'undefined') {
+            const savedValues = localStorage.getItem(`form_${endpoint}_${pk_field}`);
+            return savedValues ? JSON.parse(savedValues) : {};
+        }
+        return {};
     });
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form değerleri değiştiğinde localStorage'a kaydet
     useEffect(() => {
-        localStorage.setItem(`form_${endpoint}_${pk_field}`, JSON.stringify(formValues));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`form_${endpoint}_${pk_field}`, JSON.stringify(formValues));
+        }
     }, [formValues, endpoint, pk_field]);
 
     // Sayfa kapatıldığında veya yenilendiğinde localStorage'ı temizle
     useEffect(() => {
-        const handleBeforeUnload = () => {
-            localStorage.removeItem(`form_${endpoint}_${pk_field}`);
-        };
+        if (typeof window !== 'undefined') {
+            const handleBeforeUnload = () => {
+                localStorage.removeItem(`form_${endpoint}_${pk_field}`);
+            };
 
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
+            window.addEventListener('beforeunload', handleBeforeUnload);
+            return () => {
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            };
+        }
     }, [endpoint, pk_field]);
 
     // initialValues: Her field için başlangıç değeri belirleniyor.
