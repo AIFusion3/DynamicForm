@@ -566,6 +566,17 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Debug: Render sayısını takip et
+    const renderCountRef = useRef(0);
+    renderCountRef.current += 1;
+    
+    console.log('DynamicForm render edildi:', {
+        renderCount: renderCountRef.current,
+        configChanged: !!config,
+        initialDataChanged: !!initialData,
+        timestamp: new Date().toISOString()
+    });
+
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues = useMemo(() => {
         const values: Record<string, any> = {};
@@ -660,22 +671,55 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         return validationRules;
     }, [config]);
 
+    // transformValues fonksiyonunu useMemo ile stabilize et
+    const transformValues = useMemo(() => (values: Record<string, any>) => {
+        // Form gönderilirken _options ile biten alanları temizle
+        const cleanedValues = { ...values };
+        Object.keys(cleanedValues).forEach(key => {
+            if (key.endsWith('_options')) {
+                delete cleanedValues[key];
+            }
+        });
+        return cleanedValues;
+    }, []);
+
     // useForm'u başlatırken transformValues ekleyelim
     const form = useForm({
         mode: 'uncontrolled',
         initialValues,
         validate,
-        transformValues: (values) => {
-            // Form gönderilirken _options ile biten alanları temizle
-            const cleanedValues = { ...values };
-            Object.keys(cleanedValues).forEach(key => {
-                if (key.endsWith('_options')) {
-                    delete cleanedValues[key];
-                }
-            });
-            return cleanedValues;
-        }
+        transformValues
     });
+
+    // Form'un initialize edilmesini ve sıfırlanmasını engelle
+    const formInitializedRef = useRef(false);
+    
+    useEffect(() => {
+        if (!formInitializedRef.current) {
+            formInitializedRef.current = true;
+            console.log('Form ilk kez initialize edildi');
+        } else {
+            console.log('Form yeniden initialize edilmeye çalışıldı - engellenecek');
+            // Form zaten initialize edildiyse, sadece değerleri güncelle
+            if (initialData) {
+                Object.keys(initialData).forEach(key => {
+                    const currentValue = form.getValues()[key];
+                    if (currentValue === undefined || currentValue === null || currentValue === '') {
+                        form.setFieldValue(key, initialData[key]);
+                    }
+                });
+            }
+        }
+    }, [initialValues, form, initialData]);
+
+    // Form değerlerindeki değişiklikleri izle
+    useEffect(() => {
+        const currentValues = form.getValues();
+        console.log('Form değerleri değişti:', {
+            values: currentValues,
+            timestamp: new Date().toISOString()
+        });
+    }, [JSON.stringify(form.getValues())]);
 
     // Helper function to get headers
     const getHeaders = () => {
@@ -1037,6 +1081,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         type="button" variant="outline"
                         {...cancelProps}
                         onClick={(event) => {
+                            console.log('Cancel button clicked - form reset edildi');
                             form.reset();
                             cancelProps.onClick && cancelProps.onClick(event);
                         }}
