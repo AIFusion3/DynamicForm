@@ -46,7 +46,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 // components/DynamicForm.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -330,106 +330,112 @@ var DynamicForm = function (_a) {
     var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
     var _h = useState(false), isSubmitting = _h[0], setIsSubmitting = _h[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
-    var initialValues = {};
-    config.rows.forEach(function (row) {
-        row.columns.forEach(function (column) {
-            column.fields.forEach(function (field) {
-                if (initialData && initialData[field.field] !== undefined) {
-                    if (field.type === 'number') {
-                        initialValues[field.field] = Number(initialData[field.field]);
-                    }
-                    else if (field.type === 'dropdown') {
-                        if (initialData[field.field] != null) {
-                            initialValues[field.field] = String(initialData[field.field]);
+    var initialValues = useMemo(function () {
+        var values = {};
+        config.rows.forEach(function (row) {
+            row.columns.forEach(function (column) {
+                column.fields.forEach(function (field) {
+                    if (initialData && initialData[field.field] !== undefined) {
+                        if (field.type === 'number') {
+                            values[field.field] = Number(initialData[field.field]);
+                        }
+                        else if (field.type === 'dropdown') {
+                            if (initialData[field.field] != null) {
+                                values[field.field] = String(initialData[field.field]);
+                            }
+                            else {
+                                values[field.field] = null;
+                            }
+                            var titleField = field.field + "__title";
+                            if (initialData[titleField] !== undefined) {
+                                values[titleField] = initialData[titleField];
+                            }
+                            else {
+                                values[titleField] = '';
+                            }
+                        }
+                        else if (field.type === 'segmentedcontrol') {
+                            if (initialData[field.field] != null) {
+                                values[field.field] = String(initialData[field.field]);
+                            }
+                            else {
+                                values[field.field] = null;
+                            }
+                            var titleField = field.field + "__title";
+                            if (initialData[titleField] !== undefined) {
+                                values[titleField] = initialData[titleField];
+                            }
+                            else {
+                                values[titleField] = '';
+                            }
+                        }
+                        else if (field.type === 'tree') {
+                            values[field.field] = Array.isArray(initialData[field.field])
+                                ? initialData[field.field]
+                                : [initialData[field.field]].filter(Boolean);
+                            var titleField = field.field + "__title";
+                            if (initialData[titleField] !== undefined) {
+                                values[titleField] = initialData[titleField];
+                            }
+                        }
+                        else if (field.type === 'switch') {
+                            values[field.field] = Boolean(initialData[field.field]);
+                        }
+                        else if (field.type === 'multiselect') {
+                            values[field.field] = Array.isArray(initialData[field.field])
+                                ? initialData[field.field]
+                                : [initialData[field.field]].filter(Boolean);
                         }
                         else {
-                            initialValues[field.field] = null;
+                            values[field.field] = initialData[field.field];
                         }
-                        var titleField = field.field + "__title";
-                        if (initialData[titleField] !== undefined) {
-                            initialValues[titleField] = initialData[titleField];
-                        }
-                        else {
-                            initialValues[titleField] = '';
-                        }
-                    }
-                    else if (field.type === 'segmentedcontrol') {
-                        if (initialData[field.field] != null) {
-                            initialValues[field.field] = String(initialData[field.field]);
-                        }
-                        else {
-                            initialValues[field.field] = null;
-                        }
-                        var titleField = field.field + "__title";
-                        if (initialData[titleField] !== undefined) {
-                            initialValues[titleField] = initialData[titleField];
-                        }
-                        else {
-                            initialValues[titleField] = '';
-                        }
-                    }
-                    else if (field.type === 'tree') {
-                        initialValues[field.field] = Array.isArray(initialData[field.field])
-                            ? initialData[field.field]
-                            : [initialData[field.field]].filter(Boolean);
-                        var titleField = field.field + "__title";
-                        if (initialData[titleField] !== undefined) {
-                            initialValues[titleField] = initialData[titleField];
-                        }
-                    }
-                    else if (field.type === 'switch') {
-                        initialValues[field.field] = Boolean(initialData[field.field]);
-                    }
-                    else if (field.type === 'multiselect') {
-                        initialValues[field.field] = Array.isArray(initialData[field.field])
-                            ? initialData[field.field]
-                            : [initialData[field.field]].filter(Boolean);
                     }
                     else {
-                        initialValues[field.field] = initialData[field.field];
+                        if (field.type === 'checkbox' || field.type === 'switch') {
+                            values[field.field] = false;
+                        }
+                        else if (field.type === 'date' || field.type === 'datetime') {
+                            values[field.field] = null;
+                        }
+                        else if (field.type === 'number') {
+                            values[field.field] = field.defaultValue || 0;
+                        }
+                        else if (field.type === 'multiselect' || field.type === 'tree') {
+                            values[field.field] = [];
+                        }
+                        else {
+                            values[field.field] = '';
+                        }
                     }
-                }
-                else {
-                    if (field.type === 'checkbox' || field.type === 'switch') {
-                        initialValues[field.field] = false;
-                    }
-                    else if (field.type === 'date' || field.type === 'datetime') {
-                        initialValues[field.field] = null;
-                    }
-                    else if (field.type === 'number') {
-                        initialValues[field.field] = field.defaultValue || 0;
-                    }
-                    else if (field.type === 'multiselect' || field.type === 'tree') {
-                        initialValues[field.field] = [];
-                    }
-                    else {
-                        initialValues[field.field] = '';
-                    }
-                }
+                });
             });
         });
-    });
+        return values;
+    }, [config, initialData]);
     // validate: Zorunlu alanlar için validasyon fonksiyonları
-    var validate = {};
-    config.rows.forEach(function (row) {
-        row.columns.forEach(function (column) {
-            column.fields.forEach(function (field) {
-                if (field.required) {
-                    if (field.type === 'checkbox') {
-                        validate[field.field] = function (value) { return (value ? null : "".concat(field.title, " is required.")); };
+    var validate = useMemo(function () {
+        var validationRules = {};
+        config.rows.forEach(function (row) {
+            row.columns.forEach(function (column) {
+                column.fields.forEach(function (field) {
+                    if (field.required) {
+                        if (field.type === 'checkbox') {
+                            validationRules[field.field] = function (value) { return (value ? null : "".concat(field.title, " is required.")); };
+                        }
+                        else if (field.type === 'date') {
+                            validationRules[field.field] = function (value) { return (value !== null ? null : "".concat(field.title, " is required.")); };
+                        }
+                        else {
+                            validationRules[field.field] = function (value) {
+                                return value && value.toString().trim() !== '' ? null : "".concat(field.title, " is required.");
+                            };
+                        }
                     }
-                    else if (field.type === 'date') {
-                        validate[field.field] = function (value) { return (value !== null ? null : "".concat(field.title, " is required.")); };
-                    }
-                    else {
-                        validate[field.field] = function (value) {
-                            return value && value.toString().trim() !== '' ? null : "".concat(field.title, " is required.");
-                        };
-                    }
-                }
+                });
             });
         });
-    });
+        return validationRules;
+    }, [config]);
     // useForm'u başlatırken transformValues ekleyelim
     var form = useForm({
         mode: 'uncontrolled',
