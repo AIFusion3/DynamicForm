@@ -574,20 +574,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         formValuesRef.current = formValues;
     }, [formValues]);
 
-    // Sayfa odağını kaybettiğinde ve geri geldiğinde form değerlerini koru
-    useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                setFormValues(formValuesRef.current);
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, []);
-
     // initialValues: Her field için başlangıç değeri belirleniyor.
     const initialValues: Record<string, any> = {};
     config.rows.forEach((row) => {

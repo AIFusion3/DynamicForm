@@ -336,18 +336,6 @@ var DynamicForm = function (_a) {
     useEffect(function () {
         formValuesRef.current = formValues;
     }, [formValues]);
-    // Sayfa odağını kaybettiğinde ve geri geldiğinde form değerlerini koru
-    useEffect(function () {
-        var handleVisibilityChange = function () {
-            if (document.visibilityState === 'visible') {
-                setFormValues(formValuesRef.current);
-            }
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return function () {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, []);
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = {};
     config.rows.forEach(function (row) {
