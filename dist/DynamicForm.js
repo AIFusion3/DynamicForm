@@ -327,7 +327,6 @@ var RefreshField = function (_a) {
  */
 var DynamicForm = function (_a) {
     var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e, _f = _a.hiddenCancel, hiddenCancel = _f === void 0 ? false : _f;
-<<<<<<< HEAD
     // Form değerlerini takip etmek için state ve ref ekliyoruz
     var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
     var formValuesRef = useRef({});
@@ -349,49 +348,13 @@ var DynamicForm = function (_a) {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
-=======
-    // Form değerlerini takip etmek için state ekliyoruz
-    var _g = useState(function () {
-        // Tarayıcı kontrolü
-        if (typeof window !== 'undefined') {
-            var savedValues = localStorage.getItem("form_".concat(endpoint, "_").concat(pk_field));
-            return savedValues ? JSON.parse(savedValues) : {};
-        }
-        return {};
-    }), formValues = _g[0], setFormValues = _g[1];
-    var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
-    var _j = useState(false), isSubmitting = _j[0], setIsSubmitting = _j[1];
-    // Form değerleri değiştiğinde localStorage'a kaydet
-    useEffect(function () {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem("form_".concat(endpoint, "_").concat(pk_field), JSON.stringify(formValues));
-        }
-    }, [formValues, endpoint, pk_field]);
-    // Sayfa kapatıldığında veya yenilendiğinde localStorage'ı temizle
-    useEffect(function () {
-        if (typeof window !== 'undefined') {
-            var handleBeforeUnload_1 = function () {
-                localStorage.removeItem("form_".concat(endpoint, "_").concat(pk_field));
-            };
-            window.addEventListener('beforeunload', handleBeforeUnload_1);
-            return function () {
-                window.removeEventListener('beforeunload', handleBeforeUnload_1);
-            };
-        }
-    }, [endpoint, pk_field]);
->>>>>>> 46588d1d8bce0c0cdd9cc57e974b9e69baf6708f
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = {};
     config.rows.forEach(function (row) {
         row.columns.forEach(function (column) {
             column.fields.forEach(function (field) {
-<<<<<<< HEAD
                 // Önce ref'ten değeri kontrol et
                 var savedValue = formValuesRef.current[field.field];
-=======
-                // Önce localStorage'dan değeri kontrol et
-                var savedValue = formValues[field.field];
->>>>>>> 46588d1d8bce0c0cdd9cc57e974b9e69baf6708f
                 if (savedValue !== undefined) {
                     initialValues[field.field] = savedValue;
                 }
