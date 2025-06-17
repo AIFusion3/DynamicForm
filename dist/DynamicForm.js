@@ -46,7 +46,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 // components/DynamicForm.tsx
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -454,15 +454,13 @@ var DynamicForm = function (_a) {
         validate: validate,
         transformValues: transformValues
     });
-    // Helper function to get headers
-    var getHeaders = function () {
+    // Helper function to get headers - useCallback ile stabilize et
+    var getHeaders = useCallback(function () {
         var headers = {
             'Content-Type': 'application/json'
         };
-        console.log("useToken----->", useToken);
         if (useToken) {
             var token = localStorage.getItem('token');
-            console.log("token----->", token);
             if (token) {
                 headers['Authorization'] = "Bearer ".concat(token);
             }
@@ -470,9 +468,8 @@ var DynamicForm = function (_a) {
                 console.warn('Token required but not found in localStorage');
             }
         }
-        console.log('Request Headers:', headers); // Debug için
         return headers;
-    };
+    }, [useToken]);
     // Form submit edildiğinde değerleri gönderiyoruz.
     var handleSubmit = form.onSubmit(function (values) { return __awaiter(void 0, void 0, void 0, function () {
         var formData_1, requestHeaders, isPutRequest, method, url, response, result, error_1;

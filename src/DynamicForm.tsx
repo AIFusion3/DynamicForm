@@ -1,5 +1,5 @@
 // components/DynamicForm.tsx
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import {
     Button,
     ButtonProps,
@@ -684,15 +684,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
 
 
-    // Helper function to get headers
-    const getHeaders = () => {
+    // Helper function to get headers - useCallback ile stabilize et
+    const getHeaders = useCallback(() => {
         const headers: Record<string, string> = {
             'Content-Type': 'application/json'
         };
-        console.log("useToken----->", useToken);
         if (useToken) {
             const token = localStorage.getItem('token');
-            console.log("token----->", token);
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             } else {
@@ -700,9 +698,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             }
         }
 
-        console.log('Request Headers:', headers); // Debug için
         return headers;
-    };
+    }, [useToken]);
 
     // Form submit edildiğinde değerleri gönderiyoruz.
     const handleSubmit = form.onSubmit(async (values) => {
