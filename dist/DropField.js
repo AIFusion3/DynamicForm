@@ -228,12 +228,15 @@ var DropField = function (_a) {
     var height = field.height || 200;
     return (React.createElement("div", null,
         React.createElement(Paper, { shadow: "xs", p: "xs", withBorder: true, radius: "md", bg: "#f9f9f9", pos: "relative", w: typeof width === 'number' ? width : '100%', h: typeof height === 'number' ? height : '100%', style: { overflow: 'hidden' } },
-            !imageUrls && (React.createElement(Dropzone, { onDrop: handleDrop, onReject: function () { return setError('Dosya reddedildi'); }, maxSize: field.maxSize || 5 * 1024 * 1024, accept: field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp'], multiple: false, disabled: loading, w: "100%", h: "100%", mx: "auto", style: {
+            !imageUrls && (React.createElement(Dropzone, { onDrop: handleDrop, onReject: function () { return setError('Dosya reddedildi'); }, maxSize: field.maxSize || 5 * 1024 * 1024, accept: field.acceptedFileTypes ?
+                    Object.fromEntries(field.acceptedFileTypes.map(function (type) { return [type, []]; })) :
+                    { 'image/png': [], 'image/jpeg': [], 'image/webp': [] }, multiple: false, disabled: loading, w: "100%", h: "100%", mx: "auto", style: {
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    cursor: 'pointer'
                 } },
-                React.createElement(Group, { justify: "center", style: { pointerEvents: 'none' } },
+                React.createElement(Group, { justify: "center" },
                     React.createElement(Box, { ta: "center" },
                         React.createElement(IconUpload, { style: { color: 'var(--mantine-color-gray-6)', marginBottom: '10px' } }),
                         React.createElement(Text, { size: "xs", fw: 500 }, field.title),
@@ -259,7 +262,9 @@ var DropField = function (_a) {
                         borderRadius: '5px'
                     } },
                     React.createElement(Group, { gap: 5 },
-                        React.createElement(Dropzone, { onDrop: handleDrop, onReject: function () { return setError('Dosya reddedildi'); }, maxSize: field.maxSize || 5 * 1024 * 1024, accept: field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp'], multiple: false, disabled: loading, p: 0, style: {
+                        React.createElement(Dropzone, { onDrop: handleDrop, onReject: function () { return setError('Dosya reddedildi'); }, maxSize: field.maxSize || 5 * 1024 * 1024, accept: field.acceptedFileTypes ?
+                                Object.fromEntries(field.acceptedFileTypes.map(function (type) { return [type, []]; })) :
+                                { 'image/png': [], 'image/jpeg': [], 'image/webp': [] }, multiple: false, disabled: loading, p: 0, style: {
                                 border: 'none',
                                 background: 'transparent'
                             } },

@@ -12,6 +12,7 @@ export interface FieldConfig {
     type: FieldType;
     required?: boolean;
     maxLength?: number;
+    minLength?: number;
     placeholder?: string;
     mask?: string;
     minRows?: number;

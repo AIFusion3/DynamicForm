@@ -242,7 +242,10 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
             onDrop={handleDrop}
             onReject={() => setError('Dosya reddedildi')}
             maxSize={field.maxSize || 5 * 1024 * 1024}
-            accept={field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp']}
+            accept={field.acceptedFileTypes ? 
+              Object.fromEntries(field.acceptedFileTypes.map(type => [type, []])) : 
+              { 'image/png': [], 'image/jpeg': [], 'image/webp': [] }
+            }
             multiple={false}
             disabled={loading}
             w="100%"
@@ -251,10 +254,11 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              cursor: 'pointer'
             }}
           >
-            <Group justify="center" style={{ pointerEvents: 'none' }}>
+            <Group justify="center">
               <Box ta="center">
                 <IconUpload style={{ color: 'var(--mantine-color-gray-6)', marginBottom: '10px' }} />
                 <Text size="xs" fw={500}>
@@ -331,7 +335,10 @@ const DropField: React.FC<DropFieldProps> = ({ field, form, globalStyle, getHead
                     onDrop={handleDrop}
                     onReject={() => setError('Dosya reddedildi')}
                     maxSize={field.maxSize || 5 * 1024 * 1024}
-                    accept={field.acceptedFileTypes || ['image/png', 'image/jpeg', 'image/webp']}
+                    accept={field.acceptedFileTypes ? 
+                      Object.fromEntries(field.acceptedFileTypes.map(type => [type, []])) : 
+                      { 'image/png': [], 'image/jpeg': [], 'image/webp': [] }
+                    }
                     multiple={false}
                     disabled={loading}
                     p={0}

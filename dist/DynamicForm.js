@@ -46,7 +46,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 // components/DynamicForm.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -327,140 +327,152 @@ var RefreshField = function (_a) {
  */
 var DynamicForm = function (_a) {
     var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e, _f = _a.hiddenCancel, hiddenCancel = _f === void 0 ? false : _f;
-    // Form değerlerini takip etmek için state ekliyoruz
-    var _g = useState({}), formValues = _g[0], setFormValues = _g[1];
-    var _h = useState({}), dropdownOptions = _h[0], setDropdownOptions = _h[1];
-    var _j = useState(false), isSubmitting = _j[0], setIsSubmitting = _j[1];
+    var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
+    var _h = useState(false), isSubmitting = _h[0], setIsSubmitting = _h[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
-    var initialValues = {};
-    config.rows.forEach(function (row) {
-        row.columns.forEach(function (column) {
-            column.fields.forEach(function (field) {
-                if (initialData && initialData[field.field] !== undefined) {
-                    if (field.type === 'number') {
-                        initialValues[field.field] = Number(initialData[field.field]);
-                    }
-                    else if (field.type === 'dropdown') {
-                        if (initialData[field.field] != null) {
-                            initialValues[field.field] = String(initialData[field.field]);
+    var initialValues = useMemo(function () {
+        var values = {};
+        config.rows.forEach(function (row) {
+            row.columns.forEach(function (column) {
+                column.fields.forEach(function (field) {
+                    if (initialData && initialData[field.field] !== undefined) {
+                        if (field.type === 'number') {
+                            values[field.field] = Number(initialData[field.field]);
+                        }
+                        else if (field.type === 'dropdown') {
+                            if (initialData[field.field] != null) {
+                                values[field.field] = String(initialData[field.field]);
+                            }
+                            else {
+                                values[field.field] = null;
+                            }
+                            var titleField = field.field + "__title";
+                            if (initialData[titleField] !== undefined) {
+                                values[titleField] = initialData[titleField];
+                            }
+                            else {
+                                values[titleField] = '';
+                            }
+                        }
+                        else if (field.type === 'segmentedcontrol') {
+                            if (initialData[field.field] != null) {
+                                values[field.field] = String(initialData[field.field]);
+                            }
+                            else {
+                                values[field.field] = null;
+                            }
+                            var titleField = field.field + "__title";
+                            if (initialData[titleField] !== undefined) {
+                                values[titleField] = initialData[titleField];
+                            }
+                            else {
+                                values[titleField] = '';
+                            }
+                        }
+                        else if (field.type === 'tree') {
+                            values[field.field] = Array.isArray(initialData[field.field])
+                                ? initialData[field.field]
+                                : [initialData[field.field]].filter(Boolean);
+                            var titleField = field.field + "__title";
+                            if (initialData[titleField] !== undefined) {
+                                values[titleField] = initialData[titleField];
+                            }
+                        }
+                        else if (field.type === 'switch') {
+                            values[field.field] = Boolean(initialData[field.field]);
+                        }
+                        else if (field.type === 'multiselect') {
+                            values[field.field] = Array.isArray(initialData[field.field])
+                                ? initialData[field.field]
+                                : [initialData[field.field]].filter(Boolean);
                         }
                         else {
-                            initialValues[field.field] = null;
+                            values[field.field] = initialData[field.field];
                         }
-                        var titleField = field.field + "__title";
-                        if (initialData[titleField] !== undefined) {
-                            initialValues[titleField] = initialData[titleField];
-                        }
-                        else {
-                            initialValues[titleField] = '';
-                        }
-                    }
-                    else if (field.type === 'segmentedcontrol') {
-                        if (initialData[field.field] != null) {
-                            initialValues[field.field] = String(initialData[field.field]);
-                        }
-                        else {
-                            initialValues[field.field] = null;
-                        }
-                        var titleField = field.field + "__title";
-                        if (initialData[titleField] !== undefined) {
-                            initialValues[titleField] = initialData[titleField];
-                        }
-                        else {
-                            initialValues[titleField] = '';
-                        }
-                    }
-                    else if (field.type === 'tree') {
-                        initialValues[field.field] = Array.isArray(initialData[field.field])
-                            ? initialData[field.field]
-                            : [initialData[field.field]].filter(Boolean);
-                        // __title alanını initialData'dan al
-                        var titleField = field.field + "__title";
-                        if (initialData[titleField] !== undefined) {
-                            initialValues[titleField] = initialData[titleField];
-                        }
-                    }
-                    else if (field.type === 'switch') {
-                        initialValues[field.field] = Boolean(initialData[field.field]);
-                    }
-                    else if (field.type === 'multiselect') {
-                        initialValues[field.field] = Array.isArray(initialData[field.field])
-                            ? initialData[field.field]
-                            : [initialData[field.field]].filter(Boolean);
                     }
                     else {
-                        initialValues[field.field] = initialData[field.field];
+                        if (field.type === 'checkbox' || field.type === 'switch') {
+                            values[field.field] = false;
+                        }
+                        else if (field.type === 'date' || field.type === 'datetime') {
+                            values[field.field] = null;
+                        }
+                        else if (field.type === 'number') {
+                            values[field.field] = field.defaultValue || 0;
+                        }
+                        else if (field.type === 'multiselect' || field.type === 'tree') {
+                            values[field.field] = [];
+                        }
+                        else {
+                            values[field.field] = '';
+                        }
                     }
-                }
-                else {
-                    if (field.type === 'checkbox' || field.type === 'switch') {
-                        initialValues[field.field] = false;
-                    }
-                    else if (field.type === 'date' || field.type === 'datetime') {
-                        initialValues[field.field] = null;
-                    }
-                    else if (field.type === 'number') {
-                        initialValues[field.field] = field.defaultValue || 0;
-                    }
-                    else if (field.type === 'multiselect' || field.type === 'tree') {
-                        initialValues[field.field] = [];
-                    }
-                    else {
-                        initialValues[field.field] = '';
-                    }
-                }
+                });
             });
         });
-    });
-    // validate: Zorunlu alanlar için validasyon fonksiyonları
-    var validate = {};
-    config.rows.forEach(function (row) {
-        row.columns.forEach(function (column) {
-            column.fields.forEach(function (field) {
-                if (field.required) {
-                    if (field.type === 'checkbox') {
-                        validate[field.field] = function (value) { return (value ? null : "".concat(field.title, " is required.")); };
-                    }
-                    else if (field.type === 'date') {
-                        validate[field.field] = function (value) { return (value !== null ? null : "".concat(field.title, " is required.")); };
-                    }
-                    else {
-                        validate[field.field] = function (value) {
-                            return value && value.toString().trim() !== '' ? null : "".concat(field.title, " is required.");
-                        };
-                    }
-                }
+        return values;
+    }, [config, initialData]);
+    // validate: Zorunlu alanlar ve minLength kontrolü için validasyon fonksiyonları
+    var validate = useMemo(function () {
+        var validationRules = {};
+        config.rows.forEach(function (row) {
+            row.columns.forEach(function (column) {
+                column.fields.forEach(function (field) {
+                    validationRules[field.field] = function (value) {
+                        // Zorunlu alan kontrolü
+                        if (field.required) {
+                            if (field.type === 'checkbox') {
+                                if (!value)
+                                    return "".concat(field.title, " gereklidir.");
+                            }
+                            else if (field.type === 'date') {
+                                if (value === null)
+                                    return "".concat(field.title, " gereklidir.");
+                            }
+                            else {
+                                if (!value || value.toString().trim() === '')
+                                    return "".concat(field.title, " gereklidir.");
+                            }
+                        }
+                        // minLength kontrolü - sadece veri girildiyse
+                        if (field.minLength && value && value.toString().trim() !== '') {
+                            var trimmedValue = value.toString().trim();
+                            if (trimmedValue.length < field.minLength) {
+                                return "".concat(field.title, " en az ").concat(field.minLength, " karakter olmal\u0131d\u0131r.");
+                            }
+                        }
+                        return null;
+                    };
+                });
             });
         });
-    });
+        return validationRules;
+    }, [config]);
+    // transformValues fonksiyonunu useMemo ile stabilize et
+    var transformValues = useMemo(function () { return function (values) {
+        // Form gönderilirken _options ile biten alanları temizle
+        var cleanedValues = __assign({}, values);
+        Object.keys(cleanedValues).forEach(function (key) {
+            if (key.endsWith('_options')) {
+                delete cleanedValues[key];
+            }
+        });
+        return cleanedValues;
+    }; }, []);
     // useForm'u başlatırken transformValues ekleyelim
     var form = useForm({
         mode: 'uncontrolled',
         initialValues: initialValues,
         validate: validate,
-        transformValues: function (values) {
-            // Form gönderilirken _options ile biten alanları temizle
-            var cleanedValues = __assign({}, values);
-            Object.keys(cleanedValues).forEach(function (key) {
-                if (key.endsWith('_options')) {
-                    delete cleanedValues[key];
-                }
-            });
-            return cleanedValues;
-        },
-        onValuesChange: function (values) {
-            setFormValues(values);
-        }
+        transformValues: transformValues
     });
-    // Helper function to get headers
-    var getHeaders = function () {
+    // Helper function to get headers - useCallback ile stabilize et
+    var getHeaders = useCallback(function () {
         var headers = {
             'Content-Type': 'application/json'
         };
-        console.log("useToken----->", useToken);
         if (useToken) {
             var token = localStorage.getItem('token');
-            console.log("token----->", token);
             if (token) {
                 headers['Authorization'] = "Bearer ".concat(token);
             }
@@ -468,9 +480,8 @@ var DynamicForm = function (_a) {
                 console.warn('Token required but not found in localStorage');
             }
         }
-        console.log('Request Headers:', headers); // Debug için
         return headers;
-    };
+    }, [useToken]);
     // Form submit edildiğinde değerleri gönderiyoruz.
     var handleSubmit = form.onSubmit(function (values) { return __awaiter(void 0, void 0, void 0, function () {
         var formData_1, requestHeaders, isPutRequest, method, url, response, result, error_1;
@@ -597,7 +608,7 @@ var DynamicForm = function (_a) {
                     span: (_a = column.span) !== null && _a !== void 0 ? _a : (12 / row.columns.length) }, column.fields.map(function (field, fieldIndex) {
                     var _a, _b, _c;
                     return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
-                        field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, minLength: field.minLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'date' && (React.createElement(DatePickerInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) {
                                 if (value) {
@@ -656,7 +667,7 @@ var DynamicForm = function (_a) {
                 } }), submitProps.children || 'Save')),
         showDebug === true && (React.createElement("div", { style: { marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' } },
             React.createElement(Text, { size: "sm", mb: 8 }, "Debug - Form Values:"),
-            React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(formValues, null, 2)))))); };
+            React.createElement("pre", { style: { margin: 0 } }, JSON.stringify(form.getValues(), null, 2)))))); };
     // Options güncelleme fonksiyonu
     var setOptionsForField = function (fieldName, options) {
         setDropdownOptions(function (prev) {
@@ -740,7 +751,6 @@ var DynamicForm = function (_a) {
                                                                             form.setFieldValue(f.field, null);
                                                                         }
                                                                         c.fields[index] = __assign(__assign({}, result_1.data), { field: f.field });
-                                                                        setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
                                                             });
@@ -776,8 +786,6 @@ var DynamicForm = function (_a) {
                                                                                 form.setFieldValue(f.field, '');
                                                                             }
                                                                         }
-                                                                        // Formu yeniden render etmek için state'i güncelle
-                                                                        setFormValues(__assign({}, form.values));
                                                                     }
                                                                 });
                                                             });
