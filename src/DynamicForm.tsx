@@ -78,6 +78,12 @@ export interface FieldConfig {
     maxLength?: number; // Newly added
     minLength?: number; // Minimum length for validation
     placeholder?: string;  // Placeholder property added
+    // Visibility kontrolü için yeni özellikler
+    visible_field?: string;    // Görünürlük kontrolü için hangi field'a bakılacak
+    hidden_field?: string;     // Gizlilik kontrolü için hangi field'a bakılacak  
+    visible_value?: string | number; // Bu değer seçildiğinde field görünür olur
+    hidden_value?: string | number;  // Bu değer seçildiğinde field gizli olur
+    visible?: 'show' | 'hidden';     // Başlangıç görünürlük durumu
     mask?: string;  // Mask pattern for maskinput
     // Options for textarea:
     minRows?: number;
@@ -566,6 +572,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 }) => {
     const [dropdownOptions, setDropdownOptions] = useState<Record<string, DropdownOption[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [, forceUpdate] = useState({});
 
 
 
@@ -695,7 +702,35 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         transformValues
     });
 
+    // Field visibility kontrolü için fonksiyon
+    const isFieldVisible = useCallback((field: FieldConfig): boolean => {
+        const formValues = form.getValues();
+        
+        // Başlangıç durumu kontrolü
+        let isVisible = field.visible !== 'hidden'; // Varsayılan: göster
+        
+        // visible_field ve visible_value kontrolü
+        if (field.visible_field && field.visible_value !== undefined) {
+            const fieldValue = formValues[field.visible_field];
+            isVisible = String(fieldValue) === String(field.visible_value);
+        }
+        
+        // hidden_field ve hidden_value kontrolü (öncelikli)
+        if (field.hidden_field && field.hidden_value !== undefined) {
+            const fieldValue = formValues[field.hidden_field];
+            if (String(fieldValue) === String(field.hidden_value)) {
+                isVisible = false;
+            }
+        }
+        
+        return isVisible;
+    }, [form]);
 
+    // Form değerleri değiştiğinde visibility'yi güncelle
+    useEffect(() => {
+        const formValues = form.getValues();
+        forceUpdate({});
+    }, [form.getValues()]);
 
     // Helper function to get headers - useCallback ile stabilize et
     const getHeaders = useCallback(() => {
@@ -843,7 +878,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                             >
                                 {column.fields.map((field, fieldIndex) => (
                                     <div key={fieldIndex} style={{ marginBottom: '1rem' }}>
-                                        {field.type === 'textbox' && (
+                                        {field.type === 'textbox' && isFieldVisible(field) && (
                                             <TextInput
                                                 label={field.title}
                                                 placeholder={field.placeholder || field.title}
