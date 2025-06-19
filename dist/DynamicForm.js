@@ -329,6 +329,7 @@ var DynamicForm = function (_a) {
     var config = _a.config, baseUrl = _a.baseUrl, endpoint = _a.endpoint, initialData = _a.initialData, onSuccess = _a.onSuccess, submitButtonProps = _a.submitButtonProps, cancelButtonProps = _a.cancelButtonProps, _b = _a.useToken, useToken = _b === void 0 ? false : _b, _c = _a.showDebug, showDebug = _c === void 0 ? false : _c, pk_field = _a.pk_field, _d = _a.noSubmit, noSubmit = _d === void 0 ? false : _d, _e = _a.noForm, noForm = _e === void 0 ? false : _e, _f = _a.hiddenCancel, hiddenCancel = _f === void 0 ? false : _f;
     var _g = useState({}), dropdownOptions = _g[0], setDropdownOptions = _g[1];
     var _h = useState(false), isSubmitting = _h[0], setIsSubmitting = _h[1];
+    var _j = useState({}), forceUpdate = _j[1];
     // initialValues: Her field için başlangıç değeri belirleniyor.
     var initialValues = useMemo(function () {
         var values = {};
@@ -466,6 +467,30 @@ var DynamicForm = function (_a) {
         validate: validate,
         transformValues: transformValues
     });
+    // Field visibility kontrolü için fonksiyon
+    var isFieldVisible = useCallback(function (field) {
+        var formValues = form.getValues();
+        // Başlangıç durumu kontrolü
+        var isVisible = field.visible !== 'hidden'; // Varsayılan: göster
+        // visible_field ve visible_value kontrolü
+        if (field.visible_field && field.visible_value !== undefined) {
+            var fieldValue = formValues[field.visible_field];
+            isVisible = String(fieldValue) === String(field.visible_value);
+        }
+        // hidden_field ve hidden_value kontrolü (öncelikli)
+        if (field.hidden_field && field.hidden_value !== undefined) {
+            var fieldValue = formValues[field.hidden_field];
+            if (String(fieldValue) === String(field.hidden_value)) {
+                isVisible = false;
+            }
+        }
+        return isVisible;
+    }, [form]);
+    // Form değerleri değiştiğinde visibility'yi güncelle
+    useEffect(function () {
+        var formValues = form.getValues();
+        forceUpdate({});
+    }, [form.getValues()]);
     // Helper function to get headers - useCallback ile stabilize et
     var getHeaders = useCallback(function () {
         var headers = {
@@ -608,7 +633,7 @@ var DynamicForm = function (_a) {
                     span: (_a = column.span) !== null && _a !== void 0 ? _a : (12 / row.columns.length) }, column.fields.map(function (field, fieldIndex) {
                     var _a, _b, _c;
                     return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
-                        field.type === 'textbox' && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, minLength: field.minLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'textbox' && isFieldVisible(field) && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, minLength: field.minLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'date' && (React.createElement(DatePickerInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) {
                                 if (value) {

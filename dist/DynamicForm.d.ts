@@ -14,6 +14,11 @@ export interface FieldConfig {
     maxLength?: number;
     minLength?: number;
     placeholder?: string;
+    visible_field?: string;
+    hidden_field?: string;
+    visible_value?: string | number;
+    hidden_value?: string | number;
+    visible?: 'show' | 'hidden';
     mask?: string;
     minRows?: number;
     maxRows?: number;
