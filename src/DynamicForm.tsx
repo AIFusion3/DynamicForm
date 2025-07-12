@@ -981,11 +981,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 defaultValue={field.defaultValue}
                                                 label={field.title}
                                                 placeholder={field.placeholder}
-                                                value={form.values[field.field]}
-                                                onValueChange={(val) => {
-                                                    form.setFieldValue(field.field, val.floatValue ?? null);
-                                                }}
-                                                error={form.errors[field.field]}
+                                                {...form.getInputProps(field.field)}
                                                 thousandSeparator={field.thousandSeparator || ','}
                                                 decimalSeparator={field.decimalSeparator || '.'}
                                             />
