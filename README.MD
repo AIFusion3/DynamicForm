@@ -174,12 +174,67 @@ FormConfig
 - required: Boolean indicating if the field is required
 - placeholder: Placeholder text
 - maxLength: Maximum character length (for text inputs)
+- minLength: Minimum character length (for text inputs)
+
+### Conditional Visibility Properties
+All field types support conditional visibility based on other field values:
+
+- visible_field: Field name to watch for visibility control
+- hidden_field: Field name to watch for hiding control  
+- visible_value: Field becomes visible when the watched field has this value
+- hidden_value: Field becomes hidden when the watched field has this value
+- visible: Initial visibility state ('show' | 'hidden'), default is 'show'
+
+**Visibility Logic:**
+1. Initial state is determined by the `visible` property (default: 'show')
+2. If `visible_field` and `visible_value` are set, field is shown only when the watched field equals the visible_value
+3. If `hidden_field` and `hidden_value` are set, field is hidden when the watched field equals the hidden_value (takes priority)
+4. Visibility updates automatically when watched field values change
+
+**Example:**
+```tsx
+// Dropdown field that controls visibility
+{
+  field: "document_type",
+  title: "Document Type",
+  type: "dropdown",
+  options: [
+    { value: "tckn", label: "TC Identity Number" },
+    { value: "vkn", label: "Tax Number" }
+  ]
+},
+
+// Conditional field - shown only when Tax Number is selected
+{
+  field: "tax_number",
+  title: "Tax Number", 
+  type: "textbox",
+  visible_field: "document_type",
+  visible_value: "vkn",
+  visible: "hidden", // Initially hidden
+  maxLength: 10,
+  minLength: 10
+},
+
+// Conditional field - hidden when Tax Number is selected
+{
+  field: "identity_number",
+  title: "TC Identity Number",
+  type: "textbox", 
+  hidden_field: "document_type",
+  hidden_value: "vkn",
+  visible: "show", // Initially visible
+  maxLength: 11,
+  minLength: 11
+}
+```
 
 ### Special Properties
 
 #### Textbox
 - type: "textbox"
 - maxLength: Maximum character length
+- minLength: Minimum character length (validates only if data is entered)
 
 ```tsx
 {
@@ -188,7 +243,8 @@ FormConfig
   type: "textbox",
   required: true,
   placeholder: "Enter your full name",
-  maxLength: 100
+  maxLength: 100,
+  minLength: 2
 }
 ```
 
