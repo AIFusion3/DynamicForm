@@ -819,8 +819,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             console.log("isPutRequest----->", isPutRequest);
             const method = isPutRequest ? 'PUT' : 'POST';
             const url = isPutRequest 
-                ? `${baseUrl}/${endpoint}/${initialData[pk_field]}`
-                : `${baseUrl}/${endpoint}`;
+                ? getFullUrl(`${endpoint}/${initialData[pk_field]}`, baseUrl)
+                : getFullUrl(endpoint, baseUrl);
 
             const response = await fetch(url, {
                 method,

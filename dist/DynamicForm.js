@@ -575,8 +575,8 @@ var DynamicForm = function (_a) {
                     console.log("isPutRequest----->", isPutRequest);
                     method = isPutRequest ? 'PUT' : 'POST';
                     url = isPutRequest
-                        ? "".concat(baseUrl, "/").concat(endpoint, "/").concat(initialData[pk_field])
-                        : "".concat(baseUrl, "/").concat(endpoint);
+                        ? getFullUrl("".concat(endpoint, "/").concat(initialData[pk_field]), baseUrl)
+                        : getFullUrl(endpoint, baseUrl);
                     return [4 /*yield*/, fetch(url, {
                             method: method,
                             headers: requestHeaders,
