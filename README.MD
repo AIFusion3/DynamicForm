@@ -23,6 +23,7 @@ A flexible and customizable form component built with Mantine UI.
   - UploadCollection (Multiple file uploads with preview and ordering)
   - HTMLEditor (Rich text editor)
   - SubListForm (Nested table support with JSON data)
+  - ColumnField (Multi-column hierarchical data selection)
   - Refresh (Dynamic field type changing based on other field values)
 - Automatic form validation
 - Dependent fields support
@@ -48,6 +49,17 @@ const config = {
   rows: [
     {
       title: "Personal Information",
+      headerStyle: { 
+        color: '#2c3e50',
+        fontSize: '18px',
+        fontWeight: 'bold'
+      },
+      rowStyle: {
+        backgroundColor: '#f8f9fa',
+        padding: '1.5rem',
+        borderRadius: '12px',
+        border: '1px solid #e9ecef'
+      },
       columns: [
         {
           span: 6,
@@ -86,6 +98,12 @@ const config = {
     },
     {
       title: "Additional Information",
+      rowStyle: {
+        marginTop: '2rem',
+        backgroundColor: '#fff3cd',
+        padding: '1rem',
+        borderLeft: '4px solid #ffc107'
+      },
       columns: [
         {
           fields: [
@@ -140,6 +158,7 @@ FormConfig
 - **RowConfig**: Defines a row in the form
   - `title`: Optional title for the row
   - `headerStyle`: Optional style for the row header
+  - `rowStyle`: Optional style for the row container
   - `columns`: Array of column configurations
 
 - **ColumnConfig**: Defines a column within a row
@@ -148,6 +167,99 @@ FormConfig
 
 - **FieldConfig**: Defines an individual form field
   - Common and type-specific properties as described below
+
+## Row Styling
+
+### headerStyle vs rowStyle
+
+The form supports two different styling approaches for rows:
+
+- **`headerStyle`**: Applied only to the row title/header text
+- **`rowStyle`**: Applied to the entire row container (including all fields)
+
+### Example Usage
+
+```tsx
+const config = {
+  rows: [
+    {
+      title: "Personal Information",
+      // Styles only the title text
+      headerStyle: { 
+        color: '#2c3e50',
+        fontSize: '20px',
+        fontWeight: 'bold',
+        marginBottom: '1rem'
+      },
+      // Styles the entire row container
+      rowStyle: {
+        backgroundColor: '#f8f9fa',
+        padding: '2rem',
+        borderRadius: '12px',
+        border: '1px solid #e9ecef',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        marginBottom: '3rem'
+      },
+      columns: [...]
+    },
+    {
+      title: "Contact Information",
+      // Alert-style row
+      rowStyle: {
+        backgroundColor: '#d1ecf1',
+        borderLeft: '5px solid #bee5eb',
+        padding: '1.5rem',
+        borderRadius: '0 8px 8px 0'
+      },
+      columns: [...]
+    },
+    {
+      title: "Emergency Section",
+      headerStyle: { color: '#dc3545', fontWeight: 'bold' },
+      rowStyle: {
+        backgroundColor: '#f8d7da',
+        border: '2px solid #f5c6cb',
+        padding: '1rem',
+        borderRadius: '8px'
+      },
+      columns: [...]
+    }
+  ]
+};
+```
+
+### Common Use Cases
+
+**Card-style rows:**
+```tsx
+rowStyle: {
+  backgroundColor: '#ffffff',
+  padding: '2rem',
+  borderRadius: '12px',
+  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+  border: '1px solid #e5e5e5'
+}
+```
+
+**Alert/Warning sections:**
+```tsx
+rowStyle: {
+  backgroundColor: '#fff3cd',
+  border: '1px solid #ffeaa7',
+  borderLeft: '4px solid #fdcb6e',
+  padding: '1rem'
+}
+```
+
+**Grouped sections:**
+```tsx
+rowStyle: {
+  backgroundColor: '#f1f3f4',
+  margin: '0 -1rem',
+  padding: '1.5rem',
+  borderTop: '3px solid #4285f4'
+}
+```
 
 ## Props
 
@@ -389,6 +501,7 @@ For dependent dropdowns, use the `refField` property to specify the field that t
 - defaultValue: Default value
 - decimalSeparator: Decimal separator
 - thousandSeparator: Thousand separator
+- hideControls: Hide spinner buttons (default: true)
 
 ```tsx
 {
@@ -403,7 +516,20 @@ For dependent dropdowns, use the `refField` property to specify the field that t
   prefix: "$",
   defaultValue: 0,
   decimalSeparator: ".",
-  thousandSeparator: ","
+  thousandSeparator: ",",
+  hideControls: true // Hide spinner buttons (default)
+}
+
+// With spinner buttons enabled
+{
+  field: "quantity",
+  title: "Quantity",
+  type: "number",
+  required: true,
+  min: 1,
+  max: 100,
+  step: 1,
+  hideControls: false // Show spinner buttons
 }
 ```
 
@@ -860,6 +986,132 @@ The API should return a response with the following format:
 ```
 
 The component will replace the target field with the new configuration returned by the API. This allows for dynamic form behavior based on user selections.
+
+#### ColumnField
+- type: "columnfield"
+- optionsUrl: API URL for hierarchical data
+- options: Static hierarchical data
+- columnWidth: Width of each column (default: 200)
+- columnHeight: Height of each column (default: 300)
+- border: Border style (default: '1px solid #e0e0e0')
+- borderRadius: Border radius for columns and items (default: 4)
+- backgroundColor: Background color for items (default: '#ffffff')
+- selectedColor: Background color for selected items (default: '#e6f7ff')
+- fontSize: Font size for item text (default: 12)
+
+```tsx
+// Dynamic options from API
+{
+  field: "category",
+  title: "Category Selection",
+  type: "columnfield",
+  required: true,
+  optionsUrl: "https://api.example.com/categories",
+  columnWidth: 220,
+  columnHeight: 350,
+  selectedColor: "#f0f8ff"
+}
+
+// Static options
+{
+  field: "productCategory",
+  title: "Product Category",
+  type: "columnfield",
+  required: true,
+  options: [
+    {
+      label: "Electronics",
+      value: "electronics",
+      children: [
+        {
+          label: "Computers",
+          value: "computers"
+        },
+        {
+          label: "Mobile Phones",
+          value: "phones",
+          children: [
+            {
+              label: "Smartphones",
+              value: "smartphones"
+            },
+            {
+              label: "Accessories",
+              value: "accessories"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: "Clothing",
+      value: "clothing"
+    }
+  ]
+}
+
+// With conditional visibility
+{
+  field: "subcategory",
+  title: "Sub Category",
+  type: "columnfield",
+  visible_field: "enable_categories",
+  visible_value: "yes",
+  visible: "hidden",
+  optionsUrl: "https://api.example.com/subcategories"
+}
+```
+
+Features of ColumnField:
+- **Multi-column hierarchical interface**: iOS Settings-like navigation with multiple columns showing category levels
+- **Interactive selection**: Click on parent categories to reveal children in next column
+- **Visual feedback**: Selected items are highlighted with customizable colors
+- **Responsive design**: Horizontal scrolling for multiple columns on smaller screens
+- **Automatic navigation**: Seamless browsing through category hierarchies
+- **Form integration**: Stores both value (ID) and title (display name) in form
+- **Validation support**: Required field validation with error messages
+- **Flexible data source**: Supports both static data and API-loaded hierarchical data
+- **Customizable appearance**: Full control over colors, sizes, and styling
+
+**Data Format:**
+The component expects hierarchical data in the following format:
+
+```json
+[
+  {
+    "label": "Category Name",
+    "value": "unique_id",
+    "children": [
+      {
+        "label": "Subcategory Name",
+        "value": "sub_unique_id",
+        "children": [
+          // Further nested items
+        ]
+      }
+    ]
+  }
+]
+```
+
+**Form Values:**
+When a selection is made, the form stores:
+- The selected item's value in the field (e.g., "smartphones")
+- The selected item's label in a field named `{fieldName}__title` (e.g., "Smartphones")
+
+**Use Cases:**
+- E-commerce product category selection
+- Location/address hierarchical selection (Country > State > City)
+- Organization structure navigation (Company > Department > Team)
+- File/folder structure browsing
+- Menu/page hierarchy selection
+- Any multi-level categorization system
+
+**Validation:**
+- Required field validation ensures a selection is made
+- Validation prevents selection of parent categories that have children (forces selection to leaf nodes)
+- Error messages are displayed below the component
+- Real-time validation feedback during user interaction
 
 ## URL Handling and baseUrl Integration
 

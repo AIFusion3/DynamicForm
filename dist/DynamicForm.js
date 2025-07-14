@@ -624,7 +624,7 @@ var DynamicForm = function (_a) {
     var submitProps = submitButtonProps || {};
     // Form içeriğini render eden fonksiyon
     var renderFormContent = function () { return (React.createElement(React.Fragment, null,
-        config.rows.map(function (row, rowIndex) { return (React.createElement("div", { key: rowIndex, style: { marginBottom: '2rem' } },
+        config.rows.map(function (row, rowIndex) { return (React.createElement("div", { key: rowIndex, style: __assign({ marginBottom: '2rem' }, row.rowStyle) },
             row.title && (React.createElement(Text, { size: "lg", mb: "sm", style: row.headerStyle }, row.title)),
             React.createElement(Grid, { gutter: "md" }, row.columns.map(function (column, colIndex) {
                 var _a;

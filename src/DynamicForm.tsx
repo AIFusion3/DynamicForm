@@ -139,6 +139,7 @@ export interface ColumnConfig {
 export interface RowConfig {
     title?: string;                    // Row title (e.g. "General Information") 
     headerStyle?: React.CSSProperties; // Custom style for row header (optional)
+    rowStyle?: React.CSSProperties;    // Custom style for row container (optional)
     columns: ColumnConfig[];           // Columns
 }
 
@@ -863,7 +864,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     const renderFormContent = () => (
         <>
             {config.rows.map((row, rowIndex) => (
-                <div key={rowIndex} style={{ marginBottom: '2rem' }}>
+                <div key={rowIndex} style={{ marginBottom: '2rem', ...row.rowStyle }}>
                     {row.title && (
                         <Text size="lg" mb="sm" style={row.headerStyle}>
                             {row.title}

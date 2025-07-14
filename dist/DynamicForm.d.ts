@@ -70,6 +70,7 @@ export interface ColumnConfig {
 export interface RowConfig {
     title?: string;
     headerStyle?: React.CSSProperties;
+    rowStyle?: React.CSSProperties;
     columns: ColumnConfig[];
 }
 export interface FormConfig {
