@@ -67,6 +67,18 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
 import { IconX } from '@tabler/icons-react';
+// IMaskInput wrapper component
+var MaskInputField = function (_a) {
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle;
+    var _b = useState(form.values[field.field] || ''), value = _b[0], setValue = _b[1];
+    useEffect(function () {
+        setValue(form.values[field.field] || '');
+    }, [form.values[field.field]]);
+    return (React.createElement(InputBase, { label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '', value: value, onAccept: function (value) {
+            setValue(value);
+            form.setFieldValue(field.field, value);
+        }, required: field.required, error: form.errors[field.field], style: globalStyle }));
+};
 // Dayjs plugins
 dayjs.locale('tr');
 // URL yardımcı fonksiyonu
@@ -647,9 +659,7 @@ var DynamicForm = function (_a) {
                         field.type === 'datetime' && (React.createElement(DateTimePicker, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" }))),
                         field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
                         field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),
-                        field.type === 'maskinput' && (React.createElement(InputBase, { label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '', value: form.values[field.field] || '', onChange: function (event) {
-                                form.setFieldValue(field.field, event.currentTarget.value);
-                            }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined })),
+                        field.type === 'maskinput' && (React.createElement(MaskInputField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'number' && (React.createElement(NumberInput, __assign({ required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder }, form.getInputProps(field.field), { thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' }))),
                         field.type === 'switch' && (React.createElement(SwitchField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),

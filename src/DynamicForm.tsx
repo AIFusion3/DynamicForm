@@ -39,6 +39,36 @@ import ColumnField from './ColumnField';
 import { ColumnFieldProps } from './ColumnField';
 import { IconX } from '@tabler/icons-react';
 
+// IMaskInput wrapper component
+const MaskInputField: React.FC<{
+    field: FieldConfig;
+    form: ReturnType<typeof useForm>;
+    globalStyle?: React.CSSProperties;
+}> = ({ field, form, globalStyle }) => {
+    const [value, setValue] = useState(form.values[field.field] || '');
+
+    useEffect(() => {
+        setValue(form.values[field.field] || '');
+    }, [form.values[field.field]]);
+
+    return (
+        <InputBase
+            label={field.title}
+            placeholder={field.placeholder || field.title}
+            component={IMaskInput}
+            mask={field.mask || ''}
+            value={value}
+            onAccept={(value) => {
+                setValue(value);
+                form.setFieldValue(field.field, value);
+            }}
+            required={field.required}
+            error={form.errors[field.field]}
+            style={globalStyle}
+        />
+    );
+};
+
 // Dayjs plugins
 dayjs.locale('tr');
 
@@ -960,18 +990,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             />
                                         )}
                                         {field.type === 'maskinput' && (
-                                            <InputBase
-                                                label={field.title}
-                                                placeholder={field.placeholder || field.title}
-                                                component={IMaskInput}
-                                                mask={field.mask || ''}
-                                                value={form.values[field.field] || ''}
-                                                onChange={(event) => {
-                                                    form.setFieldValue(field.field, event.currentTarget.value);
-                                                }}
-                                                required={field.required}
-                                                error={form.errors[field.field]}
-                                                style={config.fieldStyle ? config.fieldStyle : undefined}
+                                            <MaskInputField
+                                                field={field}
+                                                form={form}
+                                                globalStyle={config.fieldStyle}
                                             />
                                         )}
                                         {field.type === 'number' && (
