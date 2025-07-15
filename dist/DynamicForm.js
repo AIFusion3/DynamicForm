@@ -599,12 +599,12 @@ var DynamicForm = function (_a) {
                         console.log("result----->", result);
                         notifications.show({
                             title: 'Hata',
-                            message: result.message,
+                            message: result.message || result.detail || 'Bir hata oluştu',
                             color: 'red',
                             autoClose: 7000,
                             icon: React.createElement(IconX, null),
                             withCloseButton: true,
-                            position: 'bottom-right',
+                            position: 'top-right',
                         });
                     }
                     return [3 /*break*/, 6];

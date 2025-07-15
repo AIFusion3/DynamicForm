@@ -841,12 +841,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 console.log("result----->", result);
                 notifications.show({
                     title: 'Hata',
-                    message: result.message,
+                    message: result.message || result.detail || 'Bir hata oluştu',
                     color: 'red',
                     autoClose: 7000,
                     icon: <IconX />,
                     withCloseButton: true,
-                    position: 'bottom-right',
+                    position: 'top-right',
                 });
             }
         } catch (error) {
