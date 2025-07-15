@@ -596,7 +596,6 @@ var DynamicForm = function (_a) {
                         }
                     }
                     else {
-                        console.log("result----->", result);
                         notifications.show({
                             title: 'Hata',
                             message: result.message || result.detail || 'Bir hata oluştu',
@@ -648,7 +647,9 @@ var DynamicForm = function (_a) {
                         field.type === 'datetime' && (React.createElement(DateTimePicker, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" }))),
                         field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
                         field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),
-                        field.type === 'maskinput' && (React.createElement(InputBase, __assign({ label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '' }, form.getInputProps(field.field), { required: field.required, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'maskinput' && (React.createElement(InputBase, { label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '', value: form.values[field.field] || '', onAccept: function (value, mask) {
+                                form.setFieldValue(field.field, value);
+                            }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined })),
                         field.type === 'number' && (React.createElement(NumberInput, __assign({ required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder }, form.getInputProps(field.field), { thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' }))),
                         field.type === 'switch' && (React.createElement(SwitchField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),

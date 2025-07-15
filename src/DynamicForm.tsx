@@ -838,7 +838,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                     onSuccess(result.data);
                 }
             } else {
-                console.log("result----->", result);
                 notifications.show({
                     title: 'Hata',
                     message: result.message || result.detail || 'Bir hata oluştu',
@@ -966,8 +965,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 placeholder={field.placeholder || field.title}
                                                 component={IMaskInput}
                                                 mask={field.mask || ''}
-                                                {...form.getInputProps(field.field)}
+                                                value={form.values[field.field] || ''}
+                                                onAccept={(value, mask) => {
+                                                    form.setFieldValue(field.field, value);
+                                                }}
                                                 required={field.required}
+                                                error={form.errors[field.field]}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
                                             />
                                         )}
