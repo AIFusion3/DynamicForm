@@ -841,7 +841,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 console.log("result----->", result);
                 notifications.show({
                     title: 'Hata',
-                    message: result.message || 'Bir hata oluştu',
+                    message: result.message,
                     color: 'red',
                     autoClose: 7000,
                     icon: <IconX />,

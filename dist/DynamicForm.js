@@ -599,7 +599,7 @@ var DynamicForm = function (_a) {
                         console.log("result----->", result);
                         notifications.show({
                             title: 'Hata',
-                            message: result.message || 'Bir hata oluştu',
+                            message: result.message,
                             color: 'red',
                             autoClose: 7000,
                             icon: React.createElement(IconX, null),
