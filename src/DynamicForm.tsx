@@ -966,8 +966,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 component={IMaskInput}
                                                 mask={field.mask || ''}
                                                 value={form.values[field.field] || ''}
-                                                onAccept={(value, mask) => {
-                                                    form.setFieldValue(field.field, value);
+                                                onChange={(event) => {
+                                                    form.setFieldValue(field.field, event.currentTarget.value);
                                                 }}
                                                 required={field.required}
                                                 error={form.errors[field.field]}
