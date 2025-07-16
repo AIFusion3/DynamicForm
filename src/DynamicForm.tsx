@@ -63,6 +63,7 @@ const MaskInputField: React.FC<{
                 form.setFieldValue(field.field, value);
             }}
             required={field.required}
+            disabled={field.disabled}
             error={form.errors[field.field]}
             style={globalStyle}
         />
@@ -105,6 +106,7 @@ export interface FieldConfig {
     title: string;      // Label to display
     type: FieldType;
     required?: boolean;
+    disabled?: boolean; // Disable the field
     maxLength?: number; // Newly added
     minLength?: number; // Minimum length for validation
     placeholder?: string;  // Placeholder property added
@@ -132,6 +134,9 @@ export interface FieldConfig {
     decimalSeparator?: string;
     thousandSeparator?: string;
     defaultChecked?: boolean;  // Default value for switch
+    thumbIcon?: React.ReactNode;  // Thumb icon for switch (static)
+    thumbIconChecked?: React.ReactNode;  // Thumb icon when checked
+    thumbIconUnchecked?: React.ReactNode;  // Thumb icon when unchecked
     refField?: string;  // Reference field name
     // Properties for upload field
     uploadUrl?: string;  // URL to upload files
@@ -552,6 +557,12 @@ const SwitchField: React.FC<{
                 setIsChecked(newValue);
                 form.setFieldValue(field.field, newValue);
             }}
+            disabled={field.disabled}
+            thumbIcon={
+                field.thumbIconChecked && field.thumbIconUnchecked
+                    ? (isChecked ? field.thumbIconChecked : field.thumbIconUnchecked)
+                    : field.thumbIcon
+            }
             style={globalStyle ? globalStyle : undefined}
         />
     );
@@ -914,6 +925,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 placeholder={field.placeholder || field.title}
                                                 {...form.getInputProps(field.field)}
                                                 required={field.required}
+                                                disabled={field.disabled}
                                                 maxLength={field.maxLength}
                                                 minLength={field.minLength}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
@@ -925,6 +937,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 placeholder={field.placeholder || field.title}
                                                 {...form.getInputProps(field.field)}
                                                 required={field.required}
+                                                disabled={field.disabled}
                                                 maxLength={field.maxLength}
                                                 autosize={field.autosize ?? undefined}
                                                 minRows={field.minRows ?? 1}
@@ -948,6 +961,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                     }
                                                 }}
                                                 required={field.required}
+                                                disabled={field.disabled}
                                                 error={form.errors[field.field]}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
                                                 valueFormat={field.valueFormat || "DD.MM.YYYY"}
@@ -963,6 +977,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 {...form.getInputProps(field.field)}
                                                 onChange={(value) => form.setFieldValue(field.field, value)}
                                                 required={field.required}
+                                                disabled={field.disabled}
                                                 error={form.errors[field.field]}
                                                 style={config.fieldStyle ? config.fieldStyle : undefined}
                                                 valueFormat={field.valueFormat || "DD.MM.YYYY HH:mm"}
@@ -973,6 +988,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                             <Checkbox
                                                 label={field.title}
                                                 {...form.getInputProps(field.field, { type: 'checkbox' })}
+                                                disabled={field.disabled}
                                             // Checkbox bileşeninde style uygulanması opsiyonel olabilir;
                                             // istenirse ekleyebilirsiniz.
                                             />
@@ -999,6 +1015,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                         {field.type === 'number' && (
                                             <NumberInput
                                                 required={field.required}
+                                                disabled={field.disabled}
                                                 min={field.min}
                                                 max={field.max}
                                                 step={field.step}

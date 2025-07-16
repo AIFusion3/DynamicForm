@@ -11,6 +11,7 @@ export interface FieldConfig {
     title: string;
     type: FieldType;
     required?: boolean;
+    disabled?: boolean;
     maxLength?: number;
     minLength?: number;
     placeholder?: string;
@@ -37,6 +38,9 @@ export interface FieldConfig {
     decimalSeparator?: string;
     thousandSeparator?: string;
     defaultChecked?: boolean;
+    thumbIcon?: React.ReactNode;
+    thumbIconChecked?: React.ReactNode;
+    thumbIconUnchecked?: React.ReactNode;
     refField?: string;
     uploadUrl?: string;
     maxSize?: number;

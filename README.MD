@@ -284,6 +284,7 @@ rowStyle: {
 - title: Label
 - type: Field type
 - required: Boolean indicating if the field is required
+- disabled: Boolean indicating if the field is disabled
 - placeholder: Placeholder text
 - maxLength: Maximum character length (for text inputs)
 - minLength: Minimum character length (for text inputs)
@@ -354,9 +355,19 @@ All field types support conditional visibility based on other field values:
   title: "Full Name",
   type: "textbox",
   required: true,
+  disabled: false,
   placeholder: "Enter your full name",
   maxLength: 100,
   minLength: 2
+}
+
+// Disabled field example
+{
+  field: "readonlyField",
+  title: "Read Only Field",
+  type: "textbox",
+  disabled: true,
+  placeholder: "This field is disabled"
 }
 ```
 
@@ -426,13 +437,67 @@ All field types support conditional visibility based on other field values:
 #### Switch
 - type: "switch"
 - defaultChecked: Default state
+- thumbIcon: Static React component for thumb icon
+- thumbIconChecked: React component for thumb icon when checked
+- thumbIconUnchecked: React component for thumb icon when unchecked
 
 ```tsx
+import { IconCheck, IconX } from '@tabler/icons-react';
+
+// Basic switch
 {
   field: "isActive",
   title: "Active Status",
   type: "switch",
   defaultChecked: true
+}
+
+// Disabled switch
+{
+  field: "privacyAgreement",
+  title: "I agree to sell my privacy",
+  type: "switch",
+  defaultChecked: true,
+  disabled: true
+}
+
+// Switch with static thumb icon
+{
+  field: "notifications",
+  title: "Enable Notifications",
+  type: "switch",
+  defaultChecked: false,
+  thumbIcon: (
+    <IconCheck size={12} color="var(--mantine-color-teal-6)" stroke={3} />
+  )
+}
+
+// Switch with dynamic thumb icons (checked/unchecked states)
+{
+  field: "autoSave",
+  title: "Auto Save",
+  type: "switch",
+  defaultChecked: true,
+  thumbIconChecked: (
+    <IconCheck size={12} color="var(--mantine-color-teal-6)" stroke={3} />
+  ),
+  thumbIconUnchecked: (
+    <IconX size={12} color="var(--mantine-color-red-6)" stroke={3} />
+  )
+}
+
+// Another example with different icons
+{
+  field: "darkMode",
+  title: "Dark Mode",
+  type: "switch",
+  defaultChecked: false,
+  thumbIconChecked: (
+    <IconMoon size={12} color="var(--mantine-color-blue-6)" stroke={3} />
+  ),
+  thumbIconUnchecked: (
+    <IconSun size={12} color="var(--mantine-color-yellow-6)" stroke={3} />
+  )
 }
 ```
 

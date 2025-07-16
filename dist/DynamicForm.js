@@ -77,7 +77,7 @@ var MaskInputField = function (_a) {
     return (React.createElement(InputBase, { label: field.title, placeholder: field.placeholder || field.title, component: IMaskInput, mask: field.mask || '', value: value, onAccept: function (value) {
             setValue(value);
             form.setFieldValue(field.field, value);
-        }, required: field.required, error: form.errors[field.field], style: globalStyle }));
+        }, required: field.required, disabled: field.disabled, error: form.errors[field.field], style: globalStyle }));
 };
 // Dayjs plugins
 dayjs.locale('tr');
@@ -319,7 +319,9 @@ var SwitchField = function (_a) {
             var newValue = event.currentTarget.checked;
             setIsChecked(newValue);
             form.setFieldValue(field.field, newValue);
-        }, style: globalStyle ? globalStyle : undefined }));
+        }, disabled: field.disabled, thumbIcon: field.thumbIconChecked && field.thumbIconUnchecked
+            ? (isChecked ? field.thumbIconChecked : field.thumbIconUnchecked)
+            : field.thumbIcon, style: globalStyle ? globalStyle : undefined }));
 };
 var RefreshField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle;
@@ -644,8 +646,8 @@ var DynamicForm = function (_a) {
                     span: (_a = column.span) !== null && _a !== void 0 ? _a : (12 / row.columns.length) }, column.fields.map(function (field, fieldIndex) {
                     var _a, _b, _c;
                     return (React.createElement("div", { key: fieldIndex, style: { marginBottom: '1rem' } },
-                        field.type === 'textbox' && isFieldVisible(field) && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, minLength: field.minLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
-                        field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'textbox' && isFieldVisible(field) && (React.createElement(TextInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, disabled: field.disabled, maxLength: field.maxLength, minLength: field.minLength, style: config.fieldStyle ? config.fieldStyle : undefined }))),
+                        field.type === 'textarea' && (React.createElement(Textarea, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { required: field.required, disabled: field.disabled, maxLength: field.maxLength, autosize: (_a = field.autosize) !== null && _a !== void 0 ? _a : undefined, minRows: (_b = field.minRows) !== null && _b !== void 0 ? _b : 1, maxRows: (_c = field.maxRows) !== null && _c !== void 0 ? _c : 2, style: config.fieldStyle ? config.fieldStyle : undefined }))),
                         field.type === 'date' && (React.createElement(DatePickerInput, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) {
                                 if (value) {
                                     // Local tarih olarak formatla (timezone problemi olmadan)
@@ -655,12 +657,12 @@ var DynamicForm = function (_a) {
                                 else {
                                     form.setFieldValue(field.field, null);
                                 }
-                            }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr", clearable: true }))),
-                        field.type === 'datetime' && (React.createElement(DateTimePicker, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" }))),
-                        field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' })))),
+                            }, required: field.required, disabled: field.disabled, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY", locale: "tr", clearable: true }))),
+                        field.type === 'datetime' && (React.createElement(DateTimePicker, __assign({ label: field.title, placeholder: field.placeholder || field.title }, form.getInputProps(field.field), { onChange: function (value) { return form.setFieldValue(field.field, value); }, required: field.required, disabled: field.disabled, error: form.errors[field.field], style: config.fieldStyle ? config.fieldStyle : undefined, valueFormat: field.valueFormat || "DD.MM.YYYY HH:mm", locale: "tr" }))),
+                        field.type === 'checkbox' && (React.createElement(Checkbox, __assign({ label: field.title }, form.getInputProps(field.field, { type: 'checkbox' }), { disabled: field.disabled }))),
                         field.type === 'dropdown' && (React.createElement(DropdownField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),
                         field.type === 'maskinput' && (React.createElement(MaskInputField, { field: field, form: form, globalStyle: config.fieldStyle })),
-                        field.type === 'number' && (React.createElement(NumberInput, __assign({ required: field.required, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder }, form.getInputProps(field.field), { thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' }))),
+                        field.type === 'number' && (React.createElement(NumberInput, __assign({ required: field.required, disabled: field.disabled, min: field.min, max: field.max, step: field.step, prefix: field.prefix, suffix: field.suffix, defaultValue: field.defaultValue, label: field.title, placeholder: field.placeholder }, form.getInputProps(field.field), { thousandSeparator: field.thousandSeparator || ',', decimalSeparator: field.decimalSeparator || '.' }))),
                         field.type === 'switch' && (React.createElement(SwitchField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'multiselect' && (React.createElement(MultiSelectField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),
                         field.type === 'upload' && (React.createElement(DropField, { field: field, form: form, globalStyle: config.fieldStyle, getHeaders: getHeaders, baseUrl: baseUrl })),
