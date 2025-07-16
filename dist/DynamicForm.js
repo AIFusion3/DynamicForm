@@ -105,14 +105,17 @@ export var getFullUrl = function (url, baseUrl) {
     return "".concat(baseUrl).concat(url.startsWith && url.startsWith('/') ? '' : '/').concat(url);
 };
 var DropdownField = function (_a) {
-    var _b;
-    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _c = _a.options, options = _c === void 0 ? [] : _c, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
-    var _d = useState(false), loading = _d[0], setLoading = _d[1];
-    var _e = useState((_b = form.values[field.field]) !== null && _b !== void 0 ? _b : ''), thisValue = _e[0], setThisValue = _e[1];
+    var _b, _c;
+    var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _d = _a.options, options = _d === void 0 ? [] : _d, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
+    var _e = useState(false), loading = _e[0], setLoading = _e[1];
+    var _f = useState((_c = (_b = form.values[field.field]) !== null && _b !== void 0 ? _b : field.defaultValue) !== null && _c !== void 0 ? _c : ''), thisValue = _f[0], setThisValue = _f[1];
     useEffect(function () {
         var _a;
         if (form.values[field.field]) {
             setThisValue(form.values[field.field]);
+        }
+        else if (field.defaultValue !== undefined) {
+            setThisValue(String(field.defaultValue));
         }
         if (field.refField && form.values[field.field] && form.values[field.refField]) {
             var url = (_a = field.optionsUrl) === null || _a === void 0 ? void 0 : _a.replace('{0}', String(form.values[field.refField]));
@@ -154,7 +157,7 @@ var DropdownField = function (_a) {
         React.createElement(Select, __assign({ label: field.title, placeholder: field.placeholder || "Bir seçim yapınız", data: options.map(function (item) { return ({
                 value: String(item.value),
                 label: item.label,
-            }); }) }, form.getInputProps(field.field), { value: thisValue, onChange: function (val) {
+            }); }) }, form.getInputProps(field.field), { value: thisValue, defaultValue: field.defaultValue !== undefined ? String(field.defaultValue) : undefined, onChange: function (val) {
                 var safeValue = val === null ? null : val;
                 form.setFieldValue(field.field, safeValue);
                 var selectedOption = options.find(function (opt) { return String(opt.value) === String(safeValue); });
@@ -285,7 +288,7 @@ var SegmentedControlField = function (_a) {
             field.title,
             " ",
             field.required && React.createElement("span", { style: { color: 'red' } }, "*")),
-        React.createElement(SegmentedControl, __assign({}, form.getInputProps(field.field), { onChange: function (value) {
+        React.createElement(SegmentedControl, __assign({}, form.getInputProps(field.field), { defaultValue: field.defaultValue !== undefined ? String(field.defaultValue) : undefined, onChange: function (value) {
                 form.setFieldValue(field.field, value);
                 var selectedOption = options.find(function (opt) { return String(opt.value) === value; });
                 if (selectedOption) {
@@ -358,6 +361,9 @@ var DynamicForm = function (_a) {
                             if (initialData[field.field] != null) {
                                 values[field.field] = String(initialData[field.field]);
                             }
+                            else if (field.defaultValue !== undefined) {
+                                values[field.field] = String(field.defaultValue);
+                            }
                             else {
                                 values[field.field] = null;
                             }
@@ -372,6 +378,9 @@ var DynamicForm = function (_a) {
                         else if (field.type === 'segmentedcontrol') {
                             if (initialData[field.field] != null) {
                                 values[field.field] = String(initialData[field.field]);
+                            }
+                            else if (field.defaultValue !== undefined) {
+                                values[field.field] = String(field.defaultValue);
                             }
                             else {
                                 values[field.field] = null;
@@ -407,19 +416,19 @@ var DynamicForm = function (_a) {
                     }
                     else {
                         if (field.type === 'checkbox' || field.type === 'switch') {
-                            values[field.field] = false;
+                            values[field.field] = field.defaultValue !== undefined ? Boolean(field.defaultValue) : false;
                         }
                         else if (field.type === 'date' || field.type === 'datetime') {
                             values[field.field] = null;
                         }
                         else if (field.type === 'number') {
-                            values[field.field] = field.defaultValue || 0;
+                            values[field.field] = field.defaultValue !== undefined ? Number(field.defaultValue) : 0;
                         }
                         else if (field.type === 'multiselect' || field.type === 'tree') {
                             values[field.field] = [];
                         }
                         else {
-                            values[field.field] = '';
+                            values[field.field] = field.defaultValue !== undefined ? String(field.defaultValue) : '';
                         }
                     }
                 });

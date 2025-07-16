@@ -124,13 +124,13 @@ export interface FieldConfig {
     // For dropdown fields:
     optionsUrl?: string;  // URL to fetch options from API
     options?: { value: string; label: string }[]; // Static options (optional)
+    defaultValue?: string | number;  // Default value for any field type
     // Properties for number input
     min?: number;
     max?: number;
     step?: number;
     prefix?: string;
     suffix?: string;
-    defaultValue?: number;
     decimalSeparator?: string;
     thousandSeparator?: string;
     defaultChecked?: boolean;  // Default value for switch
@@ -228,11 +228,13 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     baseUrl
 }) => {
     const [loading, setLoading] = useState(false);
-    const [thisValue, setThisValue] = useState(form.values[field.field] ?? '');
+    const [thisValue, setThisValue] = useState(form.values[field.field] ?? field.defaultValue ?? '');
     
     useEffect(() => {
         if(form.values[field.field]) {
             setThisValue(form.values[field.field]);
+        } else if (field.defaultValue !== undefined) {
+            setThisValue(String(field.defaultValue));
         }
         
         if (field.refField && form.values[field.field] && form.values[field.refField]) {
@@ -289,6 +291,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 }))}
                 {...form.getInputProps(field.field)}
                 value={thisValue}
+                defaultValue={field.defaultValue !== undefined ? String(field.defaultValue) : undefined}
                 onChange={(val) => {
                     const safeValue = val === null ? null : val;
                     form.setFieldValue(field.field, safeValue);
@@ -499,6 +502,7 @@ const SegmentedControlField: React.FC<DropdownFieldProps> = ({
             </Text>
             <SegmentedControl
                 {...form.getInputProps(field.field)}
+                defaultValue={field.defaultValue !== undefined ? String(field.defaultValue) : undefined}
                 onChange={(value) => {
                     form.setFieldValue(field.field, value);
                     const selectedOption = options.find(opt => String(opt.value) === value);
@@ -631,6 +635,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         } else if (field.type === 'dropdown') {
                             if (initialData[field.field] != null) {
                                 values[field.field] = String(initialData[field.field]);
+                            } else if (field.defaultValue !== undefined) {
+                                values[field.field] = String(field.defaultValue);
                             } else {
                                 values[field.field] = null;
                             }
@@ -644,6 +650,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         } else if (field.type === 'segmentedcontrol') {
                             if (initialData[field.field] != null) {
                                 values[field.field] = String(initialData[field.field]);
+                            } else if (field.defaultValue !== undefined) {
+                                values[field.field] = String(field.defaultValue);
                             } else {
                                 values[field.field] = null;
                             }
@@ -674,15 +682,15 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                         }
                     } else {
                         if (field.type === 'checkbox' || field.type === 'switch') {
-                            values[field.field] = false;
+                            values[field.field] = field.defaultValue !== undefined ? Boolean(field.defaultValue) : false;
                         } else if (field.type === 'date' || field.type === 'datetime') {
                             values[field.field] = null;
                         } else if (field.type === 'number') {
-                            values[field.field] = field.defaultValue || 0;
+                            values[field.field] = field.defaultValue !== undefined ? Number(field.defaultValue) : 0;
                         } else if (field.type === 'multiselect' || field.type === 'tree') {
                             values[field.field] = [];
                         } else {
-                            values[field.field] = '';
+                            values[field.field] = field.defaultValue !== undefined ? String(field.defaultValue) : '';
                         }
                     }
                 });

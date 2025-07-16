@@ -29,12 +29,12 @@ export interface FieldConfig {
         value: string;
         label: string;
     }[];
+    defaultValue?: string | number;
     min?: number;
     max?: number;
     step?: number;
     prefix?: string;
     suffix?: string;
-    defaultValue?: number;
     decimalSeparator?: string;
     thousandSeparator?: string;
     defaultChecked?: boolean;
