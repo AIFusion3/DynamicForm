@@ -308,6 +308,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 style={globalStyle ? globalStyle : undefined}
                 allowDeselect={true}
                 clearable={true}
+                disabled={field.disabled}
                 searchable
             />
             {loading && <Loader size="xs" mt={5} />}
@@ -375,7 +376,7 @@ const MultiSelectField: React.FC<DropdownFieldProps> = ({
                 onChange={handleValueChange}
                 error={form.errors[field.field]}
                 required={field.required}
-                disabled={loading}
+                disabled={loading || field.disabled}
                 style={globalStyle ? globalStyle : undefined}
                 searchable
             />

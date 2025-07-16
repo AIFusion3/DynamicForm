@@ -166,7 +166,7 @@ var DropdownField = function (_a) {
                 }
                 onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, safeValue || '');
                 setThisValue(safeValue !== null && safeValue !== void 0 ? safeValue : '');
-            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, allowDeselect: true, clearable: true, searchable: true })),
+            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, allowDeselect: true, clearable: true, disabled: field.disabled, searchable: true })),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
@@ -205,7 +205,7 @@ var MultiSelectField = function (_a) {
         form.setFieldValue(field.field, value);
     };
     return (React.createElement(React.Fragment, null,
-        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Bir seçim yapınız", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading, style: globalStyle ? globalStyle : undefined, searchable: true }),
+        React.createElement(MultiSelect, { label: field.title, placeholder: field.placeholder || "Bir seçim yapınız", data: options.map(function (item) { return ({ value: String(item.value), label: item.label }); }), value: selectedValues, onChange: handleValueChange, error: form.errors[field.field], required: field.required, disabled: loading || field.disabled, style: globalStyle ? globalStyle : undefined, searchable: true }),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // HTMLEditor bileşenini oluşturalım
