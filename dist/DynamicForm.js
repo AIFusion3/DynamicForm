@@ -288,7 +288,7 @@ var SegmentedControlField = function (_a) {
             field.title,
             " ",
             field.required && React.createElement("span", { style: { color: 'red' } }, "*")),
-        React.createElement(SegmentedControl, __assign({}, form.getInputProps(field.field), { defaultValue: field.defaultValue !== undefined ? String(field.defaultValue) : undefined, onChange: function (value) {
+        React.createElement(SegmentedControl, __assign({}, form.getInputProps(field.field), { onChange: function (value) {
                 form.setFieldValue(field.field, value);
                 var selectedOption = options.find(function (opt) { return String(opt.value) === value; });
                 if (selectedOption) {

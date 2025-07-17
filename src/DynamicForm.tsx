@@ -502,7 +502,6 @@ const SegmentedControlField: React.FC<DropdownFieldProps> = ({
             </Text>
             <SegmentedControl
                 {...form.getInputProps(field.field)}
-                defaultValue={field.defaultValue !== undefined ? String(field.defaultValue) : undefined}
                 onChange={(value) => {
                     form.setFieldValue(field.field, value);
                     const selectedOption = options.find(opt => String(opt.value) === value);
