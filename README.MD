@@ -10,24 +10,22 @@ A flexible and customizable form component built with Mantine UI.
 
 - Form creation with JSON configuration
 - Supported field types:
-  - Textbox - Text input field
-  - Textarea - Multi-line text input
-  - Date - Date picker
-  - DateTime - Date and time picker
-  - Checkbox - Boolean checkbox input
-  - Dropdown - Single select dropdown (with dependent dropdown support)
-  - MaskInput - Masked input field (phone, credit card, etc.)
-  - Number - Numeric input with formatting
-  - Switch - Toggle switch with icons
-  - MultiSelect - Multi-select dropdown
-  - Upload - Single file upload with preview
-  - UploadCollection - Multiple file uploads with preview and ordering
-  - HTMLEditor - Rich text WYSIWYG editor
-  - Tree - Hierarchical tree selection
-  - SubListForm - Nested table/form support with JSON data
-  - SegmentedControl - Segmented button control
-  - ColumnField - Multi-column hierarchical data selection
-  - Refresh - Dynamic field type changing based on other field values
+  - Textbox
+  - Textarea
+  - Date 
+  - Checkbox
+  - Dropdown (With dependent dropdown support)
+  - Mask Input
+  - Number
+  - Switch
+  - MultiSelect
+  - Upload (File upload with preview)
+  - UploadCollection (Multiple file uploads with preview and ordering)
+  - HTMLEditor (Rich text editor)
+  - SubListForm (Nested table support with JSON data)
+  - ColumnField (Multi-column hierarchical data selection)
+  - Refresh (Dynamic field type changing based on other field values)
+  - ColorInput (Color picker with multiple formats and swatches)
 - Automatic form validation
 - Dependent fields support
 - API integration with customizable endpoints
@@ -42,6 +40,21 @@ npm install dynamic-form
 # or
 yarn add dynamic-form
 ```
+
+### CSS Imports (Mantine v8)
+
+Bu kütüphane Mantine v8 kullanıyor. Uygulamanızda gerekli CSS dosyalarını import etmelisiniz:
+
+```tsx
+// Ana uygulama dosyanızda (App.tsx, _app.tsx, layout.tsx vb.)
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
+import '@mantine/tiptap/styles.css';
+import '@mantine/dropzone/styles.css';
+```
+
+**Not:** Mantine v8'de her paket için CSS import'u manuel olarak yapılmalıdır.
 
 ## Quick Start
 
@@ -554,6 +567,8 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 - options: Static options
 - refField: Dependent field
 - defaultValue: Default selected value (string | number)
+- dropdownBackgroundColor: Dropdown menu background color (default: '#f5f5f5')
+- selectFirst: Auto select first option (default: true)
 
 ```tsx
 {
@@ -563,7 +578,19 @@ import { IconCheck, IconX } from '@tabler/icons-react';
   required: true,
   placeholder: "Select a country",
   optionsUrl: "https://api.example.com/countries",
-  defaultValue: "TR" // Default selected value
+  defaultValue: "TR", // Default selected value
+  dropdownBackgroundColor: "#ffffff", // Custom dropdown menu background
+  selectFirst: true // Auto select first option (default: true)
+}
+
+// Disable auto-select first option
+{
+  field: "city",
+  title: "City",
+  type: "dropdown",
+  required: true,
+  optionsUrl: "https://api.example.com/cities",
+  selectFirst: false // Don't auto select first option
 }
 ```
 
@@ -1176,6 +1203,89 @@ The API should return a response with the following format:
 ```
 
 The component will replace the target field with the new configuration returned by the API. This allows for dynamic form behavior based on user selections.
+
+#### ColorInput
+- type: "colorinput"
+- format: Color format - 'hex' | 'hexa' | 'rgb' | 'rgba' | 'hsl' | 'hsla' (default: 'hex')
+- defaultValue: Default color value (string)
+- swatches: Array of predefined color swatches
+- swatchesPerRow: Number of swatches per row (default: 7)
+- withPicker: Show/hide color picker dropdown (default: true)
+- withEyeDropper: Show/hide eye dropper tool (default: true)
+- closeOnColorSwatchClick: Close dropdown when swatch is clicked (default: false)
+
+```tsx
+// Basic color input
+{
+  field: "brandColor",
+  title: "Brand Color",
+  type: "colorinput",
+  required: true,
+  placeholder: "Pick a color",
+  defaultValue: "#228BE6"
+}
+
+// With predefined swatches
+{
+  field: "themeColor",
+  title: "Theme Color",
+  type: "colorinput",
+  format: "hex",
+  swatches: [
+    '#2e2e2e', '#868e96', '#fa5252', '#e64980', 
+    '#be4bdb', '#7950f2', '#4c6ef5', '#228be6', 
+    '#15aabf', '#12b886', '#40c057', '#82c91e', 
+    '#fab005', '#fd7e14'
+  ],
+  swatchesPerRow: 7,
+  defaultValue: "#228be6"
+}
+
+// RGBA format with swatches
+{
+  field: "backgroundColor",
+  title: "Background Color",
+  type: "colorinput",
+  format: "rgba",
+  placeholder: "Select background color",
+  swatches: [
+    'rgba(0, 0, 0, 0.5)',
+    'rgba(255, 255, 255, 0.8)',
+    'rgba(34, 139, 230, 0.6)'
+  ],
+  closeOnColorSwatchClick: true
+}
+
+// Without picker, only swatches
+{
+  field: "accentColor",
+  title: "Accent Color",
+  type: "colorinput",
+  withPicker: false,
+  withEyeDropper: false,
+  swatches: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'],
+  closeOnColorSwatchClick: true
+}
+```
+
+Features of ColorInput:
+- Multiple color format support (hex, hexa, rgb, rgba, hsl, hsla)
+- Eye dropper tool for picking colors from screen (browser support required)
+- Predefined color swatches for quick selection
+- Customizable swatches per row
+- Alpha/opacity slider for hexa, rgba, and hsla formats
+- Color picker with hue and saturation controls
+- Can be used with or without the picker dropdown
+- Form validation integration
+- Default value support
+
+**Supported Color Formats:**
+- `hex`: #RRGGBB (e.g., #228BE6)
+- `hexa`: #RRGGBBAA (e.g., #228BE680) - includes alpha/opacity slider
+- `rgb`: rgb(R, G, B) (e.g., rgb(34, 139, 230))
+- `rgba`: rgba(R, G, B, A) (e.g., rgba(34, 139, 230, 0.5)) - includes alpha/opacity slider
+- `hsl`: hsl(H, S%, L%) (e.g., hsl(211, 79%, 52%))
+- `hsla`: hsla(H, S%, L%, A) (e.g., hsla(211, 79%, 52%, 0.5)) - includes alpha/opacity slider
 
 #### ColumnField
 - type: "columnfield"

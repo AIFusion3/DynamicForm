@@ -1,10 +1,8 @@
 import React from 'react';
 import { ButtonProps, MantineColor } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import '@mantine/dates/styles.css';
-import '@mantine/tiptap/styles.css';
 import 'dayjs/locale/tr';
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh' | 'colorinput';
 export declare const getFullUrl: (url: string | undefined, baseUrl: string) => string;
 export interface FieldConfig {
     field: string;
@@ -30,6 +28,8 @@ export interface FieldConfig {
         label: string;
     }[];
     defaultValue?: string | number;
+    dropdownBackgroundColor?: string;
+    selectFirst?: boolean;
     min?: number;
     max?: number;
     step?: number;
@@ -66,6 +66,12 @@ export interface FieldConfig {
     is_dropdown?: boolean;
     changeto?: ChangeToConfig[];
     refreshMessage?: string;
+    format?: 'hex' | 'hexa' | 'rgb' | 'rgba' | 'hsl' | 'hsla';
+    swatches?: string[];
+    swatchesPerRow?: number;
+    withPicker?: boolean;
+    withEyeDropper?: boolean;
+    closeOnColorSwatchClick?: boolean;
 }
 export interface ColumnConfig {
     span?: number;

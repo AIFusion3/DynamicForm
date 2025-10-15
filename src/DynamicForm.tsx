@@ -16,12 +16,12 @@ import {
     Switch,
     MultiSelect,
     SegmentedControl,
-    MantineColor
+    MantineColor,
+    ColorInput
 } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { MantineProvider } from '@mantine/core';
-import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
@@ -32,7 +32,6 @@ import { RichTextEditor } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import '@mantine/tiptap/styles.css';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
@@ -74,7 +73,7 @@ const MaskInputField: React.FC<{
 dayjs.locale('tr');
 
 // Supported field types
-export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh';
+export type FieldType = 'textbox' | 'textarea' | 'date' | 'checkbox' | 'dropdown' | 'maskinput' | 'number' | 'switch' | 'multiselect' | 'upload' | 'uploadcollection' | 'tree' | 'sublistform' | 'htmleditor' | 'datetime' | 'segmentedcontrol' | 'columnfield' | 'refresh' | 'colorinput';
 
 // URL yardımcı fonksiyonu
 export const getFullUrl = (url: string | undefined, baseUrl: string): string => {
@@ -125,6 +124,8 @@ export interface FieldConfig {
     optionsUrl?: string;  // URL to fetch options from API
     options?: { value: string; label: string }[]; // Static options (optional)
     defaultValue?: string | number;  // Default value for any field type
+    dropdownBackgroundColor?: string;  // Dropdown menu background color
+    selectFirst?: boolean;  // Auto select first option (default: true)
     // Properties for number input
     min?: number;
     max?: number;
@@ -163,6 +164,13 @@ export interface FieldConfig {
     is_dropdown?: boolean;  // Tree bileşeni için dropdown modu
     changeto?: ChangeToConfig[];  // Yeni özellik
     refreshMessage?: string;  // Refresh field için özel mesaj
+    // ColorInput için özellikler
+    format?: 'hex' | 'hexa' | 'rgb' | 'rgba' | 'hsl' | 'hsla';  // Color format
+    swatches?: string[];  // Predefined color swatches
+    swatchesPerRow?: number;  // Number of swatches per row
+    withPicker?: boolean;  // Show/hide color picker (default: true)
+    withEyeDropper?: boolean;  // Show/hide eye dropper (default: true)
+    closeOnColorSwatchClick?: boolean;  // Close dropdown on swatch click
 }
 
 // New: Interface defining fields in a column, added optional span
@@ -230,13 +238,24 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     const [loading, setLoading] = useState(false);
     const [thisValue, setThisValue] = useState(form.values[field.field] ?? field.defaultValue ?? '');
     
+    // selectFirst için otomatik ilk option'ı seçme
     useEffect(() => {
-        if(form.values[field.field]) {
+        const shouldSelectFirst = field.selectFirst !== false; // varsayılan true
+        
+        if (form.values[field.field]) {
             setThisValue(form.values[field.field]);
         } else if (field.defaultValue !== undefined) {
             setThisValue(String(field.defaultValue));
+        } else if (shouldSelectFirst && options.length > 0 && !form.values[field.field]) {
+            const firstOption = options[0];
+            const firstValue = String(firstOption.value);
+            form.setFieldValue(field.field, firstValue);
+            form.setFieldValue(field.field + "__title", firstOption.label);
+            setThisValue(firstValue);
         }
-        
+    }, [options]);
+    
+    useEffect(() => {
         if (field.refField && form.values[field.field] && form.values[field.refField]) {
             const url = field.optionsUrl?.replace('{0}', String(form.values[field.refField]));
             if (url) {
@@ -309,6 +328,13 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 error={form.errors[field.field]}
                 required={field.required}
                 style={globalStyle ? globalStyle : undefined}
+                comboboxProps={{
+                    styles: {
+                        dropdown: {
+                            backgroundColor: field.dropdownBackgroundColor || '#f5f5f5'
+                        }
+                    }
+                }}
                 allowDeselect={true}
                 clearable={true}
                 disabled={field.disabled}
@@ -676,6 +702,8 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                             values[field.field] = Array.isArray(initialData[field.field]) 
                                 ? initialData[field.field] 
                                 : [initialData[field.field]].filter(Boolean);
+                        } else if (field.type === 'colorinput') {
+                            values[field.field] = initialData[field.field] || field.defaultValue || '';
                         } else {
                             values[field.field] = initialData[field.field];
                         }
@@ -1121,6 +1149,22 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                                                 field={field}
                                                 form={form}
                                                 globalStyle={config.fieldStyle}
+                                            />
+                                        )}
+                                        {field.type === 'colorinput' && (
+                                            <ColorInput
+                                                label={field.title}
+                                                placeholder={field.placeholder || "Renk seçiniz"}
+                                                {...form.getInputProps(field.field)}
+                                                required={field.required}
+                                                disabled={field.disabled}
+                                                format={field.format || 'hex'}
+                                                swatches={field.swatches}
+                                                swatchesPerRow={field.swatchesPerRow}
+                                                withPicker={field.withPicker !== false}
+                                                withEyeDropper={field.withEyeDropper !== false}
+                                                closeOnColorSwatchClick={field.closeOnColorSwatchClick}
+                                                style={config.fieldStyle ? config.fieldStyle : undefined}
                                             />
                                         )}
                                     </div>
