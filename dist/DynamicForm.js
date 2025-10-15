@@ -47,11 +47,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 // components/DynamicForm.tsx
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl } from '@mantine/core';
+import { Button, TextInput, Textarea, Grid, Checkbox, Group, Select, Loader, Text, InputBase, NumberInput, Switch, MultiSelect, SegmentedControl, ColorInput } from '@mantine/core';
 import { DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { MantineProvider } from '@mantine/core';
-import '@mantine/dates/styles.css';
 import { IMaskInput } from 'react-imask';
 import { notifications, Notifications } from '@mantine/notifications';
 import DropField from './DropField';
@@ -62,7 +61,6 @@ import { RichTextEditor } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import '@mantine/tiptap/styles.css';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
 import ColumnField from './ColumnField';
@@ -109,14 +107,25 @@ var DropdownField = function (_a) {
     var field = _a.field, form = _a.form, globalStyle = _a.globalStyle, onDropdownChange = _a.onDropdownChange, _d = _a.options, options = _d === void 0 ? [] : _d, setOptionsForField = _a.setOptionsForField, getHeaders = _a.getHeaders, baseUrl = _a.baseUrl;
     var _e = useState(false), loading = _e[0], setLoading = _e[1];
     var _f = useState((_c = (_b = form.values[field.field]) !== null && _b !== void 0 ? _b : field.defaultValue) !== null && _c !== void 0 ? _c : ''), thisValue = _f[0], setThisValue = _f[1];
+    // selectFirst için otomatik ilk option'ı seçme
     useEffect(function () {
-        var _a;
+        var shouldSelectFirst = field.selectFirst !== false; // varsayılan true
         if (form.values[field.field]) {
             setThisValue(form.values[field.field]);
         }
         else if (field.defaultValue !== undefined) {
             setThisValue(String(field.defaultValue));
         }
+        else if (shouldSelectFirst && options.length > 0 && !form.values[field.field]) {
+            var firstOption = options[0];
+            var firstValue = String(firstOption.value);
+            form.setFieldValue(field.field, firstValue);
+            form.setFieldValue(field.field + "__title", firstOption.label);
+            setThisValue(firstValue);
+        }
+    }, [options]);
+    useEffect(function () {
+        var _a;
         if (field.refField && form.values[field.field] && form.values[field.refField]) {
             var url = (_a = field.optionsUrl) === null || _a === void 0 ? void 0 : _a.replace('{0}', String(form.values[field.refField]));
             if (url) {
@@ -169,7 +178,13 @@ var DropdownField = function (_a) {
                 }
                 onDropdownChange === null || onDropdownChange === void 0 ? void 0 : onDropdownChange(field.field, safeValue || '');
                 setThisValue(safeValue !== null && safeValue !== void 0 ? safeValue : '');
-            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, allowDeselect: true, clearable: true, disabled: field.disabled, searchable: true })),
+            }, error: form.errors[field.field], required: field.required, style: globalStyle ? globalStyle : undefined, comboboxProps: {
+                styles: {
+                    dropdown: {
+                        backgroundColor: field.dropdownBackgroundColor || '#f5f5f5'
+                    }
+                }
+            }, allowDeselect: true, clearable: true, disabled: field.disabled, searchable: true })),
         loading && React.createElement(Loader, { size: "xs", mt: 5 })));
 };
 // MultiSelect için yeni bir bileşen oluşturuyoruz
@@ -409,6 +424,9 @@ var DynamicForm = function (_a) {
                             values[field.field] = Array.isArray(initialData[field.field])
                                 ? initialData[field.field]
                                 : [initialData[field.field]].filter(Boolean);
+                        }
+                        else if (field.type === 'colorinput') {
+                            values[field.field] = initialData[field.field] || field.defaultValue || '';
                         }
                         else {
                             values[field.field] = initialData[field.field];
@@ -681,7 +699,8 @@ var DynamicForm = function (_a) {
                         field.type === 'htmleditor' && (React.createElement(HTMLEditorField, { field: field, form: form, globalStyle: config.fieldStyle })),
                         field.type === 'segmentedcontrol' && (React.createElement(SegmentedControlField, { field: field, form: form, globalStyle: config.fieldStyle, onDropdownChange: handleDropdownChange, options: dropdownOptions[field.field] || field.options || [], setOptionsForField: setOptionsForField, getHeaders: getHeaders, baseUrl: baseUrl })),
                         field.type === 'columnfield' && (React.createElement(ColumnField, { field: field, form: form, getHeaders: getHeaders, handleFieldChange: handleFieldChange, baseUrl: baseUrl })),
-                        field.type === 'refresh' && (React.createElement(RefreshField, { field: field, form: form, globalStyle: config.fieldStyle }))));
+                        field.type === 'refresh' && (React.createElement(RefreshField, { field: field, form: form, globalStyle: config.fieldStyle })),
+                        field.type === 'colorinput' && (React.createElement(ColorInput, __assign({ label: field.title, placeholder: field.placeholder || "Renk seçiniz" }, form.getInputProps(field.field), { required: field.required, disabled: field.disabled, format: field.format || 'hex', swatches: field.swatches, swatchesPerRow: field.swatchesPerRow, withPicker: field.withPicker !== false, withEyeDropper: field.withEyeDropper !== false, closeOnColorSwatchClick: field.closeOnColorSwatchClick, style: config.fieldStyle ? config.fieldStyle : undefined })))));
                 })));
             })))); }),
         React.createElement(Group, null,
