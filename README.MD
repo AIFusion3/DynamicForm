@@ -10,21 +10,24 @@ A flexible and customizable form component built with Mantine UI.
 
 - Form creation with JSON configuration
 - Supported field types:
-  - Textbox
-  - Textarea
-  - Date 
-  - Checkbox
-  - Dropdown (With dependent dropdown support)
-  - Mask Input
-  - Number
-  - Switch
-  - MultiSelect
-  - Upload (File upload with preview)
-  - UploadCollection (Multiple file uploads with preview and ordering)
-  - HTMLEditor (Rich text editor)
-  - SubListForm (Nested table support with JSON data)
-  - ColumnField (Multi-column hierarchical data selection)
-  - Refresh (Dynamic field type changing based on other field values)
+  - Textbox - Text input field
+  - Textarea - Multi-line text input
+  - Date - Date picker
+  - DateTime - Date and time picker
+  - Checkbox - Boolean checkbox input
+  - Dropdown - Single select dropdown (with dependent dropdown support)
+  - MaskInput - Masked input field (phone, credit card, etc.)
+  - Number - Numeric input with formatting
+  - Switch - Toggle switch with icons
+  - MultiSelect - Multi-select dropdown
+  - Upload - Single file upload with preview
+  - UploadCollection - Multiple file uploads with preview and ordering
+  - HTMLEditor - Rich text WYSIWYG editor
+  - Tree - Hierarchical tree selection
+  - SubListForm - Nested table/form support with JSON data
+  - SegmentedControl - Segmented button control
+  - ColumnField - Multi-column hierarchical data selection
+  - Refresh - Dynamic field type changing based on other field values
 - Automatic form validation
 - Dependent fields support
 - API integration with customizable endpoints
@@ -288,6 +291,38 @@ rowStyle: {
 - placeholder: Placeholder text
 - maxLength: Maximum character length (for text inputs)
 - minLength: Minimum character length (for text inputs)
+- defaultValue: Default value for the field (string | number) - applicable to most field types
+
+### Default Values
+
+Most field types support the `defaultValue` property to set an initial value when no `initialData` is provided:
+
+**Supported Field Types:**
+- **Textbox/Textarea/MaskInput**: `defaultValue: string` - Sets default text
+- **Number**: `defaultValue: number` - Sets default numeric value
+- **Checkbox/Switch**: `defaultValue: boolean` - Sets default checked state (Note: Switch also supports `defaultChecked`)
+- **Dropdown**: `defaultValue: string | number` - Sets default selected option value
+- **SegmentedControl**: `defaultValue: string | number` - Sets default selected segment
+- **Date/DateTime**: Use `initialData` instead, `defaultValue` not applicable
+
+**Important Notes:**
+- `defaultValue` is only used when `initialData[field.field]` is undefined
+- For Dropdown and SegmentedControl, the component uses Mantine's native `defaultValue` prop
+- The value type must match the field type (string for text, number for numeric, boolean for checkbox)
+
+**Example:**
+```tsx
+{
+  field: "country",
+  title: "Country",
+  type: "dropdown",
+  defaultValue: "US", // Will select "US" option by default
+  options: [
+    { value: "US", label: "United States" },
+    { value: "TR", label: "Turkey" }
+  ]
+}
+```
 
 ### Conditional Visibility Properties
 All field types support conditional visibility based on other field values:
@@ -348,6 +383,7 @@ All field types support conditional visibility based on other field values:
 - type: "textbox"
 - maxLength: Maximum character length
 - minLength: Minimum character length (validates only if data is entered)
+- defaultValue: Default text value
 
 ```tsx
 {
@@ -358,7 +394,8 @@ All field types support conditional visibility based on other field values:
   disabled: false,
   placeholder: "Enter your full name",
   maxLength: 100,
-  minLength: 2
+  minLength: 2,
+  defaultValue: "John Doe" // Default text
 }
 
 // Disabled field example
@@ -424,13 +461,23 @@ All field types support conditional visibility based on other field values:
 
 #### Checkbox
 - type: "checkbox"
+- defaultValue: Default checked state (boolean)
 
 ```tsx
 {
   field: "agreeTerms",
   title: "I agree to the terms and conditions",
   type: "checkbox",
-  required: true
+  required: true,
+  defaultValue: false // Default unchecked
+}
+
+// Default checked example
+{
+  field: "newsletter",
+  title: "Subscribe to newsletter",
+  type: "checkbox",
+  defaultValue: true // Default checked
 }
 ```
 
@@ -506,6 +553,7 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 - optionsUrl: API URL for options
 - options: Static options
 - refField: Dependent field
+- defaultValue: Default selected value (string | number)
 
 ```tsx
 {
@@ -514,7 +562,8 @@ import { IconCheck, IconX } from '@tabler/icons-react';
   type: "dropdown",
   required: true,
   placeholder: "Select a country",
-  optionsUrl: "https://api.example.com/countries"
+  optionsUrl: "https://api.example.com/countries",
+  defaultValue: "TR" // Default selected value
 }
 ```
 
@@ -766,6 +815,80 @@ Features of HTMLEditor:
 - Customizable height
 - HTML content output
 
+#### Tree
+- type: "tree"
+- optionsUrl: API URL for hierarchical tree data
+- options: Static hierarchical tree data
+- is_dropdown: Boolean for dropdown mode (default: false)
+- levelOffset: Tree level offset for indentation
+
+```tsx
+// Tree selection (checkbox mode)
+{
+  field: "categories",
+  title: "Categories",
+  type: "tree",
+  required: true,
+  optionsUrl: "https://api.example.com/tree-categories",
+  is_dropdown: false
+}
+
+// Dropdown mode (single selection)
+{
+  field: "category",
+  title: "Category",
+  type: "tree",
+  required: true,
+  optionsUrl: "https://api.example.com/tree-categories",
+  is_dropdown: true
+}
+
+// Static tree data
+{
+  field: "departments",
+  title: "Departments",
+  type: "tree",
+  options: [
+    {
+      value: "1",
+      label: "Engineering",
+      children: [
+        { value: "1.1", label: "Frontend" },
+        { value: "1.2", label: "Backend" }
+      ]
+    },
+    {
+      value: "2",
+      label: "Marketing"
+    }
+  ]
+}
+```
+
+Features of Tree:
+- Hierarchical data selection with expandable/collapsible nodes
+- Two modes: checkbox (multi-select) and dropdown (single-select)
+- Support for nested children at any depth
+- Dynamic loading from API or static data
+- Form integration with validation
+- Visual tree structure with proper indentation
+
+Expected data format:
+```json
+[
+  {
+    "value": "unique_id",
+    "label": "Node Label",
+    "children": [
+      {
+        "value": "child_id",
+        "label": "Child Label"
+      }
+    ]
+  }
+]
+```
+
 #### SegmentedControl
 - type: "segmentedcontrol"
 - color: MantineColor (theme color or custom color)
@@ -776,6 +899,7 @@ Features of HTMLEditor:
 - options: Array of { value: string, label: string }
 - optionsUrl: API URL for dynamic options loading
 - refField: Reference field for dependent loading
+- defaultValue: Default selected value (string | number)
 
 ```tsx
 // Static options
@@ -788,6 +912,7 @@ Features of HTMLEditor:
   size: "sm",
   fullWidth: true,
   orientation: "horizontal",
+  defaultValue: "1", // Default selected value
   options: [
     { value: "1", label: "Active" },
     { value: "0", label: "Passive" }
