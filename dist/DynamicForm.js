@@ -109,7 +109,7 @@ var DropdownField = function (_a) {
     var _f = useState((_c = (_b = form.values[field.field]) !== null && _b !== void 0 ? _b : field.defaultValue) !== null && _c !== void 0 ? _c : ''), thisValue = _f[0], setThisValue = _f[1];
     // selectFirst için otomatik ilk option'ı seçme
     useEffect(function () {
-        var shouldSelectFirst = field.selectFirst !== false; // varsayılan true
+        var shouldSelectFirst = field.selectFirst === true; // varsayılan false
         if (form.values[field.field]) {
             setThisValue(form.values[field.field]);
         }

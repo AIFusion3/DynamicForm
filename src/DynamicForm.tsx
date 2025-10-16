@@ -240,7 +240,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
     
     // selectFirst için otomatik ilk option'ı seçme
     useEffect(() => {
-        const shouldSelectFirst = field.selectFirst !== false; // varsayılan true
+        const shouldSelectFirst = field.selectFirst === true; // varsayılan false
         
         if (form.values[field.field]) {
             setThisValue(form.values[field.field]);

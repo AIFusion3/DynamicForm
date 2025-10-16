@@ -568,7 +568,7 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 - refField: Dependent field
 - defaultValue: Default selected value (string | number)
 - dropdownBackgroundColor: Dropdown menu background color (default: '#f5f5f5')
-- selectFirst: Auto select first option (default: true)
+- selectFirst: Auto select first option (default: false)
 
 ```tsx
 {
@@ -580,17 +580,17 @@ import { IconCheck, IconX } from '@tabler/icons-react';
   optionsUrl: "https://api.example.com/countries",
   defaultValue: "TR", // Default selected value
   dropdownBackgroundColor: "#ffffff", // Custom dropdown menu background
-  selectFirst: true // Auto select first option (default: true)
+  selectFirst: true // Auto select first option (default: false)
 }
 
-// Disable auto-select first option
+// Enable auto-select first option (must be explicitly set)
 {
   field: "city",
   title: "City",
   type: "dropdown",
   required: true,
-  optionsUrl: "https://api.example.com/cities",
-  selectFirst: false // Don't auto select first option
+  optionsUrl: "https://api.example.com/cities"
+  // selectFirst not set, so first option won't be selected (default: false)
 }
 ```
 
